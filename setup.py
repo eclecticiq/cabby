@@ -7,8 +7,12 @@ setup(
     packages = find_packages(),
 
     scripts = [
-        'bin/taxii-discovery'
-        'bin/taxii-poll'
-        'bin/taxii-push'
+        '/bin/taxii-discovery'
+        '/bin/taxii-poll'
+        '/bin/taxii-push'
+    ],
+
+    install_requires = [
+        'libtaxii'
     ]
 )
