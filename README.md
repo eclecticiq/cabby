@@ -1,8 +1,6 @@
 taxii-client
 ============
 
-TAXII python client
-
 A simple python client for TAXII servers. Usage:
 
 ```python
@@ -30,4 +28,20 @@ client.push(content, binding, uri='/services/inbox/default')
 
 
 ```
+
+
+## Scripts
+
+Usage:
+```shell
+
+$ python bin/taxii-discovery --host taxiitest.mitre.org
+
+$ python bin/taxii-poll --host taxiitest.mitre.org --collection default --dest-dir /tmp/
+
+$ python bin/taxii-push --host taxiitest.mitre.org --file /tmp/samples/stix/watchlist-1.1.1.xml
+
+```
+
+Use ```--help``` to get more usage details
 
