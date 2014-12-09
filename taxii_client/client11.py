@@ -44,7 +44,7 @@ class Client11(AbstractClient):
         return response
 
 
-    def push_into_inbox(self, content, content_binding, subtype=None, collections=[], uri=None):
+    def push(self, content, content_binding, subtype=None, collections=[], uri=None):
 
         content_block = tm11.ContentBlock(tm11.ContentBinding(content_binding), content)
 

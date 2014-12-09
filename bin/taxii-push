@@ -3,7 +3,7 @@
 from common import run_client
 
 import logging
-log = logging.getLogger('taxii-push-inbox')
+log = logging.getLogger('taxii-push')
 
 DEFAULT_BINDING = 'urn:stix.mitre.org:xml:1.1.1'
 
@@ -23,7 +23,7 @@ def runner(client, path, args):
 
     collections = args.dest.split(',') if args.dest else []
 
-    client.push_into_inbox(content, args.content_binding, subtype=args.subtype, collections=collections, uri=path)
+    client.push(content, args.content_binding, subtype=args.subtype, collections=collections, uri=path)
 
     log.info("Done")
 

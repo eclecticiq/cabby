@@ -9,6 +9,6 @@ setup(
     scripts = [
         'bin/taxii-discovery'
         'bin/taxii-poll'
-        'bin/taxii-push-inbox'
+        'bin/taxii-push'
     ]
 )

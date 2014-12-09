@@ -18,7 +18,7 @@ class Client10(AbstractClient):
         return self.services
 
 
-    def push_into_inbox(self, content, content_binding, subtype=None, collections=[], uri=None):
+    def push(self, content, content_binding, subtype=None, collections=[], uri=None):
 
         if subtype:
             log.warn('Subtype is not supported in TAXII version %s. Ignoring', self.taxii_version)
