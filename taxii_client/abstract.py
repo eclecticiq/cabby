@@ -74,7 +74,7 @@ class AbstractClient(object):
 
     def _get_service(self, service_type):
         if not self.services:
-            self.discover_services()
+            self.discover_services(uri=None)
 
         candidates = filter(lambda i: i.service_type == service_type, self.services)
 
