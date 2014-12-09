@@ -42,11 +42,11 @@ client.push(content, binding, uri='/services/inbox/default')
 Usage:
 ```shell
 
-$ python bin/taxii-discovery --host taxiitest.mitre.org
+$ taxii-discovery --host taxiitest.mitre.org
 
-$ python bin/taxii-poll --host taxiitest.mitre.org --collection default --dest-dir /tmp/
+$ taxii-poll --host taxiitest.mitre.org --collection default --dest-dir /tmp/
 
-$ python bin/taxii-push --host taxiitest.mitre.org --file /tmp/samples/stix/watchlist-1.1.1.xml
+$ taxii-push --host taxiitest.mitre.org --file /tmp/samples/stix/watchlist-1.1.1.xml
 
 ```
 
