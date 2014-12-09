@@ -5,7 +5,7 @@ import re
 import calendar
 from datetime import datetime
 
-from common import run_client
+from taxii_client.script_commons import run_client
 
 import logging
 log = logging.getLogger('taxii-poll')

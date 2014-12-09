@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from common import run_client
+from taxii_client.script_commons import run_client
 
 import logging
 log = logging.getLogger('taxii-push')

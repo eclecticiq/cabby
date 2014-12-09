@@ -32,11 +32,10 @@ def configure_taxii_client_auth(tclient, cert=None, key=None, username=None, pas
 def extract_content(response):
     for block in response.content_blocks:
         yield dict(
-            type = dict(
-                binding = block.content_binding.binding_id,
-                subtypes = block.content_binding.subtype_ids
-            ),
-            date = block.timestamp_label,
             content = block.content,
+            binding = (block.content_binding.binding_id, block.content_binding.subtype_ids),
+
+            timestamp = block.timestamp_label,
+
             is_xml = block.content_is_xml
         )

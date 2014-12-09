@@ -26,7 +26,9 @@ class AbstractClient(object):
     def __init__(self, host, port=None, use_https=False, auth=dict()):
 
         self.host = host
-        self.port = port
+        self.port = port or (443 if use_https else 80)
+
+        self.server_id = '%s:%d' % (self.host, self.port)
 
         self.client = configure_taxii_client_auth(HttpClient(), **auth)
         self.client.set_use_https(use_https)
@@ -47,7 +49,7 @@ class AbstractClient(object):
         port = p.port or self.port
         path = p.path
 
-        log.info("Sending request to %s:%d%s", host, port, path)
+        log.info("Sending request to %s%s%s", host, (":%d" % port if port else ""), path)
 
 
         if log.isEnabledFor(logging.DEBUG):
