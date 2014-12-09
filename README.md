@@ -1,7 +1,14 @@
 taxii-client
 ============
 
-A simple python client for TAXII servers. Usage:
+A simple python client for TAXII server.
+
+## Installation
+```shell
+pip install git+ssh://github.com/Intelworks/taxii-client.git
+```
+
+## Usage
 
 ```python
 from taxii_client import create_client
