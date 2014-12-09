@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+
+from common import run_client
+
+import logging
+log = logging.getLogger('taxii-push-inbox')
+
+DEFAULT_BINDING = 'urn:stix.mitre.org:xml:1.1.1'
+
+def extend_arguments(parser):
+    parser.add_argument("--file", dest="content_file", help="file with the content to send", required=True)
+    parser.add_argument("--binding", dest="content_binding", default=DEFAULT_BINDING, help="content binding")
+    parser.add_argument("--subtype", dest="subtype", default=None, help="the subtype of the content binding")
+    parser.add_argument("--dest", dest="dest", default=None, help="names of the collections to push the content into, comma separated")
+
+    return parser
+
+
+def runner(client, path, args):
+
+    with open(args.content_file, 'r') as f:
+        content = f.read()
+
+    collections = args.dest.split(',') if args.dest else []
+
+    client.push_into_inbox(content, args.content_binding, subtype=args.subtype, collections=collections, uri=path)
+
+    log.info("Done")
+
+
+if __name__ == '__main__':
+    run_client(extend_arguments, runner)

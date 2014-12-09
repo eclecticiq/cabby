@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+
+import os
+import re
+import calendar
+from datetime import datetime
+
+from common import run_client
+
+import logging
+log = logging.getLogger('taxii-poll')
+
+
+def extend_arguments(parser):
+    parser.add_argument("--collection", dest="collection", help="collection to poll", required=True)
+    parser.add_argument("--dest-dir", dest="dest_dir", default="./", help="directory to save polled content", required=True)
+
+    parser.add_argument("--begin-timestamp", dest="begin_ts", type=int, help="begin time as timestamp")
+    parser.add_argument("--end-timestamp", dest="end_ts", type=int, help="end time as timestamp")
+    parser.add_argument("--subscription-id", dest="subscription_id", help="subscription ID")
+
+
+    return parser
+
+
+def generate_filename(collection, content_block):
+
+    collection_name = re.sub(r"[^\w]+", "-", collection) if collection else ""
+
+    if content_block['date']:
+        ts = calendar.timegm(content_block['date'].timetuple())
+        timepart = "%s" % ts
+    else:
+        ts = calendar.timegm(datetime.now().timetuple())
+        timepart = "NOW%s" % ts
+
+    filename = '%s__%s' % (collection_name, timepart)
+
+    if content_block['is_xml']:
+        filename += '.xml'
+
+    return filename
+
+
+def save_to_dir(dest_dir, collection, content_block):
+
+    filename = generate_filename(collection, content_block)
+    path = os.path.abspath(os.path.join(dest_dir, filename))
+
+    with open(path, 'w') as f:
+        f.write(content_block['content'])
+
+    log.info("Content block saved to %s", path)
+
+
+
+def runner(client, path, args):
+
+    blocks = client.poll(args.collection, begin_ts=args.begin_ts, end_ts=args.end_ts,
+            subscription=args.subscription_id, uri=path)
+
+    dest_dir = os.path.abspath(args.dest_dir)
+
+    i = 0
+    for block in blocks:
+        save_to_dir(dest_dir, args.collection, block)
+        i += 1
+
+    log.info("%d blocks saved into %s", i, dest_dir)
+
+
+if __name__ == '__main__':
+    run_client(extend_arguments, runner)
+
+
+
