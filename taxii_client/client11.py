@@ -9,7 +9,7 @@ import libtaxii.messages_11 as tm11
 from libtaxii.constants import *
 
 from .abstract import AbstractClient, StatusMessage
-from .utils import extract_content
+from .utils import extract_content, ts_to_date
 
 import logging
 log = logging.getLogger(__name__)
@@ -67,8 +67,8 @@ class Client11(AbstractClient):
 
     def poll(self, collection, begin_ts=None, end_ts=None, subscription=None, uri=None):
 
-        begin_date = datetime.fromtimestamp(begin_ts) if begin_ts else None
-        end_date = datetime.fromtimestamp(end_ts) if end_ts else None
+        begin_date = ts_to_date(begin_ts)
+        end_date = ts_to_date(end_ts)
 
         data = dict(
             message_id = self._generate_id(),

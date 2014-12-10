@@ -13,6 +13,7 @@ setup(
     ],
 
     install_requires = [
-        'libtaxii'
+        'libtaxii',
+        'pytz'
     ]
 )

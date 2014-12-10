@@ -1,5 +1,20 @@
 
+import pytz
+
 from libtaxii.clients import HttpClient
+from datetime import datetime
+
+
+def ts_to_date(timestamp):
+
+    if not timestamp:
+        return None
+
+    date = datetime.utcfromtimestamp(timestamp)
+    date = date.replace(tzinfo=pytz.UTC)
+
+    return date
+
 
 def configure_taxii_client_auth(tclient, cert=None, key=None, username=None, password=None):
     tls_auth = (cert and key)
