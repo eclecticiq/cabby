@@ -3,6 +3,8 @@
 import os
 import re
 import calendar
+import hashlib
+
 from datetime import datetime
 
 from taxii_client.script_commons import run_client
@@ -27,14 +29,12 @@ def generate_filename(collection, content_block):
 
     collection_name = re.sub(r"[^\w]+", "-", collection) if collection else ""
 
-    if content_block['date']:
-        ts = calendar.timegm(content_block['date'].timetuple())
-        timepart = "%s" % ts
-    else:
-        ts = calendar.timegm(datetime.now().timetuple())
-        timepart = "NOW%s" % ts
+    stamp = (content_block['timestamp'] or datetime.now()).isoformat()
 
-    filename = '%s__%s' % (collection_name, timepart)
+    hash = hashlib.md5()
+    hash.update(content_block['content'])
+
+    filename = '%s_%s_%s' % (collection_name, stamp, hash.hexdigest())
 
     if content_block['is_xml']:
         filename += '.xml'

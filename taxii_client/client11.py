@@ -8,37 +8,28 @@ import libtaxii.messages_11 as tm11
 
 from libtaxii.constants import *
 
-from .abstract import AbstractClient, StatusMessage
+from .abstract import AbstractClient
 from .utils import extract_content, ts_to_date
+from .exceptions import *
 
 import logging
 log = logging.getLogger(__name__)
 
-DEFAULT_DISCOVERY_PATH = '/services/discovery/'
 
 class Client11(AbstractClient):
 
     taxii_version = libtaxii.VID_TAXII_XML_11
 
-    def discover_services(self, uri):
 
-        uri = uri or DEFAULT_DISCOVERY_PATH
-        
+    def _discovery_request(self, uri):
         request = tm11.DiscoveryRequest(message_id=self._generate_id())
         response = self._execute_request(request, uri=uri)
-
-        if isinstance(response, StatusMessage):
-            log.error("Got a response with a status '%s':\n%s", response.status, response.text)
-            return []
-
-        self.services = response.service_instances
-
-        return self.services
+        return response
 
 
     def get_collections(self, uri=None):
-        request = tm11.CollectionInformationRequest(message_id=self._generate_id())
 
+        request = tm11.CollectionInformationRequest(message_id=self._generate_id())
         response = self._execute_request(request, uri=uri, service_type=SVC_COLLECTION_MANAGEMENT)
 
         return response
@@ -57,12 +48,6 @@ class Client11(AbstractClient):
             inbox_message.destination_collection_names.extend(collections)
 
         response = self._execute_request(inbox_message, uri=uri, service_type=SVC_INBOX)
-
-        if response.status != ST_SUCCESS:
-            log.error("Got a response with a status '%s':\n%s", response.status, response.text)
-            return False
-
-        return response.status == ST_SUCCESS
 
 
     def poll(self, collection, begin_ts=None, end_ts=None, subscription=None, uri=None):
@@ -85,10 +70,6 @@ class Client11(AbstractClient):
         request = tm11.PollRequest(**data)
 
         response = self._execute_request(request, uri=uri, service_type=SVC_POLL)
-
-        if isinstance(response, StatusMessage):
-            log.error("Got a response with a status '%s':\n%s", response.status, response.text)
-            raise StopIteration()
 
         for block in extract_content(response):
             yield block
