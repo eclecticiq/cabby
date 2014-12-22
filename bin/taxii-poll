@@ -8,6 +8,7 @@ import hashlib
 from datetime import datetime
 
 from taxii_client.script_commons import run_client
+from taxii_client.utils import ts_to_date
 
 import logging
 log = logging.getLogger('taxii-poll')
@@ -56,7 +57,10 @@ def save_to_dir(dest_dir, collection, content_block):
 
 def runner(client, path, args):
 
-    blocks = client.poll(args.collection, begin_ts=args.begin_ts, end_ts=args.end_ts,
+    begin_date = ts_to_date(args.begin_ts) if args.begin_ts else None
+    end_date = ts_to_date(args.end_ts) if args.end_ts else None
+
+    blocks = client.poll(args.collection, begin_date=begin_date, end_date=end_date,
             subscription=args.subscription_id, uri=path)
 
     dest_dir = os.path.abspath(args.dest_dir)

@@ -9,7 +9,7 @@ import libtaxii.messages_11 as tm11
 from libtaxii.constants import *
 
 from .abstract import AbstractClient
-from .utils import extract_content, ts_to_date
+from .utils import extract_content, ts_to_date, ContentBlock
 from .exceptions import *
 
 import logging
@@ -50,10 +50,7 @@ class Client11(AbstractClient):
         response = self._execute_request(inbox_message, uri=uri, service_type=SVC_INBOX)
 
 
-    def poll(self, collection, begin_ts=None, end_ts=None, subscription=None, uri=None):
-
-        begin_date = ts_to_date(begin_ts)
-        end_date = ts_to_date(end_ts)
+    def poll(self, collection, begin_date=None, end_date=None, subscription=None, uri=None):
 
         data = dict(
             message_id = self._generate_id(),
@@ -71,7 +68,8 @@ class Client11(AbstractClient):
 
         response = self._execute_request(request, uri=uri, service_type=SVC_POLL)
 
-        for block in extract_content(response):
+
+        for block in extract_content(response, source=self.host, source_collection=collection):
             yield block
 
         while response.more:
@@ -91,7 +89,7 @@ class Client11(AbstractClient):
 
         response = self._execute_request(request, uri=uri, service_type=SVC_POLL)
 
-        for block in extract_content(response):
+        for block in extract_content(response, source=self.host, source_collection=collection):
             yield block
 
 

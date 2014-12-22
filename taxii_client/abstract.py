@@ -15,14 +15,12 @@ log = logging.getLogger(__name__)
 
 class AbstractClient(object):
 
-    def __init__(self, host, discovery_path=None, port=None, use_https=False, auth=dict()):
+    def __init__(self, host, discovery_path=None, port=None, use_https=False, auth=None):
 
         self.host = host
         self.port = port or (443 if use_https else 80)
 
-        self.server_id = '%s:%d' % (self.host, self.port)
-
-        self.client = configure_taxii_client_auth(HttpClient(), **auth)
+        self.client = configure_taxii_client_auth(HttpClient(), **(auth or {}))
         self.client.set_use_https(use_https)
 
         self.discovery_path = discovery_path
@@ -42,7 +40,7 @@ class AbstractClient(object):
         port = p.port or self.port
         path = p.path
 
-        log.info("Sending %s request to %s%s%s", request.message_type, host, (":%d" % port if port else ""), path)
+        log.info("Sending %s to %s%s%s", request.message_type, host, (":%d" % port if port else ""), path)
 
 
         if log.isEnabledFor(logging.DEBUG):
@@ -53,6 +51,7 @@ class AbstractClient(object):
         response_raw = self.client.call_taxii_service2(host, path, self.taxii_version, request_body, port=port)
         response = get_message_from_http_response(response_raw, in_response_to='0')
 
+        log.info("Response received for %s from %s%s%s", request.message_type, host, (":%d" % port if port else ""), path)
 
         if log.isEnabledFor(logging.DEBUG):
             log.debug("Response:\n%s", response.to_xml(pretty_print=True))

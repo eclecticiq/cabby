@@ -1,8 +1,12 @@
 
 import pytz
+import json
+import calendar
 
 from libtaxii.clients import HttpClient
 from datetime import datetime
+
+from collections import namedtuple
 
 
 def ts_to_date(timestamp):
@@ -10,10 +14,18 @@ def ts_to_date(timestamp):
     if not timestamp:
         return None
 
-    date = datetime.utcfromtimestamp(timestamp)
-    date = date.replace(tzinfo=pytz.UTC)
+    return datetime.utcfromtimestamp(timestamp).replace(tzinfo=pytz.UTC)
 
-    return date
+
+def date_to_ts(obj):
+    if obj.utcoffset() is not None:
+        obj = obj - obj.utcoffset()
+
+    millis = int(
+        calendar.timegm(obj.timetuple()) * 1000 +
+        obj.microsecond / 1000
+    )
+    return millis
 
 
 def configure_taxii_client_auth(tclient, cert=None, key=None, username=None, password=None):
@@ -44,13 +56,36 @@ def configure_taxii_client_auth(tclient, cert=None, key=None, username=None, pas
     return tclient
 
 
-def extract_content(response):
-    for block in response.content_blocks:
-        yield dict(
-            content = block.content,
-            binding = (block.content_binding.binding_id, block.content_binding.subtype_ids),
 
+
+class DatetimeJSONEncoder(json.JSONEncoder):
+
+    def default(self, obj):
+
+        if isinstance(obj, datetime):
+            return date_to_ts(obj)
+        else:
+            return JSONEncoder.default(self, obj)
+
+
+AbstractContentBlock = namedtuple('AbstractContentBlock', ['content', 'binding', 'subtypes', 'timestamp', 'source', 'sink_collection', 'source_collection'])
+
+class ContentBlock(AbstractContentBlock):
+
+    def to_json(self):
+        return json.dumps(self._asdict(), cls=DatetimeJSONEncoder)
+
+
+def extract_content(response, source=None, source_collection=None, sink_collection=None):
+    for block in response.content_blocks:
+        yield ContentBlock(
+            content = block.content,
+            binding = block.content_binding.binding_id,
             timestamp = block.timestamp_label,
 
-            is_xml = block.content_is_xml
+            subtypes = block.content_binding.subtype_ids,
+
+            source = source,
+            source_collection = source_collection,
+            sink_collection = sink_collection
         )
