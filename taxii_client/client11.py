@@ -1,11 +1,6 @@
 from datetime import datetime
 
-import libtaxii
-from libtaxii.common import generate_message_id
-from libtaxii.clients import HttpClient
-import libtaxii.messages_10 as tm10
 import libtaxii.messages_11 as tm11
-
 from libtaxii.constants import *
 
 from .abstract import AbstractClient
@@ -18,7 +13,7 @@ log = logging.getLogger(__name__)
 
 class Client11(AbstractClient):
 
-    taxii_version = libtaxii.VID_TAXII_XML_11
+    taxii_version = VID_TAXII_XML_11
 
 
     def _discovery_request(self, uri):
@@ -48,6 +43,9 @@ class Client11(AbstractClient):
             inbox_message.destination_collection_names.extend(collections)
 
         response = self._execute_request(inbox_message, uri=uri, service_type=SVC_INBOX)
+
+        if response:
+            self.log.info("Content successfully pushed")
 
 
     def poll(self, collection, begin_date=None, end_date=None, subscription=None, uri=None):

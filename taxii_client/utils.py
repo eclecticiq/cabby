@@ -4,6 +4,7 @@ import json
 import calendar
 
 from libtaxii.clients import HttpClient
+from libtaxii.messages_10 import ContentBlock as ContentBlock10
 from datetime import datetime
 
 from collections import namedtuple
@@ -78,14 +79,23 @@ class ContentBlock(AbstractContentBlock):
 
 def extract_content(response, source=None, source_collection=None, sink_collection=None):
     for block in response.content_blocks:
-        yield ContentBlock(
-            content = block.content,
-            binding = block.content_binding.binding_id,
-            timestamp = block.timestamp_label,
-
-            subtypes = block.content_binding.subtype_ids,
-
-            source = source,
-            source_collection = source_collection,
-            sink_collection = sink_collection
-        )
+        if isinstance(block, ContentBlock10):
+            yield ContentBlock(
+                content = block.content,
+                binding = block.content_binding,
+                timestamp = block.timestamp_label,
+                subtypes = [],
+                source = source,
+                source_collection = source_collection,
+                sink_collection = sink_collection
+            )
+        else:
+            yield ContentBlock(
+                content = block.content,
+                binding = block.content_binding.binding_id,
+                timestamp = block.timestamp_label,
+                subtypes = block.content_binding.subtype_ids,
+                source = source,
+                source_collection = source_collection,
+                sink_collection = sink_collection
+            )

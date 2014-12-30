@@ -9,7 +9,6 @@ from .utils import configure_taxii_client_auth
 from .exceptions import *
 
 import logging
-log = logging.getLogger(__name__)
 
 
 
@@ -19,12 +18,20 @@ class AbstractClient(object):
 
         self.host = host
         self.port = port or (443 if use_https else 80)
-
-        self.client = configure_taxii_client_auth(HttpClient(), **(auth or {}))
-        self.client.set_use_https(use_https)
+        self.use_https = use_https
+        self.auth = auth
 
         self.discovery_path = discovery_path
         self.services = None
+
+        self.log = logging.getLogger("%s.%s" % (self.__module__, self.__class__.__name__))
+
+
+    @staticmethod
+    def _create_client(auth={}, use_https=False):
+        client = configure_taxii_client_auth(HttpClient(), **(auth or {}))
+        client.set_use_https(use_https)
+        return client
 
 
     def _execute_request(self, request, uri=None, service_type=None):
@@ -35,26 +42,32 @@ class AbstractClient(object):
             service = self._get_service(service_type)
             uri = service.service_address
 
-        p = urlparse.urlparse(uri)
-        host = p.hostname or self.host
-        port = p.port or self.port
-        path = p.path
+        parsed = urlparse.urlparse(uri)
+        host = parsed.hostname or self.host
+        port = parsed.port or self.port
+        path = parsed.path
 
-        log.info("Sending %s to %s%s%s", request.message_type, host, (":%d" % port if port else ""), path)
+        auth = self.auth
+        use_https = self.use_https or (parsed.scheme == 'https')
+
+        self.log.info("Sending %s to %s%s%s", request.message_type, host, (":%d" % port if port else ""), path)
+
+        if self.log.isEnabledFor(logging.DEBUG):
+            self.log.debug("Request:\n%s", request.to_xml(pretty_print=True))
 
 
-        if log.isEnabledFor(logging.DEBUG):
-            log.debug("Request:\n%s", request.to_xml(pretty_print=True))
-
+        client = AbstractClient._create_client(auth=auth, use_https=use_https)
 
         request_body = request.to_xml(pretty_print=True)
-        response_raw = self.client.call_taxii_service2(host, path, self.taxii_version, request_body, port=port)
+
+        response_raw = client.call_taxii_service2(host, path, self.taxii_version, request_body, port=port)
+
         response = get_message_from_http_response(response_raw, in_response_to='0')
 
-        log.info("Response received for %s from %s%s%s", request.message_type, host, (":%d" % port if port else ""), path)
+        self.log.info("Response received for %s from %s%s%s", request.message_type, host, (":%d" % port if port else ""), path)
 
-        if log.isEnabledFor(logging.DEBUG):
-            log.debug("Response:\n%s", response.to_xml(pretty_print=True))
+        if self.log.isEnabledFor(logging.DEBUG):
+            self.log.debug("Response:\n%s", response.to_xml(pretty_print=True))
 
 
         if hasattr(response, 'status_type'): # version agnostic
@@ -87,7 +100,7 @@ class AbstractClient(object):
             try:
                 self.discover_services()
             except ClientException, e:
-                log.error('Can not automatically discover advertised services')
+                self.log.error('Can not automatically discover advertised services')
                 raise e
 
         return filter(lambda i: i.service_type == service_type, self.services)
