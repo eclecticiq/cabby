@@ -84,7 +84,7 @@ def extract_content(response, source=None, source_collection=None, sink_collecti
                 content = block.content,
                 binding = block.content_binding,
                 timestamp = block.timestamp_label,
-                subtypes = [],
+                subtypes = None,
                 source = source,
                 source_collection = source_collection,
                 sink_collection = sink_collection
