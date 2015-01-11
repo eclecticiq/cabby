@@ -29,6 +29,35 @@ class Client11(AbstractClient):
 
         return response
 
+    def subscribe(self, collection, only_counters=False, content_bindings=None, uri=None):
+        '''
+            response_type = tm11.RT_COUNT_ONLY if only_counters else tm11.RT_FULL,  # Optional, defaults to FULL
+            content_bindings = content_bindings_objs, #Optional. Absence means no restrictions on returned data
+            query=query2)  # Optional. Absence means no query
+        '''
+
+        if content_bindings:
+            content_bindings_objs = [tm11.ContentBinding(cb) for cb in content_bindings]
+        else:
+            content_bindings_objs = None
+
+        subscription_parameters = tm11.SubscriptionParameters(
+            response_type = tm11.RT_COUNT_ONLY if only_counters else tm11.RT_FULL,
+            content_bindings = content_bindings_objs,
+        )
+
+        #delivery_parameters = tm11.DeliveryParameters(inbox_protocol, inbox_address, delivery_message_binding)
+
+        request = tm11.ManageCollectionSubscriptionRequest(
+            message_id = self._generate_id(),
+            action = tm11.ACT_SUBSCRIBE,
+            collection_name = collection,
+            subscription_parameters = subscription_parameters,
+        )
+        response = self._execute_request(request, uri=uri, service_type=SVC_COLLECTION_MANAGEMENT)
+
+        return response
+
 
     def push(self, content, content_binding, subtype=None, collections=[], uri=None):
 
