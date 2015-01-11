@@ -1,10 +1,12 @@
 
 import sys
 import argparse
+import logging
+
+from colorlog import ColoredFormatter
 
 from taxii_client import create_client
 
-import logging
 log = logging.getLogger(__name__)
 
 DEFAULT_PORT = 80
@@ -37,11 +39,9 @@ def get_basic_arg_parser():
 
 def _configure_logger(verbose):
     if verbose:
-        logger_format = '%(asctime)s %(name)s %(levelname)s: %(message)s'
-        logging.basicConfig(level=logging.DEBUG, format=logger_format)
+        configure_color_logging('', level=logging.DEBUG)
     else:
-        logger_format = '%(asctime)s %(levelname)s: %(message)s'
-        logging.basicConfig(level=logging.INFO, format=logger_format)
+        configure_color_logging('', level=logging.INFO)
 
 def is_args_valid(args):
 
@@ -73,5 +73,38 @@ def run_client(extend_arguments_func, run_func):
     client = create_client(args.host, discovery_path=args.discovery, port=args.port,
             use_https=args.https, auth=auth_details, version=args.version)
 
-    run_func(client, args.path, args)
+    try:
+        run_func(client, args.path, args)
+    except Exception, e:
+        log.error(e.message)
+
+
+def configure_color_logging(logger_name, level):
+
+    log = logging.getLogger(logger_name)
+
+    log.setLevel(level)
+
+    if level == logging.DEBUG:
+        format_string = "%(asctime)s %(name)s %(log_color)s%(levelname)s:%(reset)s %(white)s%(message)s"
+    else:
+        format_string = "%(asctime)s %(log_color)s%(levelname)s:%(reset)s %(white)s%(message)s"
+
+    formatter = ColoredFormatter(
+        format_string,
+        datefmt = None,
+        reset = True,
+        log_colors = {
+            'DEBUG': 'cyan',
+            'INFO': 'green',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'red',
+        }
+    )
+
+    handlers = logging.StreamHandler()
+    handlers.setFormatter(formatter)
+    log.addHandler(handlers)
+    return log
 

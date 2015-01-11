@@ -5,9 +5,10 @@ import re
 import calendar
 from datetime import datetime
 
-from taxii_client.script_commons import run_client
+from taxii_client.script_commons import run_client, configure_color_logging
 
 import logging
+
 log = logging.getLogger('taxii-discovery')
 
 
@@ -25,5 +26,6 @@ def runner(client, path, args):
 if __name__ == '__main__':
     run_client(extend_arguments, runner)
 
+    
 
 
