@@ -21,7 +21,10 @@ def runner(client, path, args):
     services = client.discover_services(uri=path)
 
     for s in services:
-        print s.to_text()
+        if args.as_xml:
+            print s.to_xml()
+        else:
+            print s.to_text()
 
 if __name__ == '__main__':
     run_client(extend_arguments, runner)
