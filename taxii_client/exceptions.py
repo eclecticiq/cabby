@@ -37,7 +37,7 @@ def status_to_message(status):
         message += '; %s;' % dict_to_pairs(status.extended_headers)
 
     if status.message:
-        message += 'Message=%s' % status.message
+        message += '; message=%s' % status.message
 
     return message
 

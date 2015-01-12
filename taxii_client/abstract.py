@@ -40,7 +40,7 @@ class AbstractClient(object):
             raise IllegalArgumentError('Either URI or service_type need to be provided')
         elif not uri:
             service = self._get_service(service_type)
-            uri = service.service_address
+            uri = 'http://%s' % service.service_address # faking http just to comply with urlparse
 
         parsed = urlparse.urlparse(uri)
         host = parsed.hostname or self.host

@@ -31,6 +31,7 @@ def get_basic_arg_parser():
     parser.add_argument("--password", dest="password", help="password for authentication")
 
     parser.add_argument("-v", "--verbose", dest="verbose", action='store_true', help="Verbose mode")
+    parser.add_argument("-x", "--as-xml", dest="as_xml", action='store_true', help="Print response as raw XML")
 
     parser.add_argument("--taxii-version", dest="version", default=DEFAULT_VERSION, help="TAXII version to use")
 
@@ -103,7 +104,7 @@ def configure_color_logging(logger_name, level):
         }
     )
 
-    handlers = logging.StreamHandler()
+    handlers = logging.StreamHandler(sys.stderr)
     handlers.setFormatter(formatter)
     log.addHandler(handlers)
     return log
