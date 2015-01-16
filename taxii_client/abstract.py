@@ -40,7 +40,11 @@ class AbstractClient(object):
             raise IllegalArgumentError('Either URI or service_type need to be provided')
         elif not uri:
             service = self._get_service(service_type)
-            uri = 'http://%s' % service.service_address # faking http just to comply with urlparse
+
+            if "://" in service.service_address:
+                uri = 'http://%s' % service.service_address # faking http just to comply with urlparse
+            else:
+                uri = service.service_address
 
         parsed = urlparse.urlparse(uri)
         host = parsed.hostname or self.host
@@ -50,11 +54,11 @@ class AbstractClient(object):
         auth = self.auth
         use_https = self.use_https or (parsed.scheme == 'https')
 
-        self.log.info("Sending %s to %s%s%s", request.message_type, host, (":%d" % port if port else ""), path)
+        self.log.info("Sending %(type)s to %(host)s:%(port)s%(path)s", dict(
+            type=request.message_type, host=host, port=port, path=path))
 
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug("Request:\n%s", request.to_xml(pretty_print=True))
-
 
         client = AbstractClient._create_client(auth=auth, use_https=use_https)
 
@@ -64,7 +68,8 @@ class AbstractClient(object):
 
         response = get_message_from_http_response(response_raw, in_response_to='0')
 
-        self.log.info("Response received for %s from %s%s%s", request.message_type, host, (":%d" % port if port else ""), path)
+        self.log.info("Response received for %(type)s from %(host)s:%(port)s%(path)s", dict(
+            type=request.message_type, host=host, port=port, path=path))
 
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug("Response:\n%s", response.to_xml(pretty_print=True))
