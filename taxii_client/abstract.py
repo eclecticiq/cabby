@@ -41,7 +41,7 @@ class AbstractClient(object):
         elif not uri:
             service = self._get_service(service_type)
 
-            if "://" in service.service_address:
+            if "://" not in service.service_address:
                 uri = 'http://%s' % service.service_address # faking http just to comply with urlparse
             else:
                 uri = service.service_address
