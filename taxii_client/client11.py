@@ -5,7 +5,6 @@ from libtaxii.constants import *
 
 from .abstract import AbstractClient
 from .utils import extract_content, ts_to_date, ContentBlock
-from .exceptions import *
 
 import logging
 log = logging.getLogger(__name__)
@@ -22,38 +21,76 @@ class Client11(AbstractClient):
         return response
 
 
-    def get_collections(self, uri=None):
+    def __subscription_status_request(self, action, collection, subscription_id=None, uri=None):
+        request_parameters = dict(
+            message_id = self._generate_id(),
+            action = action,
+            collection_name = collection,
+            subscription_id = subscription_id
+        )
 
-        request = tm11.CollectionInformationRequest(message_id=self._generate_id())
+        request = tm11.ManageCollectionSubscriptionRequest(**request_parameters)
         response = self._execute_request(request, uri=uri, service_type=SVC_COLLECTION_MANAGEMENT)
 
         return response
 
-    def subscribe(self, collection, only_counters=False, content_bindings=None, uri=None):
-        '''
-            response_type = tm11.RT_COUNT_ONLY if only_counters else tm11.RT_FULL,  # Optional, defaults to FULL
-            content_bindings = content_bindings_objs, #Optional. Absence means no restrictions on returned data
-            query=query2)  # Optional. Absence means no query
-        '''
+    
+    def get_subscription_status(self, collection, subscription_id=None, uri=None):
+
+        return self.__subscription_status_request(ACT_STATUS, collection,
+                subscription_id=subscription_id, uri=uri)
+
+
+    def pause_subscription(self, collection, subscription_id=None, uri=None):
+
+        return self.__subscription_status_request(ACT_PAUSE, collection,
+                subscription_id=subscription_id, uri=uri)
+
+
+    def resume_subscription(self, collection, subscription_id=None, uri=None):
+
+        return self.__subscription_status_request(ACT_RESUME, collection,
+                subscription_id=subscription_id, uri=uri)
+
+
+    def unsubscribe(self, collection, subscription_id=None, uri=None):
+
+        return self.__subscription_status_request(ACT_UNSUBSCRIBE, collection,
+                subscription_id=subscription_id, uri=uri)
+
+
+    def subscribe(self, collection, count_only=False, inbox_service=None, content_bindings=None, uri=None):
+
+        subscription_params = tm11.SubscriptionParameters(
+            response_type = RT_COUNT_ONLY if count_only else RT_FULL,
+        )
 
         if content_bindings:
-            content_bindings_objs = [tm11.ContentBinding(cb) for cb in content_bindings]
-        else:
-            content_bindings_objs = None
+            subscription_params['content_bindings'] = [tm11.ContentBinding(cb) for cb in content_bindings]
 
-        subscription_parameters = tm11.SubscriptionParameters(
-            response_type = tm11.RT_COUNT_ONLY if only_counters else tm11.RT_FULL,
-            content_bindings = content_bindings_objs,
-        )
-
-        #delivery_parameters = tm11.DeliveryParameters(inbox_protocol, inbox_address, delivery_message_binding)
-
-        request = tm11.ManageCollectionSubscriptionRequest(
+        request_parameters = dict(
             message_id = self._generate_id(),
-            action = tm11.ACT_SUBSCRIBE,
+            action = ACT_SUBSCRIBE,
             collection_name = collection,
-            subscription_parameters = subscription_parameters,
+            subscription_parameters = subscription_params,
         )
+
+        if inbox_service:
+            request_parameters['delivery_parameters'] = tm11.DeliveryParameters(
+                inbox_protocol = inbox_service.protocol_binding,
+                inbox_address = inbox_service.service_address,
+                delivery_message_binding = inbox_service.message_bindings[0] if inbox_service.message_bindings else ''
+            )
+
+        request = tm11.ManageCollectionSubscriptionRequest(**request_parameters)
+        response = self._execute_request(request, uri=uri, service_type=SVC_COLLECTION_MANAGEMENT)
+
+        return response
+
+
+    def get_collections(self, uri=None):
+
+        request = tm11.CollectionInformationRequest(message_id=self._generate_id())
         response = self._execute_request(request, uri=uri, service_type=SVC_COLLECTION_MANAGEMENT)
 
         return response
@@ -73,11 +110,11 @@ class Client11(AbstractClient):
 
         response = self._execute_request(inbox_message, uri=uri, service_type=SVC_INBOX)
 
-        if response:
-            self.log.info("Content successfully pushed")
+        self.log.info("Content successfully pushed")
 
 
-    def poll(self, collection, begin_date=None, end_date=None, subscription=None, uri=None):
+    def poll(self, collection, begin_date=None, end_date=None, count_only=False,
+            subscription_id=None, inbox_service=None, uri=None):
 
         data = dict(
             message_id = self._generate_id(),
@@ -86,26 +123,46 @@ class Client11(AbstractClient):
             inclusive_end_timestamp_label = end_date
         )
 
-        if subscription:
+        if subscription_id:
             data['subscription_id'] = subscription_id
         else:
-            data['poll_parameters'] = tm11.PollRequest.PollParameters()
+            poll_params = dict()
+
+            if inbox_service:
+                poll_params['delivery_parameters'] = tm11.DeliveryParameters(
+                    inbox_protocol = inbox_service.protocol_binding,
+                    inbox_address = inbox_service.service_address,
+                    delivery_message_binding = inbox_service.message_bindings[0] if inbox_service.message_bindings else []
+                )
+                poll_params['allow_asynch'] = True
+
+            if count_only:
+                poll_params['response_type'] = RT_COUNT_ONLY
+
+            data['poll_parameters'] = tm11.PollRequest.PollParameters(**poll_params)
 
         request = tm11.PollRequest(**data)
 
         response = self._execute_request(request, uri=uri, service_type=SVC_POLL)
 
-
-        for block in extract_content(response, source=self.host, source_collection=collection):
+        for block in response.content_blocks:
             yield block
 
         while response.more:
             part = response.result_part_number + 1
-            for block in self.fulfillment(collection, response.result_id, part_number=part, uri=uri, service=service):
+            for block in self.fulfilment(collection, response.result_id, part_number=part, uri=uri):
                 yield block
 
 
-    def fulfillment(self, collection, result_id, part_number=1, uri=None, service=None):
+    def poll_prepared(self, collection, begin_date=None, end_date=None, subscription_id=None, uri=None):
+
+        for block in self.poll(collection, begin_date=begin_date, end_date=end_date,
+                subscription_id=subscription_id, uri=uri):
+            #FIXME: self.host here may not be a correct host
+            yield extract_content(block, source=self.host, source_collection=collection)
+
+
+    def fulfilment(self, collection, result_id, part_number=1, uri=None, service=None):
 
         request = tm11.PollFulfillmentRequest(
             message_id = self._generate_id(),
@@ -116,7 +173,7 @@ class Client11(AbstractClient):
 
         response = self._execute_request(request, uri=uri, service_type=SVC_POLL)
 
-        for block in extract_content(response, source=self.host, source_collection=collection):
+        for block in response.content_blocks:
             yield block
 
 

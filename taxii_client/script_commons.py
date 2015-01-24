@@ -3,13 +3,10 @@ import sys
 import argparse
 import logging
 
-from colorlog import ColoredFormatter
-
 from taxii_client import create_client
 
 log = logging.getLogger(__name__)
 
-DEFAULT_PORT = 80
 DEFAULT_VERSION = '1.1'
 
 def get_basic_arg_parser():
@@ -19,7 +16,7 @@ def get_basic_arg_parser():
         formatter_class = argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument("--host", help="host where the TAXII Service is hosted", required=True)
-    parser.add_argument("--port", dest="port", default=DEFAULT_PORT, type=int, help="port where the TAXII Service is hosted")
+    parser.add_argument("--port", dest="port", type=int, help="port where the TAXII Service is hosted")
     parser.add_argument("--discovery", dest="discovery", help="path to a TAXII Discovery service")
     parser.add_argument("--path", dest="path", help="path to a TAXII Service")
 
@@ -77,7 +74,7 @@ def run_client(extend_arguments_func, run_func):
     try:
         run_func(client, args.path, args)
     except Exception, e:
-        log.error(e.message)
+        log.error(e.message, exc_info=args.verbose)
 
 
 def configure_color_logging(logger_name, level):
@@ -90,6 +87,8 @@ def configure_color_logging(logger_name, level):
         format_string = "%(asctime)s %(name)s %(log_color)s%(levelname)s:%(reset)s %(white)s%(message)s"
     else:
         format_string = "%(asctime)s %(log_color)s%(levelname)s:%(reset)s %(white)s%(message)s"
+
+    from colorlog import ColoredFormatter
 
     formatter = ColoredFormatter(
         format_string,

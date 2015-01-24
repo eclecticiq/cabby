@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import re
 import calendar
 import hashlib
@@ -16,12 +17,14 @@ log = logging.getLogger('taxii-poll')
 
 def extend_arguments(parser):
     parser.add_argument("--collection", dest="collection", help="collection to poll", required=True)
-    parser.add_argument("--dest-dir", dest="dest_dir", default="./", help="directory to save polled content", required=True)
+    parser.add_argument("--dest-dir", dest="dest_dir", help="directory to save polled content")
+
+    parser.add_argument("-l", "--limit", dest="limit", type=int, default=sys.maxint, help="Limit the number of content blocks returned")
+    parser.add_argument("--raw", dest="as_raw", action='store_true', help="Output raw TAXII messages")
 
     parser.add_argument("--begin-timestamp", dest="begin_ts", type=int, help="begin time as timestamp")
     parser.add_argument("--end-timestamp", dest="end_ts", type=int, help="end time as timestamp")
     parser.add_argument("--subscription-id", dest="subscription_id", help="subscription ID")
-
 
     return parser
 
@@ -30,26 +33,26 @@ def generate_filename(collection, content_block):
 
     collection_name = re.sub(r"[^\w]+", "-", collection) if collection else ""
 
-    stamp = (content_block['timestamp'] or datetime.now()).isoformat()
-
     hash = hashlib.md5()
-    hash.update(content_block['content'])
+    hash.update(content_block.to_xml())
 
-    filename = '%s_%s_%s' % (collection_name, stamp, hash.hexdigest())
-
-    if content_block['is_xml']:
-        filename += '.xml'
+    filename = '%s_%s' % (collection_name, hash.hexdigest())
 
     return filename
 
 
-def save_to_dir(dest_dir, collection, content_block):
+def save_to_dir(dest_dir, collection, content_block, as_raw):
 
     filename = generate_filename(collection, content_block)
     path = os.path.abspath(os.path.join(dest_dir, filename))
 
     with open(path, 'w') as f:
-        f.write(content_block['content'])
+        if as_raw:
+            content = content_block.to_xml(pretty_print=True)
+        else:
+            content = content_block.content
+
+        f.write(content)
 
     log.info("Content block saved to %s", path)
 
@@ -60,17 +63,28 @@ def runner(client, path, args):
     begin_date = ts_to_date(args.begin_ts) if args.begin_ts else None
     end_date = ts_to_date(args.end_ts) if args.end_ts else None
 
-    blocks = client.poll(args.collection, begin_date=begin_date, end_date=end_date,
-            subscription=args.subscription_id, uri=path)
+    blocks = client.poll(args.collection, begin_date=begin_date, end_date=end_date, subscription_id=args.subscription_id, uri=path)
 
-    dest_dir = os.path.abspath(args.dest_dir)
-
-    i = 0
+    counter = 0
     for block in blocks:
-        save_to_dir(dest_dir, args.collection, block)
-        i += 1
+        if args.dest_dir:
+            dest_dir = os.path.abspath(args.dest_dir)
+            save_to_dir(dest_dir, args.collection, block, args.as_raw)
+        else:
+            if args.as_raw:
+                if args.as_xml:
+                    print block.to_xml()
+                else:
+                    print block.to_text()
+            else:
+                print block.content
 
-    log.info("%d blocks saved into %s", i, dest_dir)
+        counter += 1
+        if counter >= args.limit:
+            break
+
+
+    log.info("%d blocks polled", counter)
 
 
 if __name__ == '__main__':

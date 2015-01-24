@@ -23,7 +23,7 @@ class ServiceNotFoundError(ClientException):
     pass
 
 
-class IllegalArgumentError(ValueError):
+class NoURIProvidedError(ValueError):
     pass
 
 

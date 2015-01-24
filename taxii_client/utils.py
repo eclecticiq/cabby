@@ -77,25 +77,24 @@ class ContentBlock(AbstractContentBlock):
         return json.dumps(self._asdict(), cls=DatetimeJSONEncoder)
 
 
-def extract_content(response, source=None, source_collection=None, sink_collection=None):
-    for block in response.content_blocks:
-        if isinstance(block, ContentBlock10):
-            yield ContentBlock(
-                content = block.content,
-                binding = block.content_binding,
-                timestamp = block.timestamp_label,
-                subtypes = None,
-                source = source,
-                source_collection = source_collection,
-                sink_collection = sink_collection
-            )
-        else:
-            yield ContentBlock(
-                content = block.content,
-                binding = block.content_binding.binding_id,
-                timestamp = block.timestamp_label,
-                subtypes = block.content_binding.subtype_ids,
-                source = source,
-                source_collection = source_collection,
-                sink_collection = sink_collection
-            )
+def extract_content(block, source=None, source_collection=None, sink_collection=None):
+    if isinstance(block, ContentBlock10):
+        return ContentBlock(
+            content = block.content,
+            binding = block.content_binding,
+            timestamp = block.timestamp_label,
+            subtypes = None,
+            source = source,
+            source_collection = source_collection,
+            sink_collection = sink_collection
+        )
+    else:
+        return ContentBlock(
+            content = block.content,
+            binding = block.content_binding.binding_id,
+            timestamp = block.timestamp_label,
+            subtypes = block.content_binding.subtype_ids,
+            source = source,
+            source_collection = source_collection,
+            sink_collection = sink_collection
+        )
