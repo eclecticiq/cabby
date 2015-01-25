@@ -76,7 +76,7 @@ class Client11(AbstractClient):
         )
 
         if inbox_service:
-            request_parameters['delivery_parameters'] = tm11.DeliveryParameters(
+            request_parameters['push_parameters'] = tm11.PushParameters(
                 inbox_protocol = inbox_service.protocol_binding,
                 inbox_address = inbox_service.service_address,
                 delivery_message_binding = inbox_service.message_bindings[0] if inbox_service.message_bindings else ''

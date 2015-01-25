@@ -258,7 +258,7 @@ def test_subscribe_with_push():
     message = get_sent_message()
     assert type(message) == tm11.ManageCollectionSubscriptionRequest
     assert message.collection_name == POLL_COLLECTION
-    assert message.delivery_parameters.inbox_address == inbox.service_address
+    assert message.push_parameters.inbox_address == inbox.service_address
     assert message.action == tm11.ACT_SUBSCRIBE
 
 
