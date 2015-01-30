@@ -1,3 +1,4 @@
+import logging
 import urlparse
 
 from libtaxii.clients import HttpClient
@@ -6,9 +7,11 @@ from libtaxii.constants import ST_SUCCESS, ST_NOT_FOUND
 from libtaxii import get_message_from_http_response
 
 from .utils import configure_taxii_client_auth
-from .exceptions import NoURIProvidedError, UnsuccessfulStatusError, ServiceNotFoundError, AmbiguousServicesError, ClientException
+from .exceptions import (
+        NoURIProvidedError, UnsuccessfulStatusError, ServiceNotFoundError,
+        AmbiguousServicesError, ClientException
+)
 
-import logging
 
 
 
@@ -98,12 +101,12 @@ class AbstractClient(object):
     def _get_all_services(self, service_type):
         if not self.services:
             try:
-                self.discover_services()
+                services = self.discover_services()
             except ClientException, e:
                 self.log.error('Can not automatically discover advertised services')
                 raise e
 
-        return filter(lambda i: i.service_type == service_type, self.services)
+        return filter(lambda i: i.service_type == service_type, services)
 
 
     def discover_services(self, uri=None, cache=True):

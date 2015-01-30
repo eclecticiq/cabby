@@ -1,7 +1,7 @@
 
-import sys
 import argparse
 import logging
+import sys
 
 from taxii_client import create_client
 
@@ -50,9 +50,8 @@ def is_args_valid(args):
     return True
         
 
-def run_client(extend_arguments_func, run_func):
+def run_client(parser, run_func):
 
-    parser = extend_arguments_func(get_basic_arg_parser())
     args = parser.parse_args()
 
     _configure_logger(args.verbose)
