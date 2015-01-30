@@ -5,10 +5,9 @@ import sys
 import re
 import calendar
 import hashlib
-
 from datetime import datetime
 
-from taxii_client.script_commons import run_client
+from taxii_client.script_commons import run_client, get_basic_arg_parser
 from taxii_client.utils import ts_to_date
 
 import logging
@@ -33,10 +32,10 @@ def generate_filename(collection, content_block):
 
     collection_name = re.sub(r"[^\w]+", "-", collection) if collection else ""
 
-    hash = hashlib.md5()
-    hash.update(content_block.to_xml())
+    md5 = hashlib.md5()
+    md5.update(content_block.to_xml())
 
-    filename = '%s_%s' % (collection_name, hash.hexdigest())
+    filename = '%s_%s' % (collection_name, md5.hexdigest())
 
     return filename
 
@@ -83,12 +82,11 @@ def runner(client, path, args):
         if counter >= args.limit:
             break
 
-
     log.info("%d blocks polled", counter)
 
 
 if __name__ == '__main__':
-    run_client(extend_arguments, runner)
+    run_client(extend_arguments(get_basic_arg_parser()), runner)
 
 
 

@@ -1,20 +1,12 @@
 #!/usr/bin/env python
 
+import calendar
 import os
 import re
-import calendar
 from datetime import datetime
+
 from libtaxii.constants import SVC_COLLECTION_MANAGEMENT, SVC_FEED_MANAGEMENT
-
-from taxii_client.script_commons import run_client, configure_color_logging
-
-import logging
-
-log = logging.getLogger('taxii-collections')
-
-
-def extend_arguments(parser):
-    return parser
+from taxii_client.script_commons import run_client, get_basic_arg_parser
 
 
 def runner(client, path, args):
@@ -36,8 +28,9 @@ def runner(client, path, args):
         else:
             print c.to_text()
 
+
 if __name__ == '__main__':
-    run_client(extend_arguments, runner)
+    run_client(get_basic_arg_parser(), runner)
 
     
 

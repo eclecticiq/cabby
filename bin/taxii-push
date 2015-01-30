@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
-from taxii_client.script_commons import run_client, configure_color_logging
-
 import logging
+
+from taxii_client.script_commons import run_client, get_basic_arg_parser
+
 log = logging.getLogger('taxii-push')
 
 DEFAULT_BINDING = 'urn:stix.mitre.org:xml:1.1.1'
+
 
 def extend_arguments(parser):
     parser.add_argument("--file", dest="content_file", help="file with the content to send", required=True)
@@ -29,4 +31,4 @@ def runner(client, path, args):
 
 
 if __name__ == '__main__':
-    run_client(extend_arguments, runner)
+    run_client(extend_arguments(get_basic_arg_parser()), runner)
