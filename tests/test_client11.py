@@ -12,6 +12,8 @@ from libtaxii import messages_11 as tm11
 from libtaxii.constants import *
 from fixtures11 import *
 
+httpretty.enable()
+
 ### Utils
 
 def create_client_11(**kwargs):
@@ -46,7 +48,6 @@ def test_no_discovery_path_when_pushing():
 
 def test_incorrect_path():
 
-    httpretty.enable()
     httpretty.register_uri(httpretty.POST, DISCOVERY_URI_HTTP, status=404)
 
     client = create_client_11(discovery_path=DISCOVERY_PATH)
@@ -57,7 +58,6 @@ def test_incorrect_path():
 
 def test_discovery():
 
-    httpretty.enable()
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
 
     client = create_client_11(discovery_path=DISCOVERY_PATH)
@@ -77,7 +77,6 @@ def test_discovery():
 
 def test_discovery_https():
 
-    httpretty.enable()
     register_uri(DISCOVERY_URI_HTTPS, DISCOVERY_RESPONSE)
 
     client = create_client_11(discovery_path=DISCOVERY_PATH, use_https=True)
@@ -92,7 +91,6 @@ def test_discovery_https():
 
 def test_collections():
 
-    httpretty.enable()
     register_uri(COLLECTION_MANAGEMENT_URI, COLLECTION_MANAGEMENT_RESPONSE)
 
     client = create_client_11()
@@ -107,7 +105,6 @@ def test_collections():
 
 def test_collections_with_automatic_discovery():
 
-    httpretty.enable()
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
     register_uri(COLLECTION_MANAGEMENT_URI, COLLECTION_MANAGEMENT_RESPONSE)
 
@@ -123,7 +120,6 @@ def test_collections_with_automatic_discovery():
 
 def test_poll():
 
-    httpretty.enable()
     register_uri(POLL_URI, POLL_RESPONSE)
 
     client = create_client_11()
@@ -138,7 +134,6 @@ def test_poll():
 
 def test_poll_with_subscription():
 
-    httpretty.enable()
     register_uri(POLL_URI, POLL_RESPONSE)
 
     client = create_client_11()
@@ -154,7 +149,6 @@ def test_poll_with_subscription():
 
 def test_poll_with_delivery():
 
-    httpretty.enable()
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
     register_uri(POLL_URI, POLL_RESPONSE)
 
@@ -178,7 +172,6 @@ def test_poll_with_delivery():
 
 def test_poll_prepared():
 
-    httpretty.enable()
     register_uri(POLL_URI, POLL_RESPONSE)
 
     client = create_client_11()
@@ -198,7 +191,6 @@ def test_poll_prepared():
 
 def test_poll_with_fullfilment():
 
-    httpretty.enable()
     register_uri(POLL_URI, POLL_RESPONSE_WITH_MORE_1)
 
     client = create_client_11()
@@ -225,7 +217,6 @@ def test_poll_with_fullfilment():
 
 def test_subscribe():
 
-    httpretty.enable()
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
 
     client = create_client_11()
@@ -240,7 +231,6 @@ def test_subscribe():
 
 
 def test_subscribe_with_push():
-    httpretty.enable()
 
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
@@ -265,7 +255,6 @@ def test_subscribe_with_push():
 
 def test_subscribtion_status():
 
-    httpretty.enable()
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
 
     client = create_client_11()
@@ -283,7 +272,6 @@ def test_subscribtion_status():
 
 def test_unsubscribe():
 
-    httpretty.enable()
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
 
     client = create_client_11()
@@ -301,7 +289,6 @@ def test_unsubscribe():
 
 def test_pause_subscription():
 
-    httpretty.enable()
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
 
     client = create_client_11()
@@ -319,7 +306,6 @@ def test_pause_subscription():
 
 def test_resume_subscription():
 
-    httpretty.enable()
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
 
     client = create_client_11()
@@ -337,7 +323,6 @@ def test_resume_subscription():
 
 def test_push():
 
-    httpretty.enable()
     register_uri(INBOX_URI, INBOX_RESPONSE)
 
     client = create_client_11()
@@ -354,7 +339,6 @@ def test_push():
 
 def test_push_with_destination():
 
-    httpretty.enable()
     register_uri(INBOX_URI, INBOX_RESPONSE)
 
     client = create_client_11()

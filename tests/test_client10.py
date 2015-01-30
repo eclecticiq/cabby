@@ -13,6 +13,8 @@ from libtaxii.constants import *
 from fixtures10 import *
 
 
+httpretty.enable()
+
 ### Utils
 
 def create_client_10(**kwargs):
@@ -47,7 +49,6 @@ def test_no_discovery_path_when_pushing():
 
 def test_incorrect_path():
 
-    httpretty.enable()
     httpretty.register_uri(httpretty.POST, DISCOVERY_URI_HTTP, status=404)
 
     client = create_client_10(discovery_path=DISCOVERY_PATH)
@@ -58,7 +59,6 @@ def test_incorrect_path():
 
 def test_discovery():
 
-    httpretty.enable()
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
 
     client = create_client_10(discovery_path=DISCOVERY_PATH)
@@ -77,7 +77,6 @@ def test_discovery():
 
 def test_discovery_https():
 
-    httpretty.enable()
     register_uri(DISCOVERY_URI_HTTPS, DISCOVERY_RESPONSE)
 
     client = create_client_10(discovery_path=DISCOVERY_PATH, use_https=True)
@@ -92,7 +91,6 @@ def test_discovery_https():
 
 def test_feeds():
 
-    httpretty.enable()
     register_uri(FEED_MANAGEMENT_URI, FEED_MANAGEMENT_RESPONSE)
 
     client = create_client_10()
@@ -107,7 +105,6 @@ def test_feeds():
 
 def test_collections_with_automatic_discovery():
 
-    httpretty.enable()
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
     register_uri(FEED_MANAGEMENT_URI, FEED_MANAGEMENT_RESPONSE)
 
@@ -123,7 +120,6 @@ def test_collections_with_automatic_discovery():
 
 def test_poll():
 
-    httpretty.enable()
     register_uri(POLL_URI, POLL_RESPONSE)
 
     client = create_client_10()
@@ -138,7 +134,6 @@ def test_poll():
 
 def test_poll_with_subscription():
 
-    httpretty.enable()
     register_uri(POLL_URI, POLL_RESPONSE)
 
     client = create_client_10()
@@ -154,7 +149,6 @@ def test_poll_with_subscription():
 
 def test_poll_prepared():
 
-    httpretty.enable()
     register_uri(POLL_URI, POLL_RESPONSE)
 
     client = create_client_10()
@@ -174,7 +168,6 @@ def test_poll_prepared():
 
 def test_subscribe():
 
-    httpretty.enable()
     register_uri(FEED_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
 
     client = create_client_10()
@@ -191,7 +184,6 @@ def test_subscribe():
 
 def test_subscribe_with_push():
 
-    httpretty.enable()
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
     register_uri(FEED_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
 
@@ -214,7 +206,6 @@ def test_subscribe_with_push():
 
 def test_unsubscribe():
 
-    httpretty.enable()
     register_uri(FEED_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
 
     client = create_client_10()
@@ -231,7 +222,6 @@ def test_unsubscribe():
 
 def test_push():
 
-    httpretty.enable()
     register_uri(INBOX_URI, INBOX_RESPONSE)
 
     client = create_client_10()
