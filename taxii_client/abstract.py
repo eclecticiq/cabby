@@ -105,6 +105,8 @@ class AbstractClient(object):
             except ClientException, e:
                 self.log.error('Can not automatically discover advertised services')
                 raise e
+        else:
+            services = self.services
 
         return filter(lambda i: i.service_type == service_type, services)
 
