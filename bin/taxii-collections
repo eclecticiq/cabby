@@ -16,9 +16,14 @@ def runner(client, path, args):
     collections = []
 
     for service in services:
-        if hasattr(client, 'get_collections') and service.service_type == SVC_COLLECTION_MANAGEMENT:
+        if hasattr(client, 'get_collections') and \
+                service.service_type == SVC_COLLECTION_MANAGEMENT:
+
             collections.append(client.get_collections(uri=service.service_address))
-        elif hasattr(client, 'get_feeds') and service.service_type == SVC_FEED_MANAGEMENT:
+
+        elif hasattr(client, 'get_feeds') and \
+                service.service_type == SVC_FEED_MANAGEMENT:
+
             collections.append(client.get_feeds(uri=service.service_address))
 
 

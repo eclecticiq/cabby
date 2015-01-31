@@ -59,13 +59,15 @@ def save_to_dir(dest_dir, collection, content_block, as_raw):
 
 def runner(client, path, args):
 
+    if args.limit == 0:
+        return
+
     begin_date = ts_to_date(args.begin_ts) if args.begin_ts else None
     end_date = ts_to_date(args.end_ts) if args.end_ts else None
 
     blocks = client.poll(args.collection, begin_date=begin_date, end_date=end_date, subscription_id=args.subscription_id, uri=path)
 
-    counter = 0
-    for block in blocks:
+    for counter, block in enumerate(blocks, 1):
         if args.dest_dir:
             dest_dir = os.path.abspath(args.dest_dir)
             save_to_dir(dest_dir, args.collection, block, args.as_raw)
@@ -78,7 +80,6 @@ def runner(client, path, args):
             else:
                 print block.content
 
-        counter += 1
         if counter >= args.limit:
             break
 
