@@ -45,10 +45,10 @@ class AbstractClient(object):
             service = self._get_service(service_type)
             uri = service.service_address
 
-        if '://' not in uri:
-            uri = 'http://%s' % uri # faking schema because otherwise urlparse gets confused
-
         parsed = urlparse.urlparse(uri)
+        if not parsed.scheme:
+            parsed = urlparse.urlparse("http://" + uri) # faking schema because otherwise urlparse gets confused
+
         host = parsed.hostname or self.host
         port = parsed.port or self.port
         path = parsed.path

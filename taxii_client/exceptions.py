@@ -31,15 +31,16 @@ def status_to_message(status):
     l = [status.status_type]
 
     if status.status_detail:
-        l += [dict_to_pairs(status.status_detail)]
+        l.append(dict_to_pairs(status.status_detail))
 
     if status.extended_headers:
-        l += [dict_to_pairs(status.extended_headers)]
+        l.append(dict_to_pairs(status.extended_headers))
     
     if status.message:
-        l += [status.message]
+        l.append(status.message)
 
-    return "; ".join( l )
+    return "; ".join(l)
+
 
 def dict_to_pairs(d):
     pairs = []
