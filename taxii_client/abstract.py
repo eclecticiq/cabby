@@ -1,3 +1,4 @@
+import logging
 import urlparse
 
 from libtaxii.clients import HttpClient
@@ -6,9 +7,11 @@ from libtaxii.constants import ST_SUCCESS, ST_NOT_FOUND
 from libtaxii import get_message_from_http_response
 
 from .utils import configure_taxii_client_auth
-from .exceptions import *
+from .exceptions import (
+        NoURIProvidedError, UnsuccessfulStatusError, ServiceNotFoundError,
+        AmbiguousServicesError, ClientException
+)
 
-import logging
 
 
 
@@ -37,16 +40,15 @@ class AbstractClient(object):
     def _execute_request(self, request, uri=None, service_type=None):
 
         if not uri and not service_type:
-            raise IllegalArgumentError('Either URI or service_type need to be provided')
+            raise NoURIProvidedError('Either URI or service_type need to be provided')
         elif not uri:
             service = self._get_service(service_type)
-
-            if "://" not in service.service_address:
-                uri = 'http://%s' % service.service_address # faking http just to comply with urlparse
-            else:
-                uri = service.service_address
+            uri = service.service_address
 
         parsed = urlparse.urlparse(uri)
+        if not parsed.scheme:
+            parsed = urlparse.urlparse("http://" + uri) # faking schema because otherwise urlparse gets confused
+
         host = parsed.hostname or self.host
         port = parsed.port or self.port
         path = parsed.path
@@ -54,9 +56,9 @@ class AbstractClient(object):
         auth = self.auth
         use_https = self.use_https or (parsed.scheme == 'https')
 
-        self.log.info("Sending %(type)s to %(host)s:%(port)s%(path)s", dict(
-            type=request.message_type, host=host, port=port, path=path))
+        full_path = "%(host)s:%(port)s%(path)s" % dict(host=host, port=port, path=path)
 
+        self.log.info("Sending %s to %s", request.message_type, full_path)
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug("Request:\n%s", request.to_xml(pretty_print=True))
 
@@ -68,18 +70,14 @@ class AbstractClient(object):
 
         response = get_message_from_http_response(response_raw, in_response_to='0')
 
-        self.log.info("Response received for %(type)s from %(host)s:%(port)s%(path)s", dict(
-            type=request.message_type, host=host, port=port, path=path))
-
+        self.log.info("Response received for %s from %s", request.message_type, full_path)
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug("Response:\n%s", response.to_xml(pretty_print=True))
 
-
         if hasattr(response, 'status_type'): # version agnostic
-            if response.status_type == ST_SUCCESS:
-                return True
-            else:
+            if response.status_type != ST_SUCCESS:
                 raise UnsuccessfulStatusError(response)
+            return True
 
         return response
 
@@ -103,25 +101,28 @@ class AbstractClient(object):
     def _get_all_services(self, service_type):
         if not self.services:
             try:
-                self.discover_services()
+                services = self.discover_services()
             except ClientException, e:
                 self.log.error('Can not automatically discover advertised services')
                 raise e
+        else:
+            services = self.services
 
-        return filter(lambda i: i.service_type == service_type, self.services)
+        return filter(lambda i: i.service_type == service_type, services)
 
 
-    def discover_services(self, uri=None):
+    def discover_services(self, uri=None, cache=True):
 
         uri = uri or self.discovery_path
 
         if not uri:
-            raise IllegalArgumentError('Discovery service path is not specified')
+            raise NoURIProvidedError('Discovery service URI is not specified')
 
         response = self._discovery_request(uri)
+        services = response.service_instances
 
-        self.services = response.service_instances
+        if cache:
+            self.services = services
 
-        return self.services
-
+        return services
 

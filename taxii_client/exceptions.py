@@ -23,23 +23,24 @@ class ServiceNotFoundError(ClientException):
     pass
 
 
-class IllegalArgumentError(ValueError):
+class NoURIProvidedError(ValueError):
     pass
 
 
 def status_to_message(status):
-    message = status.status_type
+    l = [status.status_type]
 
     if status.status_detail:
-        message += '; %s;' % dict_to_pairs(status.status_detail)
+        l.append(dict_to_pairs(status.status_detail))
 
     if status.extended_headers:
-        message += '; %s;' % dict_to_pairs(status.extended_headers)
-
+        l.append(dict_to_pairs(status.extended_headers))
+    
     if status.message:
-        message += '; message=%s' % status.message
+        l.append(status.message)
 
-    return message
+    return "; ".join(l)
+
 
 def dict_to_pairs(d):
     pairs = []
