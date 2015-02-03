@@ -57,16 +57,13 @@ def configure_taxii_client_auth(tclient, cert=None, key=None, username=None, pas
     return tclient
 
 
-
-
 class DatetimeJSONEncoder(json.JSONEncoder):
-
+    """Datetime aware JSON encoder"""
     def default(self, obj):
-
         if isinstance(obj, datetime):
             return date_to_ts(obj)
         else:
-            return JSONEncoder.default(self, obj)
+            return json.JSONEncoder.default(self, obj)
 
 
 AbstractContentBlock = namedtuple('AbstractContentBlock', ['content', 'binding', 'subtypes', 'timestamp', 'source', 'sink_collection', 'source_collection'])
