@@ -56,4 +56,3 @@ Usage:
   $ taxii-push --host taxiitest.mitre.org --file /tmp/samples/stix/watchlist-1.1.1.xml
 
 Use ``--help`` to get more usage details.
-
