@@ -8,6 +8,7 @@ setup(
     author_email="founders@intelworks.com",
     packages=find_packages(),
     scripts=[
+        'bin/taxii-collections',
         'bin/taxii-discovery',
         'bin/taxii-poll',
         'bin/taxii-push',
