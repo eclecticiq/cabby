@@ -17,5 +17,5 @@ setup(
         'libtaxii==1.1.105-SNAPSHOT',
         'pytz',
         'colorlog',
-    ]
+    ],
 )
