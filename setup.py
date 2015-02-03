@@ -5,7 +5,7 @@ setup(
     version="0.0.2",
     url="https://github.com/Intelworks/taxii-client/",
     author="Intelworks",
-    author_email="founders@intelworks.com",
+    author_email="development@intelworks.com",
     packages=find_packages(),
     scripts=[
         'bin/taxii-collections',
