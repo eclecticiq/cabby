@@ -8,8 +8,7 @@ A simple Python client for interacting with TAXII servers.
 Installation
 ============
 
-::
-
+.. code-block:: python
 
   pip install git+ssh://github.com/Intelworks/taxii-client.git
 
@@ -17,7 +16,7 @@ Installation
 Usage
 =====
 
-::
+.. code-block:: python
 
   from taxii_client import create_client
 
@@ -46,7 +45,9 @@ Usage
 Scripts
 =======
 
-Usage::
+Usage:
+
+.. code-block:: console
 
   $ taxii-discovery --host taxiitest.mitre.org
 
@@ -54,5 +55,5 @@ Usage::
 
   $ taxii-push --host taxiitest.mitre.org --file /tmp/samples/stix/watchlist-1.1.1.xml
 
-Use ``--help`` to get more usage details
+Use ``--help`` to get more usage details.
 
