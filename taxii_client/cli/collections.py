@@ -34,10 +34,3 @@ def fetch_collections():
     run_client(get_basic_arg_parser(), _runner)
 
 
-if __name__ == '__main__':
-    fetch_collections()
-
-    
-
-
-

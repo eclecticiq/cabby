@@ -41,6 +41,3 @@ def _runner(client, path, args):
 def push_content():
     run_client(extend_arguments(get_basic_arg_parser()), _runner)
 
-
-if __name__ == '__main__':
-    push_content()

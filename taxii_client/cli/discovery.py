@@ -18,7 +18,3 @@ def discover_services():
     run_client(get_basic_arg_parser(), _runner)
 
 
-if __name__ == '__main__':
-    discovery_services()
-
-    
