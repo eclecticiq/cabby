@@ -1,9 +1,10 @@
 
-import argparse
 import logging
 import sys
+import argparse
+from colorlog import ColoredFormatter
 
-from taxii_client import create_client
+from .. import create_client
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ def get_basic_arg_parser():
     parser.add_argument("--host", help="host where the TAXII Service is hosted", required=True)
     parser.add_argument("--port", dest="port", type=int, help="port where the TAXII Service is hosted")
     parser.add_argument("--discovery", dest="discovery", help="path to a TAXII Discovery service")
-    parser.add_argument("--path", dest="path", help="path to a TAXII Service")
+    parser.add_argument("--path", dest="path", help="path to a specific TAXII Service")
 
     parser.add_argument("--https", dest="https", action='store_true', help="if the client should use HTTPS")
 
@@ -35,11 +36,6 @@ def get_basic_arg_parser():
     return parser
 
 
-def _configure_logger(verbose):
-    if verbose:
-        configure_color_logging('', level=logging.DEBUG)
-    else:
-        configure_color_logging('', level=logging.INFO)
 
 def is_args_valid(args):
 
@@ -54,11 +50,11 @@ def run_client(parser, run_func):
 
     args = parser.parse_args()
 
-    _configure_logger(args.verbose)
+    level = logging.DEBUG if args.verbose else logging.INFO
+    configure_color_logging(level=level)
 
     if not is_args_valid(args):
         sys.exit(1)
-
 
     auth_details = dict(
         cert = args.cert,
@@ -76,18 +72,15 @@ def run_client(parser, run_func):
         log.error(e.message, exc_info=args.verbose)
 
 
-def configure_color_logging(logger_name, level):
+def configure_color_logging(level, logger_name=None):
 
-    log = logging.getLogger(logger_name)
-
-    log.setLevel(level)
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(level)
 
     if level == logging.DEBUG:
         format_string = "%(asctime)s %(name)s %(log_color)s%(levelname)s:%(reset)s %(white)s%(message)s"
     else:
         format_string = "%(asctime)s %(log_color)s%(levelname)s:%(reset)s %(white)s%(message)s"
-
-    from colorlog import ColoredFormatter
 
     formatter = ColoredFormatter(
         format_string,
@@ -104,6 +97,5 @@ def configure_color_logging(logger_name, level):
 
     handlers = logging.StreamHandler(sys.stderr)
     handlers.setFormatter(formatter)
-    log.addHandler(handlers)
-    return log
+    logger.addHandler(handlers)
 
