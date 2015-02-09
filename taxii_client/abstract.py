@@ -13,8 +13,6 @@ from .exceptions import (
 )
 
 
-
-
 class AbstractClient(object):
 
     def __init__(self, host, discovery_path=None, port=None, use_https=False, auth=None):

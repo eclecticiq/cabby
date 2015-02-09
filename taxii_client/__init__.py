@@ -2,7 +2,6 @@
 from .client10 import Client10
 from .client11 import Client11
 
-from .utils import ContentBlock
 
 def create_client(host, discovery_path=None, port=None, use_https=False, auth=None, version="1.1"):
 
