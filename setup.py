@@ -26,8 +26,8 @@ setup(
         ]
     },
     install_requires = [
-        'libtaxii',
-        'pytz',
+        'libtaxii==1.1.105-SNAPSHOT',
+        'pytz==2014.10',
         'colorlog',
     ],
 )
