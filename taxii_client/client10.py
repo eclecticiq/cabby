@@ -5,6 +5,7 @@ from libtaxii.constants import *
 from .abstract import AbstractClient
 from .utils import extract_content
 
+
 class Client10(AbstractClient):
 
     taxii_version = VID_TAXII_XML_10

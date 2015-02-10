@@ -9,23 +9,25 @@ with open(here('README.rst')) as fp:
     long_description = fp.read()
 
 setup(
-    name="taxii-client",
-    description="Client for interacting with TAXII servers",
-    long_description=long_description,
-    version="0.0.2",
-    url="https://github.com/Intelworks/taxii-client/",
-    author="Intelworks",
-    author_email="development@intelworks.com",
-    packages=find_packages(),
-    scripts=[
-        'bin/taxii-collections',
-        'bin/taxii-discovery',
-        'bin/taxii-poll',
-        'bin/taxii-push',
-    ],
-    install_requires=[
+    name = "taxii-client",
+    description = "Client for interacting with TAXII servers",
+    long_description = long_description,
+    version = "0.0.3",
+    url = "https://github.com/Intelworks/taxii-client/",
+    author = "Intelworks",
+    author_email = "development@intelworks.com",
+    packages = find_packages(),
+    entry_points = {
+        'console_scripts' : [
+            'taxii-poll = taxii_client.cli:poll_content',
+            'taxii-push = taxii_client.cli:push_content',
+            'taxii-discovery = taxii_client.cli:discover_services',
+            'taxii-collections = taxii_client.cli:fetch_collections',
+        ]
+    },
+    install_requires = [
         'libtaxii==1.1.105-SNAPSHOT',
-        'pytz',
+        'pytz==2014.10',
         'colorlog',
     ],
 )

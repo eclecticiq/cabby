@@ -1,32 +1,12 @@
 
+import calendar
 import pytz
 import json
-import calendar
 
 from libtaxii.clients import HttpClient
 from libtaxii.messages_10 import ContentBlock as ContentBlock10
-from datetime import datetime
 
 from collections import namedtuple
-
-
-def ts_to_date(timestamp):
-
-    if not timestamp:
-        return None
-
-    return datetime.utcfromtimestamp(timestamp).replace(tzinfo=pytz.UTC)
-
-
-def date_to_ts(obj):
-    if obj.utcoffset() is not None:
-        obj = obj - obj.utcoffset()
-
-    millis = int(
-        calendar.timegm(obj.timetuple()) * 1000 +
-        obj.microsecond / 1000
-    )
-    return millis
 
 
 def configure_taxii_client_auth(tclient, cert=None, key=None, username=None, password=None):
@@ -58,40 +38,39 @@ def configure_taxii_client_auth(tclient, cert=None, key=None, username=None, pas
 
 
 class DatetimeJSONEncoder(json.JSONEncoder):
-    """Datetime aware JSON encoder"""
+    '''Datetime aware JSON encoder'''
+
     def default(self, obj):
         if isinstance(obj, datetime):
-            return date_to_ts(obj)
+            return obj.isoformat()
         else:
             return json.JSONEncoder.default(self, obj)
 
 
-AbstractContentBlock = namedtuple('AbstractContentBlock', ['content', 'binding', 'subtypes', 'timestamp', 'source', 'sink_collection', 'source_collection'])
 
-class ContentBlock(AbstractContentBlock):
+
+class ContentBlock(namedtuple('AbstractContentBlock', ['content', 'binding', 'subtypes',
+    'timestamp', 'source', 'sink_collection', 'source_collection'])):
 
     def to_json(self):
         return json.dumps(self._asdict(), cls=DatetimeJSONEncoder)
 
 
 def extract_content(block, source=None, source_collection=None, sink_collection=None):
+
     if isinstance(block, ContentBlock10):
-        return ContentBlock(
-            content = block.content,
-            binding = block.content_binding,
-            timestamp = block.timestamp_label,
-            subtypes = None,
-            source = source,
-            source_collection = source_collection,
-            sink_collection = sink_collection
-        )
+        binding = block.content_binding
+        subtypes = None
     else:
-        return ContentBlock(
-            content = block.content,
-            binding = block.content_binding.binding_id,
-            timestamp = block.timestamp_label,
-            subtypes = block.content_binding.subtype_ids,
-            source = source,
-            source_collection = source_collection,
-            sink_collection = sink_collection
-        )
+        binding = block.content_binding.binding_id
+        subtypes = block.content_binding.subtype_ids
+
+    return ContentBlock(
+        binding = binding,
+        content = block.content,
+        timestamp = block.timestamp_label,
+        subtypes = subtypes,
+        source = source,
+        source_collection = source_collection,
+        sink_collection = sink_collection
+    )
