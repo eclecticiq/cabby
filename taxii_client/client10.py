@@ -1,9 +1,11 @@
+from itertools import imap
 
 import libtaxii.messages_10 as tm10
 from libtaxii.constants import *
 
+
 from .abstract import AbstractClient
-from .utils import extract_content
+from .entities import ContentBlock, Collection
 
 
 class Client10(AbstractClient):
@@ -66,12 +68,14 @@ class Client10(AbstractClient):
 
         if inbox_service:
             delivery_parameters = tm10.DeliveryParameters(
-                inbox_protocol = inbox_service.protocol_binding,
-                inbox_address = inbox_service.service_address,
-                delivery_message_binding = inbox_service.message_bindings[0] if inbox_service.message_bindings else ''
+                inbox_protocol = inbox_service.protocol,
+                inbox_address = inbox_service.address,
+                delivery_message_binding = inbox_service.message_bindings[0] \
+                        if inbox_service.message_bindings else ''
             )
             if content_bindings:
-                delivery_parameters['content_bindings'] = [tm10.ContentBinding(cb) for cb in content_bindings]
+                delivery_parameters['content_bindings'] = [tm10.ContentBinding(cb.binding_id) \
+                        for cb in content_bindings]
 
             request_parameters['delivery_parameters'] = delivery_parameters
 
@@ -81,12 +85,12 @@ class Client10(AbstractClient):
         return response
 
 
-    def get_feeds(self, uri=None):
+    def get_collections(self, uri=None):
 
-        request = tm10.FeedInformationRequest(message_id=tm10.generate_message_id())
+        request = tm10.FeedInformationRequest(message_id=self._generate_id())
         response = self._execute_request(request, uri=uri, service_type=SVC_FEED_MANAGEMENT)
 
-        return response
+        return map(Collection.to_entity_10, response.feed_informations)
 
 
     def poll(self, feed, begin_date=None, end_date=None, subscription_id=None, uri=None):
@@ -104,17 +108,9 @@ class Client10(AbstractClient):
         request = tm10.PollRequest(**data)
         response = self._execute_request(request, uri=uri, service_type=SVC_POLL)
 
-        for block in response.content_blocks:
-            yield block
+        return imap(ContentBlock.to_entity, response.content_blocks)
 
         # No poll fulfillment in TAXII 1.0
-
-
-    def poll_prepared(self, feed, begin_date=None, end_date=None, subscription_id=None, uri=None):
-
-        for block in self.poll(feed, begin_date=begin_date, end_date=end_date, subscription_id=subscription_id, uri=uri):
-            #FIXME: self.host here may not be a correct host
-            yield extract_content(block, source_collection=feed, source=self.host)
 
 
 

@@ -74,6 +74,8 @@ def _runner(client, path, args):
     blocks = client.poll(args.collection, begin_date=begin, end_date=end,
             subscription_id=args.subscription_id, uri=path)
 
+    counter = 0
+
     for counter, block in enumerate(blocks, 1):
         if args.dest_dir:
             dest_dir = os.path.abspath(args.dest_dir)

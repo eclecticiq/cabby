@@ -4,7 +4,6 @@ import libtaxii.messages_11 as tm11
 from libtaxii.constants import *
 
 from .abstract import AbstractClient
-from .utils import extract_content
 
 
 class Client11(AbstractClient):

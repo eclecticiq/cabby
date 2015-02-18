@@ -4,7 +4,6 @@ import pytz
 import json
 
 from libtaxii.clients import HttpClient
-from libtaxii.messages_10 import ContentBlock as ContentBlock10
 
 from collections import namedtuple
 
@@ -49,28 +48,3 @@ class DatetimeJSONEncoder(json.JSONEncoder):
 
 
 
-class ContentBlock(namedtuple('AbstractContentBlock', ['content', 'binding', 'subtypes',
-    'timestamp', 'source', 'sink_collection', 'source_collection'])):
-
-    def to_json(self):
-        return json.dumps(self._asdict(), cls=DatetimeJSONEncoder)
-
-
-def extract_content(block, source=None, source_collection=None, sink_collection=None):
-
-    if isinstance(block, ContentBlock10):
-        binding = block.content_binding
-        subtypes = None
-    else:
-        binding = block.content_binding.binding_id
-        subtypes = block.content_binding.subtype_ids
-
-    return ContentBlock(
-        binding = binding,
-        content = block.content,
-        timestamp = block.timestamp_label,
-        subtypes = subtypes,
-        source = source,
-        source_collection = source_collection,
-        sink_collection = sink_collection
-    )

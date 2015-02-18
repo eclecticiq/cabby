@@ -3,8 +3,10 @@ import urlparse
 
 from libtaxii.clients import HttpClient
 from libtaxii.common import generate_message_id
-from libtaxii.constants import ST_SUCCESS, ST_NOT_FOUND
+from libtaxii.constants import ST_SUCCESS, ST_NOT_FOUND, SVC_INBOX
 from libtaxii import get_message_from_http_response
+
+from .entities import *
 
 from .utils import configure_taxii_client_auth
 from .exceptions import (
@@ -41,7 +43,7 @@ class AbstractClient(object):
             raise NoURIProvidedError('Either URI or service_type need to be provided')
         elif not uri:
             service = self._get_service(service_type)
-            uri = service.service_address
+            uri = service.address
 
         parsed = urlparse.urlparse(uri)
         if not parsed.scheme:
@@ -106,7 +108,7 @@ class AbstractClient(object):
         else:
             services = self.services
 
-        return filter(lambda i: i.service_type == service_type, services)
+        return filter(lambda i: i.type == service_type, services)
 
 
     def discover_services(self, uri=None, cache=True):
@@ -117,10 +119,13 @@ class AbstractClient(object):
             raise NoURIProvidedError('Discovery service URI is not specified')
 
         response = self._discovery_request(uri)
-        services = response.service_instances
+        services = map(DetailedServiceInstance.to_entity, response.service_instances)
 
         if cache:
             self.services = services
 
         return services
+
+
+
 

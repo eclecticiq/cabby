@@ -5,6 +5,9 @@ from libtaxii.constants import SVC_COLLECTION_MANAGEMENT, SVC_FEED_MANAGEMENT
 from .commons import run_client, get_basic_arg_parser
 
 
+COLLECTION_SERVICES = [SVC_COLLECTION_MANAGEMENT, SVC_FEED_MANAGEMENT]
+
+
 def _runner(client, path, args):
 
     services = client.discover_services(uri=path)
@@ -12,15 +15,9 @@ def _runner(client, path, args):
     collections = []
 
     for service in services:
-        if hasattr(client, 'get_collections') and \
-                service.service_type == SVC_COLLECTION_MANAGEMENT:
-
-            collections.append(client.get_collections(uri=service.service_address))
-
-        elif hasattr(client, 'get_feeds') and \
-                service.service_type == SVC_FEED_MANAGEMENT:
-
-            collections.append(client.get_feeds(uri=service.service_address))
+        if service.service_type in COLLECTION_SERVICES:
+            fetched = client.get_collections(uri=service.service_address)
+            collections.append(fetched)
 
 
     for c in collections:
