@@ -7,6 +7,7 @@ from itertools import ifilter
 
 from taxii_client import create_client
 from taxii_client import exceptions as exc
+from taxii_client import entities
 
 from libtaxii import messages_10 as tm10
 from libtaxii.constants import *
@@ -67,8 +68,8 @@ def test_discovery():
 
     assert len(services) == 4
 
-    assert len(filter(lambda s: s.service_type == SVC_INBOX, services)) == 1
-    assert len(filter(lambda s: s.service_type == SVC_DISCOVERY, services)) == 2
+    assert len(filter(lambda s: s.type == SVC_INBOX, services)) == 1
+    assert len(filter(lambda s: s.type == SVC_DISCOVERY, services)) == 2
 
     message = get_sent_message()
 
@@ -89,15 +90,26 @@ def test_discovery_https():
     assert type(message) == tm10.DiscoveryRequest
 
 
-def test_feeds():
+def test_collections():
 
     register_uri(FEED_MANAGEMENT_URI, FEED_MANAGEMENT_RESPONSE)
 
     client = create_client_10()
 
-    response = client.get_feeds(uri=FEED_MANAGEMENT_PATH)
+    collections = client.get_collections(uri=FEED_MANAGEMENT_PATH)
 
-    assert len(response.feed_informations) == 2
+    assert len(collections) == 2
+    assert all(c.type == entities.Collection.TYPE_FEED for c in collections)
+
+    feed = collections[0]
+
+    assert len(feed.polling_services) == 1
+
+    service = feed.polling_services[0]
+
+    assert service.address == POLL_URI
+    assert service.protocol is not None
+    assert len(service.message_bindings) == 1
 
     message = get_sent_message()
     assert type(message) == tm10.FeedInformationRequest
@@ -110,9 +122,9 @@ def test_collections_with_automatic_discovery():
 
     client = create_client_10(discovery_path=DISCOVERY_URI_HTTP)
 
-    response = client.get_feeds()
+    collections = client.get_collections()
 
-    assert len(response.feed_informations) == 2
+    assert len(collections) == 2
 
     message = get_sent_message()
     assert type(message) == tm10.FeedInformationRequest
@@ -147,24 +159,6 @@ def test_poll_with_subscription():
     assert message.subscription_id == SUBSCRIPTION_ID
 
 
-def test_poll_prepared():
-
-    register_uri(POLL_URI, POLL_RESPONSE)
-
-    client = create_client_10()
-    blocks = list(client.poll_prepared(POLL_FEED, uri=POLL_PATH))
-
-    assert len(blocks) == 2
-
-    assert blocks[0].source_collection == POLL_FEED
-
-    assert blocks[0].content == CONTENT_BLOCKS[0]
-    assert blocks[1].content == CONTENT_BLOCKS[1]
-
-    message = get_sent_message()
-    assert type(message) == tm10.PollRequest
-    assert message.feed_name == POLL_FEED
-
 
 def test_subscribe():
 
@@ -191,7 +185,7 @@ def test_subscribe_with_push():
 
     services = client.discover_services()
 
-    inbox = next(ifilter(lambda s: s.service_type == SVC_INBOX, services))
+    inbox = next(ifilter(lambda s: s.type == SVC_INBOX, services))
 
     response = client.subscribe(POLL_FEED, inbox_service=inbox, uri=FEED_MANAGEMENT_PATH)
 
@@ -200,7 +194,7 @@ def test_subscribe_with_push():
     message = get_sent_message()
     assert type(message) == tm10.ManageFeedSubscriptionRequest
     assert message.feed_name == POLL_FEED
-    assert message.delivery_parameters.inbox_address == inbox.service_address
+    assert message.delivery_parameters.inbox_address == inbox.address
     assert message.action == tm10.ACT_SUBSCRIBE
 
 
