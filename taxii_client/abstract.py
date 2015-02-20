@@ -86,7 +86,7 @@ class AbstractClient(object):
 
     def _get_service(self, service_type):
 
-        candidates = self._get_all_services(service_type)
+        candidates = self.get_services(service_type=service_type)
 
         if not candidates:
             raise ServiceNotFoundError("Service with type '%s' is not advertised" % service_type)
@@ -96,7 +96,7 @@ class AbstractClient(object):
         return candidates[0]
 
 
-    def _get_all_services(self, service_type):
+    def get_services(self, service_type=[], service_types=[]):
         if not self.services:
             try:
                 services = self.discover_services()
@@ -106,7 +106,16 @@ class AbstractClient(object):
         else:
             services = self.services
 
-        return filter(lambda i: i.service_type == service_type, services)
+        if not service_type and not service_types:
+            return services
+
+        if service_type:
+            filter_func = lambda i: i.service_type == service_type
+
+        if service_types:
+            filter_func = lambda i: i.service_type in service_types
+
+        return filter(filter_func, services)
 
 
     def discover_services(self, uri=None, cache=True):
@@ -118,6 +127,12 @@ class AbstractClient(object):
 
         response = self._discovery_request(uri)
         services = response.service_instances
+
+        type_to_count = {}
+        for s in services:
+            type_to_count[s.service_type] = type_to_count.get(s.service_type, 0) + 1
+
+        self.log.info("%d services discovered: %s", len(services), ", ".join(["%s=%s" % x for x in type_to_count.items()]))
 
         if cache:
             self.services = services

@@ -86,7 +86,8 @@ class Client10(AbstractClient):
         request = tm10.FeedInformationRequest(message_id=tm10.generate_message_id())
         response = self._execute_request(request, uri=uri, service_type=SVC_FEED_MANAGEMENT)
 
-        return response
+        if response:
+            return response.feed_informations
 
 
     def poll(self, feed, begin_date=None, end_date=None, subscription_id=None, uri=None):

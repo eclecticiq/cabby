@@ -5,23 +5,24 @@ from libtaxii.constants import SVC_COLLECTION_MANAGEMENT, SVC_FEED_MANAGEMENT
 from .commons import run_client, get_basic_arg_parser
 
 
-def _runner(client, path, args):
+def _get_collections(client, path):
 
-    services = client.discover_services(uri=path)
+    if hasattr(client, 'get_collections'):
+        return client.get_collections(uri=path)
+    elif hasattr(client, 'get_feeds'):
+        return client.get_feeds(uri=path)
+
+
+def _runner(client, path, args):
 
     collections = []
 
-    for service in services:
-        if hasattr(client, 'get_collections') and \
-                service.service_type == SVC_COLLECTION_MANAGEMENT:
-
-            collections.append(client.get_collections(uri=service.service_address))
-
-        elif hasattr(client, 'get_feeds') and \
-                service.service_type == SVC_FEED_MANAGEMENT:
-
-            collections.append(client.get_feeds(uri=service.service_address))
-
+    if path:
+        collections.extend(_get_collections(client, path))
+    else:
+        for service in client.get_services(service_types=[SVC_COLLECTION_MANAGEMENT, SVC_FEED_MANAGEMENT]):
+            _collections = _get_collections(client, service.service_address)
+            collections.extend(_collections)
 
     for c in collections:
         if args.as_xml:

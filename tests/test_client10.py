@@ -97,7 +97,7 @@ def test_feeds():
 
     response = client.get_feeds(uri=FEED_MANAGEMENT_PATH)
 
-    assert len(response.feed_informations) == 2
+    assert len(response) == 2
 
     message = get_sent_message()
     assert type(message) == tm10.FeedInformationRequest
@@ -112,7 +112,7 @@ def test_collections_with_automatic_discovery():
 
     response = client.get_feeds()
 
-    assert len(response.feed_informations) == 2
+    assert len(response) == 2
 
     message = get_sent_message()
     assert type(message) == tm10.FeedInformationRequest

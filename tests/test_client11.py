@@ -97,7 +97,7 @@ def test_collections():
 
     response = client.get_collections(uri=COLLECTION_MANAGEMENT_PATH)
 
-    assert len(response.collection_informations) == 2
+    assert len(response) == 2
 
     message = get_sent_message()
     assert type(message) == tm11.CollectionInformationRequest
@@ -112,7 +112,7 @@ def test_collections_with_automatic_discovery():
 
     response = client.get_collections()
 
-    assert len(response.collection_informations) == 2
+    assert len(response) == 2
 
     message = get_sent_message()
     assert type(message) == tm11.CollectionInformationRequest

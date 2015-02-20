@@ -90,7 +90,9 @@ class Client11(AbstractClient):
         request = tm11.CollectionInformationRequest(message_id=self._generate_id())
         response = self._execute_request(request, uri=uri, service_type=SVC_COLLECTION_MANAGEMENT)
 
-        return response
+        if response:
+            return response.collection_informations
+
 
 
     def push(self, content, content_binding, subtype=None, collections=[], uri=None):
