@@ -56,13 +56,12 @@ class AbstractClient(object):
 
         full_path = "%(host)s:%(port)s%(path)s" % dict(host=host, port=port, path=path)
 
-        self.log.info("Sending %s to %s", request.message_type, full_path)
-        if self.log.isEnabledFor(logging.DEBUG):
-            self.log.debug("Request:\n%s", request.to_xml(pretty_print=True))
-
         client = AbstractClient._create_client(auth=auth, use_https=use_https)
 
         request_body = request.to_xml(pretty_print=True)
+
+        self.log.info("Sending %s to %s", request.message_type, full_path)
+        self.log.debug("Request:\n%s", request_body)
 
         response_raw = client.call_taxii_service2(host, path, self.taxii_version, request_body, port=port)
 

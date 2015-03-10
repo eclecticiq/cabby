@@ -3,6 +3,8 @@ import calendar
 import pytz
 import json
 
+from datetime import datetime
+
 from libtaxii.clients import HttpClient
 from libtaxii.messages_10 import ContentBlock as ContentBlock10
 
