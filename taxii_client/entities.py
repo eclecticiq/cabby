@@ -1,10 +1,13 @@
 
-from libtaxii.constants import *
+from libtaxii import constants as const
 
-class Collection(object):
+class Entity(object):
+    raw = None
 
-    TYPE_FEED = CT_DATA_FEED
-    TYPE_SET = CT_DATA_SET
+class Collection(Entity):
+
+    TYPE_FEED = const.CT_DATA_FEED
+    TYPE_SET = const.CT_DATA_SET
 
     version = None
 
@@ -25,89 +28,18 @@ class Collection(object):
         self.subscription_methods = subscription_methods or []
 
 
-    @staticmethod
-    def to_entity_10(collection):
-        return Collection.to_entity(collection, version=10)
 
-    @staticmethod
-    def to_entity(collection, version):
-
-        push_methods = []
-        for pm in collection.push_methods:
-            push_methods.append(PushMethod(
-                protocol = pm.push_protocol,
-                message_bindings = pm.push_message_bindings
-            ))
-
-        subscription_methods = []
-        for sm in collection.subscription_methods:
-            subscription_methods.append(ServiceInstance(
-                protocol = sm.subscription_protocol,
-                address = sm.subscription_address,
-                message_bindings = sm.subscription_message_bindings
-            ))
-
-        content_bindings = map(ContentBinding, collection.supported_contents)
-
-        polling_services = []
-        for sm in collection.polling_service_instances:
-            polling_services.append(ServiceInstance(
-                protocol = sm.poll_protocol,
-                address = sm.poll_address,
-                message_bindings = sm.poll_message_bindings
-            ))
-
-        if version == 10:
-            name = collection.feed_name
-            description = collection.feed_description
-            coll_type = Collection.TYPE_FEED
-        elif version == 11:
-            name = collection.collection_name
-            description = collection.collection_description
-            coll_type = collection.collection_type
-
-        return Collection(
-            name = name,
-            description = description,
-            type = coll_type,
-            available = collection.available,
-            push_methods = push_methods,
-            subscription_methods = subscription_methods,
-            content_bindings = content_bindings,
-            polling_services = polling_services
-        )
-
-
-
-class PushMethod(object):
-
-    def __init__(self, protocol, message_bindings):
-        self.protocol = protocol
-        self.message_bindings = message_bindings
-
-
-class ContentBinding(object):
+class ContentBinding(Entity):
 
     def __init__(self, id, subtypes=[]):
         self.id = id
         self.subtypes = subtypes
 
-    @staticmethod
-    def to_entity(raw_binding):
-
-        if isinstance(raw_binding, basestring):
-            return ContentBinding(raw_binding)
-        else:
-            return ContentBinding(
-                id = raw_binding.binding_id,
-                subtypes = raw_binding.subtype_ids
-            )
-
-
 
 # Polling services
 # Subscription methods
-class ServiceInstance(object):
+# Poll instances
+class ServiceInstance(Entity):
 
     def __init__(self, protocol, address, message_bindings):
         self.protocol = protocol
@@ -123,18 +55,48 @@ class InboxService(ServiceInstance):
         self.content_bindings = content_bindings
 
 
-class DetailedServiceInstance(object):
+class PushMethod(Entity):
+    '''
+    Entity represents the protocol that TAXII server supports
+    when it pushes data via subscription delivery
+    '''
+
+    def __init__(self, protocol, message_bindings):
+        self.protocol = protocol
+        self.message_bindings = message_bindings
+
+
+class DeliveryParameters(Entity):
+
+    def __init__(self, address, protocol, message_binding, content_bindings=[]):
+        self.address = address
+        self.protocol = protocol
+        self.message_binding = message_binding
+        self.content_bindings = content_bindings
+
+
+class SubscriptionParameters(Entity):
+
+    TYPE_FULL = const.RT_FULL
+    TYPE_COUNTS = const.RT_COUNT_ONLY
+
+    def __init__(self, response_type, content_bindings=[]):
+        self.response_type = response_type
+        self.content_bindings = content_bindings
+
+
+class DetailedServiceInstance(Entity):
     '''
     Detailed description of TAXII server instance
 
-    "Supported Query" is not supported
+    "Supported Query" is not implemented
     '''
 
-    VERSION_10 = VID_TAXII_SERVICES_10
-    VERSION_11 = VID_TAXII_SERVICES_11
+    VERSION_10 = const.VID_TAXII_SERVICES_10
+    VERSION_11 = const.VID_TAXII_SERVICES_11
 
-    PROTOCOL_HTTP = VID_TAXII_HTTP_10
-    PROTOCOL_HTTPS = VID_TAXII_HTTPS_10
+    PROTOCOL_HTTP = const.VID_TAXII_HTTP_10
+    PROTOCOL_HTTPS = const.VID_TAXII_HTTPS_10
 
     def __init__(self, type, version, protocol, address, message_bindings,
             available=None, message=None):
@@ -149,30 +111,6 @@ class DetailedServiceInstance(object):
         self.message = message
 
 
-    @staticmethod
-    def to_entity(service):
-
-        params = dict(
-            type = service.service_type,
-            version = service.services_version,
-            protocol = service.protocol_binding,
-            address = service.service_address,
-            message_bindings = service.message_bindings,
-            available = service.available,
-            message = service.message
-        )
-
-        if service.service_type == SVC_INBOX:
-            cls = InboxDetailedService
-
-            params['content_bindings'] = map(ContentBinding.to_entity, 
-                    service.inbox_service_accepted_content)
-        else:
-            cls = DetailedServiceInstance
-
-        return cls(**params)
-
-
 class InboxDetailedService(DetailedServiceInstance):
 
     def __init__(self, content_bindings, **kwargs):
@@ -181,7 +119,7 @@ class InboxDetailedService(DetailedServiceInstance):
         self.content_bindings = content_bindings
 
 
-class ContentBlock(object):
+class ContentBlock(Entity):
     
     def __init__(self, content, content_binding, timestamp):
 
@@ -190,10 +128,28 @@ class ContentBlock(object):
         self.timestamp = timestamp
 
 
-    @staticmethod
-    def to_entity(block):
-        return ContentBlock(
-            content = block.content,
-            content_binding = ContentBinding.to_entity(block.content_binding),
-            timestamp = block.timestamp_label,
-        )
+class SubscriptionResponse(Entity):
+
+    def __init__(self, collection_name, message=None, subscriptions=[]):
+
+        self.collection_name = collection_name
+        self.message = message
+        self.subscriptions = subscriptions
+
+
+class Subscription(Entity):
+
+    STATUS_UNKNOWN = 'UNKNOWN'
+    STATUS_ACTIVE = const.SS_ACTIVE
+    STATUS_PAUSED = const.SS_PAUSED
+    STATUS_UNSUBSCRIBED = const.SS_UNSUBSCRIBED
+
+    def __init__(self, subscription_id, status=STATUS_UNKNOWN, delivery_parameters=None,
+            subscription_parameters=None, poll_instances=None):
+
+        self.id = subscription_id
+        self.status = status
+        self.delivery_parameters = delivery_parameters
+        self.subscription_parameters = subscription_parameters
+        self.poll_instances = poll_instances
+
