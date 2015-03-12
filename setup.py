@@ -23,10 +23,11 @@ setup(
             'taxii-push = taxii_client.cli:push_content',
             'taxii-discovery = taxii_client.cli:discover_services',
             'taxii-collections = taxii_client.cli:fetch_collections',
+            'taxii-subscription = taxii_client.cli:manage_subscription',
         ]
     },
     install_requires = [
-        'libtaxii==1.1.105-SNAPSHOT',
+        'libtaxii',
         'pytz==2014.10',
         'colorlog',
     ],
