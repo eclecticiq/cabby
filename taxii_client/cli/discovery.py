@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-
 from .commons import run_client, get_basic_arg_parser
-
 
 def _runner(client, path, args):
 
@@ -9,9 +6,9 @@ def _runner(client, path, args):
 
     for s in services:
         if args.as_xml:
-            print s.to_xml()
+            print s.raw.to_xml(pretty_print=True)
         else:
-            print s.to_text()
+            print s.raw.to_text()
 
 
 def discover_services():
