@@ -30,6 +30,7 @@ def register_uri(uri, body, **kwargs):
 
 def get_sent_message():
     body = httpretty.last_request().body
+    print body
     return tm10.get_message_from_xml(body)
 
 ### Tests
@@ -48,6 +49,7 @@ def test_no_discovery_path_when_pushing():
         client.push(CONTENT, CONTENT_BINDING)
 
 
+@httpretty.activate
 def test_incorrect_path():
 
     httpretty.register_uri(httpretty.POST, DISCOVERY_URI_HTTP, status=404)
@@ -58,6 +60,7 @@ def test_incorrect_path():
         client.discover_services()
 
 
+@httpretty.activate
 def test_discovery():
 
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
@@ -76,6 +79,7 @@ def test_discovery():
     assert type(message) == tm10.DiscoveryRequest
 
 
+@httpretty.activate
 def test_discovery_https():
 
     register_uri(DISCOVERY_URI_HTTPS, DISCOVERY_RESPONSE)
@@ -90,6 +94,7 @@ def test_discovery_https():
     assert type(message) == tm10.DiscoveryRequest
 
 
+@httpretty.activate
 def test_collections():
 
     register_uri(FEED_MANAGEMENT_URI, FEED_MANAGEMENT_RESPONSE)
@@ -115,6 +120,7 @@ def test_collections():
     assert type(message) == tm10.FeedInformationRequest
 
 
+@httpretty.activate
 def test_collections_with_automatic_discovery():
 
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
@@ -130,6 +136,7 @@ def test_collections_with_automatic_discovery():
     assert type(message) == tm10.FeedInformationRequest
 
 
+@httpretty.activate
 def test_poll():
 
     register_uri(POLL_URI, POLL_RESPONSE)
@@ -144,6 +151,7 @@ def test_poll():
     assert message.feed_name == POLL_FEED
 
 
+@httpretty.activate
 def test_poll_with_subscription():
 
     register_uri(POLL_URI, POLL_RESPONSE)
@@ -159,7 +167,43 @@ def test_poll_with_subscription():
     assert message.subscription_id == SUBSCRIPTION_ID
 
 
+@httpretty.activate
+def test_poll_with_content_bindings():
 
+    register_uri(POLL_URI, POLL_RESPONSE)
+
+    client = create_client_10()
+
+    gen = client.poll(POLL_FEED, uri=POLL_PATH,
+            content_bindings=[CONTENT_BINDING])
+
+    block_1 = next(gen)
+    print gen, block_1.content, CONTENT_BLOCKS
+    assert block_1.content == CONTENT_BLOCKS[0]
+
+    message = get_sent_message()
+    assert type(message) == tm10.PollRequest
+    assert message.feed_name == POLL_FEED
+
+    assert len(message.content_bindings) == 1
+    assert message.content_bindings[0] == CONTENT_BINDING
+
+    binding = entities.ContentBinding(CONTENT_BINDING, subtypes=['substype-a'])
+    gen = client.poll(POLL_FEED, uri=POLL_PATH,
+            content_bindings=[binding])
+
+    block_1 = next(gen)
+    assert block_1.content == CONTENT_BLOCKS[0]
+
+    message = get_sent_message()
+    assert type(message) == tm10.PollRequest
+
+    assert len(message.content_bindings) == 1
+    assert message.content_bindings[0] == binding.id
+
+
+
+@httpretty.activate
 def test_subscribe():
 
     register_uri(FEED_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
@@ -168,7 +212,11 @@ def test_subscribe():
 
     response = client.subscribe(POLL_FEED, uri=FEED_MANAGEMENT_PATH)
 
-    assert response.feed_name == POLL_FEED
+    assert response.collection_name == POLL_FEED
+    assert len(response.subscriptions) == 1
+
+    subscription = response.subscriptions[0]
+    assert subscription.status == subscription.STATUS_UNKNOWN
 
     message = get_sent_message()
     assert type(message) == tm10.ManageFeedSubscriptionRequest
@@ -176,6 +224,7 @@ def test_subscribe():
     assert message.action == tm10.ACT_SUBSCRIBE
 
 
+@httpretty.activate
 def test_subscribe_with_push():
 
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
@@ -189,7 +238,12 @@ def test_subscribe_with_push():
 
     response = client.subscribe(POLL_FEED, inbox_service=inbox, uri=FEED_MANAGEMENT_PATH)
 
-    assert response.feed_name == POLL_FEED
+    assert response.collection_name == POLL_FEED
+    assert len(response.subscriptions) == 1
+
+    subscription = response.subscriptions[0]
+    # TAXII 1.0 does not reply with 'status' field configured
+    assert subscription.status == subscription.STATUS_UNKNOWN
 
     message = get_sent_message()
     assert type(message) == tm10.ManageFeedSubscriptionRequest
@@ -198,6 +252,7 @@ def test_subscribe_with_push():
     assert message.action == tm10.ACT_SUBSCRIBE
 
 
+@httpretty.activate
 def test_unsubscribe():
 
     register_uri(FEED_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
@@ -206,7 +261,10 @@ def test_unsubscribe():
 
     response = client.unsubscribe(POLL_FEED, uri=FEED_MANAGEMENT_PATH)
 
-    assert response.feed_name == POLL_FEED
+    assert response.collection_name == POLL_FEED
+    assert len(response.subscriptions) == 1
+    # TAXII 1.0 does not reply with 'status' field configured
+    assert response.subscriptions[0].status == entities.Subscription.STATUS_UNKNOWN
 
     message = get_sent_message()
     assert type(message) == tm10.ManageFeedSubscriptionRequest
@@ -214,6 +272,7 @@ def test_unsubscribe():
     assert message.action == tm10.ACT_UNSUBSCRIBE
 
 
+@httpretty.activate
 def test_push():
 
     register_uri(INBOX_URI, INBOX_RESPONSE)
