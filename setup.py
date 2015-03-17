@@ -25,8 +25,10 @@ setup(
             'taxii-collections = taxii_client.cli:fetch_collections',
         ]
     },
+    dependency_links = [
+        'git+https://github.com/TAXIIProject/libtaxii.git#egg=libtaxii-1.1.106'
+    ],
     install_requires = [
-        'libtaxii==1.1.105-SNAPSHOT',
         'pytz==2014.10',
         'colorlog',
     ],

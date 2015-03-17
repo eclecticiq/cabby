@@ -12,6 +12,8 @@ from .exceptions import (
         AmbiguousServicesError, ClientException
 )
 
+PROXY_TYPE_CHOICES = [HttpClient.PROXY_HTTP, HttpClient.PROXY_HTTPS]
+SUPPORTED_SCHEMES = ['http', 'https']
 
 class AbstractClient(object):
 
@@ -45,18 +47,26 @@ class AbstractClient(object):
 
         parsed = urlparse.urlparse(uri)
         if not parsed.scheme:
-            parsed = urlparse.urlparse("http://" + uri) # faking schema because otherwise urlparse gets confused
+            # faking schema because otherwise urlparse gets confused
+            parsed = urlparse.urlparse("http://" + uri)
+        elif parsed.scheme not in SUPPORTED_SCHEMES:
+            raise ValueError('Scheme "%s" is not supported. Use one of: %s' % \
+                    (parsed.scheme, ', '.join(SUPPORTED_SCHEMES)))
 
+        use_https = self.use_https or (parsed.scheme == 'https')
         host = parsed.hostname or self.host
         port = parsed.port or self.port
         path = parsed.path
 
-        auth = self.auth
-        use_https = self.use_https or (parsed.scheme == 'https')
+        full_path = "http%(https)s://%(host)s:%(port)s%(path)s" % dict(
+                https=('s' if use_https else ''), host=host, port=port,
+                path=path)
 
-        full_path = "%(host)s:%(port)s%(path)s" % dict(host=host, port=port, path=path)
+        if not host:
+            raise ValueError('Host name is not provided: %s' % full_path)
 
-        client = AbstractClient._create_client(auth=auth, use_https=use_https)
+        client = AbstractClient._create_client(
+                auth=self.auth, use_https=use_https)
 
         request_body = request.to_xml(pretty_print=True)
 
