@@ -23,6 +23,7 @@ setup(
             'taxii-push = taxii_client.cli:push_content',
             'taxii-discovery = taxii_client.cli:discover_services',
             'taxii-collections = taxii_client.cli:fetch_collections',
+            'taxii-subscription = taxii_client.cli:manage_subscription',
         ]
     },
     dependency_links = [

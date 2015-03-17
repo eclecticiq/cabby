@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import logging
 
 from libtaxii.constants import CB_STIX_XML_111
@@ -13,14 +11,10 @@ MAX_COLLECTIONS = 10
 
 
 def extend_arguments(parser):
-    parser.add_argument("--file", dest="content_file",
-            help="file with the content to send", required=True)
-    parser.add_argument("--binding", dest="content_binding", default=DEFAULT_BINDING,
-            help="content binding")
-    parser.add_argument("--subtype", dest="subtype",
-            help="the subtype of the content binding")
-    parser.add_argument("--dest", dest="dest",
-            help="names of the collections to push the content into, comma separated")
+    parser.add_argument("-f", "--content-file", dest="content_file", help="file with the content to send", required=True)
+    parser.add_argument("--binding", dest="content_binding", default=DEFAULT_BINDING, help="content binding")
+    parser.add_argument("--subtype", dest="subtype", help="the subtype of the content binding")
+    parser.add_argument("--dest", dest="dest", help="names of the collections to push the content into, comma separated")
 
     return parser
 

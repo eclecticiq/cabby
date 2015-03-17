@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os
 import sys
 import re
@@ -14,22 +12,20 @@ log = logging.getLogger(__name__)
 
 
 def extend_arguments(parser):
-    parser.add_argument("--collection", dest="collection", help="collection to poll", required=True)
+    parser.add_argument("-c", "--collection", dest="collection", help="collection to poll", required=True)
     parser.add_argument("--dest-dir", dest="dest_dir", help="directory to save polled content")
 
     parser.add_argument("-l", "--limit", dest="limit", type=int, default=sys.maxint,
             help="limit the number of content blocks returned")
 
     parser.add_argument("-r", "--raw", dest="as_raw", action='store_true',
-            help="output raw TAXII messages")
+            help="output raw TAXII messages "\
+                 "(use in combination with -x to see them as XML)")
 
-    parser.add_argument("--begin", dest="begin",
-            help="exclusive beginning of time window as ISO8601 formatted date")
+    parser.add_argument("--begin", dest="begin", help="exclusive beginning of time window as ISO8601 formatted date")
+    parser.add_argument("--end", dest="end", help="inclusive ending of time window as ISO8601 formatted date")
 
-    parser.add_argument("--end", dest="end",
-            help="inclusive ending of time window as ISO8601 formatted date")
-
-    parser.add_argument("--subscription-id", dest="subscription_id", help="subscription ID")
+    parser.add_argument("-s", "--subscription", dest="subscription_id", help="ID of an existing subscription")
 
     return parser
 
@@ -73,6 +69,8 @@ def _runner(client, path, args):
 
     blocks = client.poll(args.collection, begin_date=begin, end_date=end,
             subscription_id=args.subscription_id, uri=path)
+
+    counter = 0
 
     for counter, block in enumerate(blocks, 1):
         if args.dest_dir:

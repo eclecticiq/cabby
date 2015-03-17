@@ -1,33 +1,28 @@
-
-import calendar
-import pytz
-import json
-
-from datetime import datetime
-
 from libtaxii.clients import HttpClient
-from libtaxii.messages_10 import ContentBlock as ContentBlock10
+import libtaxii.messages_11 as tm11
 
-from collections import namedtuple
+from .entities import ContentBinding
 
 
-def configure_taxii_client_auth(tclient, cert=None, key=None, username=None, password=None):
-    tls_auth = (cert and key)
+def configure_client_auth(tclient, cert_file=None, key_file=None,
+        username=None, password=None):
+
+    tls_auth = (cert_file and key_file)
     basic_auth = (username and password)
 
     if tls_auth and basic_auth:
         tclient.set_auth_type(HttpClient.AUTH_CERT_BASIC)
         tclient.set_auth_credentials(dict(
-            key_file = key, 
-            cert_file = cert,
+            key_file = key_file, 
+            cert_file = cert_file,
             username = username,
             password = password
         ))
     elif tls_auth:
         tclient.set_auth_type(HttpClient.AUTH_CERT)
         tclient.set_auth_credentials(dict(
-            key_file = key, 
-            cert_file = cert
+            key_file = key_file, 
+            cert_file = cert_file,
         ))
     elif basic_auth:
         tclient.set_auth_type(HttpClient.AUTH_BASIC)
@@ -39,40 +34,22 @@ def configure_taxii_client_auth(tclient, cert=None, key=None, username=None, pas
     return tclient
 
 
-class DatetimeJSONEncoder(json.JSONEncoder):
-    '''Datetime aware JSON encoder'''
+def pack_content_bindings(content_bindings, version):
 
-    def default(self, obj):
-        if isinstance(obj, datetime):
-            return obj.isoformat()
+    if not content_bindings:
+        return None
+
+    bindings = []
+
+    for b in content_bindings:
+        if isinstance(b, ContentBinding):
+            binding = tm11.ContentBinding(binding_id=b.id,
+                    subtype_ids=b.subtypes) if version == 11 else b.id
         else:
-            return json.JSONEncoder.default(self, obj)
+            binding = tm11.ContentBinding(binding_id=b) \
+                    if version == 11 else b
 
+        bindings.append(binding)
 
+    return bindings
 
-
-class ContentBlock(namedtuple('AbstractContentBlock', ['content', 'binding', 'subtypes',
-    'timestamp', 'source', 'sink_collection', 'source_collection'])):
-
-    def to_json(self):
-        return json.dumps(self._asdict(), cls=DatetimeJSONEncoder)
-
-
-def extract_content(block, source=None, source_collection=None, sink_collection=None):
-
-    if isinstance(block, ContentBlock10):
-        binding = block.content_binding
-        subtypes = None
-    else:
-        binding = block.content_binding.binding_id
-        subtypes = block.content_binding.subtype_ids
-
-    return ContentBlock(
-        binding = binding,
-        content = block.content,
-        timestamp = block.timestamp_label,
-        subtypes = subtypes,
-        source = source,
-        source_collection = source_collection,
-        sink_collection = sink_collection
-    )
