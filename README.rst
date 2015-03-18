@@ -1,54 +1,42 @@
-============
 Cabby
-============
+=====
+
+Intelworks Python TAXII client implementation.
+
+:Source: https://github.com/Intelworks/Cabby
+:Documentation: http://cabby.readthedocs.org
+:Information: http://www.intelworks.com
+:Download: https://pypi.python.org/pypi/cabby/
+
+|travis badge| |landscape.io badge| |coveralls.io badge| |version badge| |py.version badge| |downloads badge| |license badge| |docs badge|
+
+.. |travis badge| image:: https://travis-ci.org/Intelworks/Cabby.svg?branch=master
+   :target: https://travis-ci.org/Intelworks/Cabby
+   :alt: Build Status
+.. |landscape.io badge| image:: https://landscape.io/github/Intelworks/Cabby/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/Intelworks/Cabby/master
+   :alt: Code Health
+.. |coveralls.io badge| image:: https://coveralls.io/repos/Intelworks/Cabby/badge.svg
+   :target: https://coveralls.io/r/Intelworks/Cabby
+   :alt: Coverage Status
+.. |version badge| image:: https://pypip.in/version/cabby/badge.svg?style=flat
+   :target: https://pypi.python.org/pypi/cabby/ 
+.. |py.version badge| image:: https://pypip.in/py_versions/cabby/badge.svg?style=flat
+   :target: https://pypi.python.org/pypi/cabby/ 
+.. |downloads badge| image:: https://pypip.in/download/cabby/badge.svg?style=flat
+   :target: https://pypi.python.org/pypi/cabby/
+.. |license badge| image:: https://pypip.in/license/cabby/badge.svg?style=flat
+   :target: https://pypi.python.org/pypi/cabby/
+.. |docs badge| image:: https://readthedocs.org/projects/cabby/badge/?version=latest
+    :alt: Documentation Status
+    :scale: 100%
+    :target: https://readthedocs.org/projects/cabby/
 
 A simple Python client for interacting with TAXII servers.
 
 
-Installation
-============
+Feedback
+--------
 
-.. code-block:: python
-
-  pip install git+ssh://github.com/Intelworks/cabby.git
-
-
-Usage
-=====
-
-.. code-block:: python
-
-  from cabby import create_client
-
-  client = create_client('taxiitest.mitre.org', port=80)
-
-  for service in client.discover_services(uri='/services/discovery'):
-      print(service.to_text())
-
-  # if only one POLL service advertised, client will use it automatically
-  content_blocks = client.poll('default')
-
-  for block in content_blocks:
-      print(block['content'])
-
-  content = '<some>content-text</some>'
-  binding = 'urn:stix.mitre.org:xml:1.1.1'
-
-  # it is also possible to specify a path to a service
-  client.push(content, binding, uri='/services/inbox/default')
-
-
-Scripts
-=======
-
-Usage:
-
-.. code-block:: console
-
-  $ taxii-discovery --host taxiitest.mitre.org
-
-  $ taxii-poll --host taxiitest.mitre.org --collection default --dest-dir /tmp/
-
-  $ taxii-push --host taxiitest.mitre.org --file /tmp/samples/stix/watchlist-1.1.1.xml
-
-Use ``--help`` to get more usage details.
+You are encouraged to provide feedback by commenting on open issues or sending us 
+email at cabby@intelworks.com
