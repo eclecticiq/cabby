@@ -23,7 +23,7 @@ def get_basic_arg_parser():
         description = "TAXII client",
         formatter_class = argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument("--host", help="host where the TAXII Service is hosted")
+    parser.add_argument("--host", dest="host", help="host where the TAXII Service is hosted")
     parser.add_argument("--port", dest="port", type=int, help="port where the TAXII Service is hosted")
     parser.add_argument("--discovery", dest="discovery", help="path to a TAXII Discovery service")
     parser.add_argument("--path", dest="uri", help="absolute path (as URL) or relative path to a specific TAXII Service")
