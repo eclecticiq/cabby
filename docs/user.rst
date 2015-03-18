@@ -2,10 +2,10 @@
 User guide
 ==========
 
-This user guide gives an overview of Cabby. It covers:
+This user guide gives an overview of cabby. It covers:
 
-* Using Cabby as a Python library and
-* Using Cabby as a command line tool
+* Using cabby as a Python library and
+* Using cabby as a command line tool
 
 Note: this document assumes basic familiarity with TAXII specification; visit the `TAXII
 homepage`_ for more information about its features.
@@ -53,6 +53,6 @@ Use ``--help`` to get more usage details.
 
 .. rubric:: Next steps
 
-The user guide should be enough to get you started with Cabby.
+The user guide should be enough to get you started with cabby.
 
 .. vim: set spell spelllang=en:
