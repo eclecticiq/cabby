@@ -3,21 +3,21 @@ Cabby
 
 Intelworks Python TAXII client implementation.
 
-:Source: https://github.com/Intelworks/Cabby
+:Source: https://github.com/Intelworks/cabby
 :Documentation: http://cabby.readthedocs.org
 :Information: http://www.intelworks.com
 :Download: https://pypi.python.org/pypi/cabby/
 
 |travis badge| |landscape.io badge| |coveralls.io badge| |version badge| |py.version badge| |downloads badge| |license badge| |docs badge|
 
-.. |travis badge| image:: https://travis-ci.org/Intelworks/Cabby.svg?branch=master
-   :target: https://travis-ci.org/Intelworks/Cabby
+.. |travis badge| image:: https://travis-ci.org/Intelworks/cabby.svg?branch=master
+   :target: https://travis-ci.org/Intelworks/cabby
    :alt: Build Status
-.. |landscape.io badge| image:: https://landscape.io/github/Intelworks/Cabby/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/Intelworks/Cabby/master
+.. |landscape.io badge| image:: https://landscape.io/github/Intelworks/cabby/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/Intelworks/cabby/master
    :alt: Code Health
-.. |coveralls.io badge| image:: https://coveralls.io/repos/Intelworks/Cabby/badge.svg
-   :target: https://coveralls.io/r/Intelworks/Cabby
+.. |coveralls.io badge| image:: https://coveralls.io/repos/Intelworks/cabby/badge.svg
+   :target: https://coveralls.io/r/Intelworks/cabby
    :alt: Coverage Status
 .. |version badge| image:: https://pypip.in/version/cabby/badge.svg?style=flat
    :target: https://pypi.python.org/pypi/cabby/ 
