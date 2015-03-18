@@ -69,15 +69,6 @@ class PushMethod(Entity):
         self.message_bindings = message_bindings
 
 
-class DeliveryParameters(Entity):
-
-    def __init__(self, address, protocol, message_binding, content_bindings=None):
-        self.address = address
-        self.protocol = protocol
-        self.message_binding = message_binding
-        self.content_bindings = content_bindings or []
-
-
 class SubscriptionParameters(Entity):
 
     TYPE_FULL = const.RT_FULL

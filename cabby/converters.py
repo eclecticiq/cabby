@@ -1,6 +1,12 @@
 from libtaxii import constants as const
 
-from .entities import *
+from .entities import (
+    ContentBinding, Collection, PushMethod, Subscription,
+    Subscription, ServiceInstance,
+    InboxDetailedService, DetailedServiceInstance, ContentBlock,
+    InboxService, SubscriptionParameters, SubscriptionResponse
+)
+
 
 def to_collection_entities(collections, version):
     return map(lambda c: to_collection_entity(c, version), collections)
@@ -157,10 +163,10 @@ def to_subscription_entity(subscription, version):
         else:
             bindings = None
 
-        parameters = DeliveryParameters(
+        parameters = InboxService(
             address = raw_delivery_parameters.inbox_address,
             protocol = raw_delivery_parameters.inbox_protocol,
-            message_binding = raw_delivery_parameters.delivery_message_binding,
+            message_bindings = [raw_delivery_parameters.delivery_message_binding],
             content_bindings = bindings
         )
         parameters.raw = raw_delivery_parameters

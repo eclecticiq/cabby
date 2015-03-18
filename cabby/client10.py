@@ -61,13 +61,13 @@ class Client10(AbstractClient):
         inbox_message = tm10.InboxMessage(message_id=self._generate_id(),
                 content_blocks=[content_block])
 
-        response = self._execute_request(inbox_message, uri=uri,
+        self._execute_request(inbox_message, uri=uri,
                 service_type=const.SVC_INBOX)
 
         self.log.debug("Content successfully pushed")
 
 
-    def subscribe(self, feed_name, count_only=False, inbox_service=None,
+    def subscribe(self, feed_name, inbox_service=None,
             content_bindings=None, uri=None):
 
         request_parameters = dict(

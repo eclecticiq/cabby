@@ -110,7 +110,7 @@ class Client11(AbstractClient):
         if collections_names:
             inbox_message.destination_collection_names.extend(collections_names)
 
-        response = self._execute_request(inbox_message, uri=uri, service_type=const.SVC_INBOX)
+        self._execute_request(inbox_message, uri=uri, service_type=const.SVC_INBOX)
 
         self.log.debug("Content successfully pushed")
 

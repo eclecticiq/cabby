@@ -1,7 +1,6 @@
 import os
 import sys
 import re
-import calendar
 import logging
 import hashlib
 import dateutil.parser
