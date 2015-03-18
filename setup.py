@@ -1,29 +1,29 @@
-import os
+from os.path import join, dirname
 from setuptools import setup, find_packages
 
+CURRENT_DIR = dirname(__file__)
 
-def here(*path):
-    return os.path.join(os.path.dirname(__file__), *path)
-
-with open(here('README.rst')) as fp:
-    long_description = fp.read()
+def get_file_contents(filename):
+    with open(join(CURRENT_DIR, filename)) as fp:
+        return fp.read()
 
 setup(
-    name = "taxii-client",
+    name = "cabby",
     description = "Client for interacting with TAXII servers",
-    long_description = long_description,
-    version = "0.0.3",
-    url = "https://github.com/Intelworks/taxii-client/",
+    long_description = get_file_contents('README.rst'),
+    url = "https://github.com/Intelworks/cabby/",
     author = "Intelworks",
-    author_email = "development@intelworks.com",
+    author_email = "cabby@intelworks.com",
+    version = "0.0.3",
+    license = "BSD License",
     packages = find_packages(),
     entry_points = {
         'console_scripts' : [
-            'taxii-poll = taxii_client.cli:poll_content',
-            'taxii-push = taxii_client.cli:push_content',
-            'taxii-discovery = taxii_client.cli:discover_services',
-            'taxii-collections = taxii_client.cli:fetch_collections',
-            'taxii-subscription = taxii_client.cli:manage_subscription',
+            'taxii-poll = cabby.cli:poll_content',
+            'taxii-push = cabby.cli:push_content',
+            'taxii-discovery = cabby.cli:discover_services',
+            'taxii-collections = cabby.cli:fetch_collections',
+            'taxii-subscription = cabby.cli:manage_subscription',
         ]
     },
     dependency_links = [

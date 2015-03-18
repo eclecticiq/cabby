@@ -1,5 +1,5 @@
 ============
-taxii-client
+Cabby
 ============
 
 A simple Python client for interacting with TAXII servers.
@@ -10,7 +10,7 @@ Installation
 
 .. code-block:: python
 
-  pip install git+ssh://github.com/Intelworks/taxii-client.git
+  pip install git+ssh://github.com/Intelworks/cabby.git
 
 
 Usage
@@ -18,7 +18,7 @@ Usage
 
 .. code-block:: python
 
-  from taxii_client import create_client
+  from cabby import create_client
 
   client = create_client('taxiitest.mitre.org', port=80)
 

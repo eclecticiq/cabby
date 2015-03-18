@@ -1,16 +1,16 @@
 import pytest
 import urllib2
-
 import httpretty
 
 from itertools import ifilter
 
-from taxii_client import create_client
-from taxii_client import exceptions as exc
-from taxii_client import entities
-
 from libtaxii import messages_11 as tm11
 from libtaxii.constants import *
+
+from cabby import create_client
+from cabby import exceptions as exc
+from cabby import entities
+
 from fixtures11 import *
 
 httpretty.enable()
