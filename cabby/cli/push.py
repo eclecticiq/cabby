@@ -27,7 +27,7 @@ def _runner(client, path, args):
     collections = args.dest.split(',', MAX_COLLECTIONS) if args.dest else []
 
     client.push(content, args.content_binding, subtype=args.subtype,
-            collections=collections, uri=path)
+            collections_names=collections, uri=path)
 
     log.info("Content pushed into %s", path)
 
