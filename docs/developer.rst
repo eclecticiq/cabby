@@ -33,7 +33,7 @@ Compiling from source
 
 After cloning the Github repo, just run this::
 
-   (envname) $ python setup.py install
+   $ python setup.py install
 
 
 Running the tests
