@@ -7,7 +7,7 @@ install:
   - pip install coveralls
 # command to run tests, e.g. python setup.py test
 script: 
-  PYTHONPATH=.:$PYTHONPATH py.test --cov ./taxii_client
+  PYTHONPATH=.:$PYTHONPATH py.test --cov ./cabby
 #  coverage run --source=opentaxii setup.py test
 after_success:
   coveralls
