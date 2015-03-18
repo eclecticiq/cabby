@@ -4,13 +4,13 @@ Installation guide
 
 .. highlight:: sh
 
-This guide provides installation instructions for Cabby.
+This guide provides installation instructions for cabby.
 
 
-Build and install Cabby
+Build and install cabby
 =======================
 
-You can automatically install the latest Cabby release from the `Python
+You can automatically install the latest cabby release from the `Python
 Package Index <http://pypi.python.org/>`_ (PyPI) using ``pip``::
 
    (envname) $ pip install cabby
@@ -23,11 +23,11 @@ work.)
 Versioning
 ==========
 
-Releases of Cabby are given major.minor.revision version numbers, where major and minor correspond to the roadmap Intelworks has. The revision` number is used to indicate a fixpack.
+Releases of cabby are given major.minor.revision version numbers, where major and minor correspond to the roadmap Intelworks has. The revision` number is used to indicate a fixpack.
 
 
 .. rubric:: Next steps
 
-Continue with the :doc:`user guide <user>` to see how to use Cabby.
+Continue with the :doc:`user guide <user>` to see how to use cabby.
 
 .. vim: set spell spelllang=en:

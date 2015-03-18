@@ -1,4 +1,4 @@
-Cabby
+cabby
 =====
 
 Intelworks Python TAXII client implementation.
