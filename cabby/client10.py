@@ -4,7 +4,10 @@ import libtaxii.messages_10 as tm10
 from libtaxii import constants as const
 
 from .abstract import AbstractClient
-from .converters import to_subscription_response_entity, to_content_block_entity, to_collection_entities
+from .converters import (
+    to_subscription_response_entity, to_content_block_entity,
+    to_collection_entities
+)
 from .utils import pack_content_bindings
 
 
@@ -19,7 +22,9 @@ class Client10(AbstractClient):
         return response
 
 
-    def __subscription_status_request(self, action, feed_name, subscription_id=None, uri=None):
+    def __subscription_status_request(self, action, feed_name,
+            subscription_id=None, uri=None):
+
         request_parameters = dict(
             message_id = self._generate_id(),
             action = action,
@@ -28,21 +33,23 @@ class Client10(AbstractClient):
         )
 
         request = tm10.ManageFeedSubscriptionRequest(**request_parameters)
-        response = self._execute_request(request, uri=uri, service_type=const.SVC_FEED_MANAGEMENT)
+        response = self._execute_request(request, uri=uri,
+                service_type=const.SVC_FEED_MANAGEMENT)
 
         return to_subscription_response_entity(response, version=10)
 
 
-    def get_subscription_status(self, feed_name, subscription_id=None, uri=None):
+    def get_subscription_status(self, feed_name, subscription_id=None,
+            uri=None):
 
-        return self.__subscription_status_request(const.ACT_STATUS, feed_name,
-                subscription_id=subscription_id, uri=uri)
+        return self.__subscription_status_request(const.ACT_STATUS,
+                feed_name, subscription_id=subscription_id, uri=uri)
 
 
     def unsubscribe(self, feed_name, subscription_id=None, uri=None):
 
-        return self.__subscription_status_request(const.ACT_UNSUBSCRIBE, feed_name,
-                subscription_id=subscription_id, uri=uri)
+        return self.__subscription_status_request(const.ACT_UNSUBSCRIBE,
+                feed_name, subscription_id=subscription_id, uri=uri)
 
 
     def push(self, content, content_binding, uri=None):
@@ -51,14 +58,17 @@ class Client10(AbstractClient):
         #Destination collections are not supported in TAXII version 1.0
 
         content_block = tm10.ContentBlock(content_binding, content)
-        inbox_message = tm10.InboxMessage(message_id=self._generate_id(), content_blocks=[content_block])
+        inbox_message = tm10.InboxMessage(message_id=self._generate_id(),
+                content_blocks=[content_block])
 
-        response = self._execute_request(inbox_message, uri=uri, service_type=const.SVC_INBOX)
+        response = self._execute_request(inbox_message, uri=uri,
+                service_type=const.SVC_INBOX)
 
         self.log.debug("Content successfully pushed")
 
 
-    def subscribe(self, feed_name, count_only=False, inbox_service=None, content_bindings=None, uri=None):
+    def subscribe(self, feed_name, count_only=False, inbox_service=None,
+            content_bindings=None, uri=None):
 
         request_parameters = dict(
             message_id = self._generate_id(),
@@ -93,7 +103,8 @@ class Client10(AbstractClient):
         return to_collection_entities(response.feed_informations, version=10)
 
 
-    def poll(self, feed_name, begin_date=None, end_date=None, subscription_id=None, content_bindings=None, uri=None):
+    def poll(self, feed_name, begin_date=None, end_date=None,
+            subscription_id=None, content_bindings=None, uri=None):
 
         data = dict(
             message_id = self._generate_id(),
@@ -113,7 +124,3 @@ class Client10(AbstractClient):
 
 
     # No poll fulfillment in TAXII 1.0
-
-
-
-

@@ -1,3 +1,4 @@
+# flake8: noqa
 
 from .discovery import discover_services
 from .collections import fetch_collections

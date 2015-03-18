@@ -60,7 +60,7 @@ class AbstractClient(object):
         }
 
     @staticmethod
-    def _create_client(auth={}, use_https=False, proxy_details=None):
+    def _create_client(auth=None, use_https=False, proxy_details=None):
 
         client = HttpClient(use_https=use_https)
         client = configure_client_auth(client, **(auth or {}))
@@ -145,7 +145,7 @@ class AbstractClient(object):
 
         return candidates[0]
 
-    def get_services(self, service_type=[], service_types=[]):
+    def get_services(self, service_type=None, service_types=None):
         if not self.services:
             try:
                 services = self.discover_services()

@@ -4,6 +4,7 @@ from libtaxii import constants as const
 class Entity(object):
     raw = None
 
+
 class Collection(Entity):
 
     TYPE_FEED = const.CT_DATA_FEED
@@ -12,8 +13,8 @@ class Collection(Entity):
     version = None
 
     def __init__(self, name, description, type=TYPE_FEED, available=None,
-            push_methods=[], content_bindings=[], polling_services=[],
-            subscription_methods=[], receiving_inboxes=[], collection_volume=None):
+            push_methods=None, content_bindings=None, polling_services=None,
+            subscription_methods=None, receiving_inboxes=None, volume=None):
 
         self.name = name
         self.description = description
@@ -27,13 +28,15 @@ class Collection(Entity):
         self.polling_services = polling_services or []
         self.subscription_methods = subscription_methods or []
 
+        self.receiving_inboxes = receiving_inboxes or []
+        self.volume = volume
 
 
 class ContentBinding(Entity):
 
-    def __init__(self, id, subtypes=[]):
+    def __init__(self, id, subtypes=None):
         self.id = id
-        self.subtypes = subtypes
+        self.subtypes = subtypes or []
 
 
 # Polling services
@@ -49,10 +52,10 @@ class ServiceInstance(Entity):
 
 class InboxService(ServiceInstance):
 
-    def __init__(self, protocol, address, message_bindings, content_bindings=[]):
+    def __init__(self, protocol, address, message_bindings, content_bindings=None):
         super(InboxService, self).__init__(protocol, address, message_bindings)
 
-        self.content_bindings = content_bindings
+        self.content_bindings = content_bindings or []
 
 
 class PushMethod(Entity):
@@ -68,11 +71,11 @@ class PushMethod(Entity):
 
 class DeliveryParameters(Entity):
 
-    def __init__(self, address, protocol, message_binding, content_bindings=[]):
+    def __init__(self, address, protocol, message_binding, content_bindings=None):
         self.address = address
         self.protocol = protocol
         self.message_binding = message_binding
-        self.content_bindings = content_bindings
+        self.content_bindings = content_bindings or []
 
 
 class SubscriptionParameters(Entity):
@@ -80,9 +83,9 @@ class SubscriptionParameters(Entity):
     TYPE_FULL = const.RT_FULL
     TYPE_COUNTS = const.RT_COUNT_ONLY
 
-    def __init__(self, response_type, content_bindings=[]):
+    def __init__(self, response_type, content_bindings=None):
         self.response_type = response_type
-        self.content_bindings = content_bindings
+        self.content_bindings = content_bindings or []
 
 
 class DetailedServiceInstance(Entity):
@@ -130,11 +133,11 @@ class ContentBlock(Entity):
 
 class SubscriptionResponse(Entity):
 
-    def __init__(self, collection_name, message=None, subscriptions=[]):
+    def __init__(self, collection_name, message=None, subscriptions=None):
 
         self.collection_name = collection_name
         self.message = message
-        self.subscriptions = subscriptions
+        self.subscriptions = subscriptions or []
 
 
 class Subscription(Entity):

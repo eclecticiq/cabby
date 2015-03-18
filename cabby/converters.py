@@ -43,10 +43,24 @@ def to_collection_entity(collection, version):
         name = collection.feed_name
         description = collection.feed_description
         coll_type = Collection.TYPE_FEED
+        volume = None
+        inboxes = None
+
     elif version == 11:
         name = collection.collection_name
         description = collection.collection_description
         coll_type = collection.collection_type
+        volume = collection.collection_volume
+
+        inboxes = []
+        for inbox in collection.receiving_inbox_services:
+            inboxes.append(InboxService(
+                protocol = inbox.inbox_protocol,
+                address = inbox.inbox_address,
+                message_bindings = inbox.inbox_message_bindings,
+                content_bindings = to_content_binding_entities(
+                    inbox.supported_contents)
+            ))
 
     collection_entity = Collection(
         name = name,
@@ -56,7 +70,9 @@ def to_collection_entity(collection, version):
         push_methods = push_methods,
         subscription_methods = subscription_methods,
         content_bindings = content_bindings,
-        polling_services = polling_services
+        polling_services = polling_services,
+        volume = volume,
+        receiving_inboxes = inboxes
     )
     collection_entity.raw = collection
 

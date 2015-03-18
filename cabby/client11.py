@@ -4,7 +4,10 @@ import libtaxii.messages_11 as tm11
 from libtaxii import constants as const
 
 from .abstract import AbstractClient
-from .converters import to_subscription_response_entity, to_content_block_entity, to_collection_entities
+from .converters import (
+    to_subscription_response_entity, to_content_block_entity,
+    to_collection_entities
+)
 from .utils import pack_content_bindings
 
 
@@ -95,7 +98,7 @@ class Client11(AbstractClient):
 
 
 
-    def push(self, content, content_binding, subtype=None, collections_names=[], uri=None):
+    def push(self, content, content_binding, subtype=None, collections_names=None, uri=None):
 
         content_block = tm11.ContentBlock(tm11.ContentBinding(content_binding), content)
 
