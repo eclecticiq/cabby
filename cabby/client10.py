@@ -8,7 +8,7 @@ from .converters import (
     to_subscription_response_entity, to_content_block_entity,
     to_collection_entities
 )
-from .utils import pack_content_bindings
+from .utils import pack_content_bindings, get_utc_now
 
 
 class Client10(AbstractClient):
@@ -52,12 +52,17 @@ class Client10(AbstractClient):
                 feed_name, subscription_id=subscription_id, uri=uri)
 
 
-    def push(self, content, content_binding, uri=None):
+    def push(self, content, content_binding, uri=None, timestamp=None):
 
         #Subtype is not supported in TAXII version 1.0
         #Destination collections are not supported in TAXII version 1.0
 
-        content_block = tm10.ContentBlock(content_binding, content)
+        content_block = tm10.ContentBlock(
+            content_binding = content_binding,
+            content = content,
+            timestamp_label = timestamp or get_utc_now()
+        )
+
         inbox_message = tm10.InboxMessage(message_id=self._generate_id(),
                 content_blocks=[content_block])
 

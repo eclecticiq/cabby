@@ -19,7 +19,7 @@ SUPPORTED_SCHEMES = ['http', 'https']
 class AbstractClient(object):
 
     def __init__(self, host=None, discovery_path=None, port=None,
-            use_https=False):
+            use_https=False, headers=None):
 
         self.host = host
         self.port = port or (443 if use_https else 80)
@@ -30,6 +30,8 @@ class AbstractClient(object):
 
         self.auth = None
         self.proxy_details = None
+
+        self.headers = headers
 
         self.log = logging.getLogger("%s.%s" % (self.__module__,
             self.__class__.__name__))
@@ -111,7 +113,8 @@ class AbstractClient(object):
         self.log.debug("Request:\n%s", request_body)
 
         response_raw = client.call_taxii_service2(
-            host, path, self.taxii_version, request_body, port=port)
+            host, path, self.taxii_version, request_body, port=port,
+            headers=self.headers)
 
         response = get_message_from_http_response(
             response_raw, in_response_to='0')

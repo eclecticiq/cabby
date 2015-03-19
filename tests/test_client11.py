@@ -1,5 +1,4 @@
 import pytest
-import urllib2
 import httpretty
 
 from itertools import ifilter
@@ -12,8 +11,6 @@ from cabby import exceptions as exc
 from cabby import entities
 
 from fixtures11 import *
-
-httpretty.enable()
 
 ### Utils
 

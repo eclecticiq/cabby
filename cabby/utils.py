@@ -1,7 +1,12 @@
+import pytz
+from datetime import datetime
 from libtaxii.clients import HttpClient
 import libtaxii.messages_11 as tm11
 
 from .entities import ContentBinding
+
+def get_utc_now():
+    return datetime.utcnow().replace(tzinfo=pytz.UTC)
 
 
 def configure_client_auth(tclient, cert_file=None, key_file=None,

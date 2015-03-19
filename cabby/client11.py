@@ -8,7 +8,7 @@ from .converters import (
     to_subscription_response_entity, to_content_block_entity,
     to_collection_entities
 )
-from .utils import pack_content_bindings
+from .utils import pack_content_bindings, get_utc_now
 
 
 class Client11(AbstractClient):
@@ -92,15 +92,21 @@ class Client11(AbstractClient):
     def get_collections(self, uri=None):
 
         request = tm11.CollectionInformationRequest(message_id=self._generate_id())
-        response = self._execute_request(request, uri=uri, service_type=const.SVC_COLLECTION_MANAGEMENT)
+        response = self._execute_request(request, uri=uri,
+                service_type=const.SVC_COLLECTION_MANAGEMENT)
 
         return to_collection_entities(response.collection_informations, version=11)
 
 
 
-    def push(self, content, content_binding, subtype=None, collections_names=None, uri=None):
+    def push(self, content, content_binding, subtype=None,
+            collections_names=None, uri=None, timestamp=None):
 
-        content_block = tm11.ContentBlock(tm11.ContentBinding(content_binding), content)
+        content_block = tm11.ContentBlock(
+            content_binding = tm11.ContentBinding(content_binding),
+            content = content,
+            timestamp_label = timestamp or get_utc_now()
+        )
 
         if subtype:
             content_block.content_binding.subtype_ids.append(subtype)

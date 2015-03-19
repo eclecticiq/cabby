@@ -38,6 +38,8 @@ def get_basic_arg_parser():
     parser.add_argument("--proxy-url", dest="proxy_url", help="proxy address formatted as URL. Can be set to 'noproxy' to force library to not use any proxy")
     parser.add_argument("--proxy-type", dest="proxy_type", choices=PROXY_TYPE_CHOICES, help="proxy type")
 
+    parser.add_argument("--header", dest="headers", action='append', help="headers to send with the requests, as header:value pairs")
+
     parser.add_argument("-v", "--verbose", dest="verbose", action='store_true', help="verbose mode")
     parser.add_argument("-x", "--as-xml", dest="as_xml", action='store_true', help="output raw XML")
 
@@ -56,6 +58,16 @@ def is_args_valid(args):
     return True
         
 
+def prepare_headers(raw_headers):
+    headers = {}
+
+    for line in raw_headers:
+        header, value = line.split(":", 1)
+        headers[header] = value.strip('"\'')
+
+    return headers
+
+
 def run_client(parser, run_func):
 
     args = parser.parse_args()
@@ -66,8 +78,10 @@ def run_client(parser, run_func):
     if not is_args_valid(args):
         sys.exit(1)
 
+    headers = prepare_headers(args.headers) if args.headers else None
+
     client = create_client(host=args.host, discovery_path=args.discovery, port=args.port,
-            use_https=args.https, version=args.version)
+            use_https=args.https, version=args.version, headers=headers)
 
     client.set_auth(
         cert_file = args.cert,

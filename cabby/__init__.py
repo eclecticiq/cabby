@@ -4,10 +4,10 @@ from .client11 import Client11
 
 
 def create_client(host=None, discovery_path=None, port=None, use_https=False,
-        version="1.1"):
+        version="1.1", headers=None):
 
     params = dict(host=host, port=port, use_https=use_https,
-            discovery_path=discovery_path)
+            discovery_path=discovery_path, headers=headers)
 
     if version == '1.1':
         return Client11(**params)

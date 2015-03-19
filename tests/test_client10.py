@@ -13,8 +13,6 @@ from cabby import entities
 from fixtures10 import *
 
 
-httpretty.enable()
-
 ### Utils
 
 def create_client_10(**kwargs):
