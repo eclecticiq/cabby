@@ -27,10 +27,11 @@ setup(
         ]
     },
     dependency_links = [
-        'git+https://github.com/TAXIIProject/libtaxii.git#egg=libtaxii-1.1.106'
+        'git+https://github.com/TAXIIProject/libtaxii.git#egg=libtaxii-1.1.106a'
     ],
     install_requires = [
         'pytz==2014.10',
         'colorlog',
+        'libtaxii==1.1.106a'
     ],
 )
