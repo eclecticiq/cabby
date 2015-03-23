@@ -23,9 +23,9 @@ def _runner(client, path, args):
 
     for c in collections:
         if args.as_xml:
-            print c.to_xml(pretty_print=True)
+            print c.raw.to_xml(pretty_print=True)
         else:
-            print c.to_text()
+            print c.raw.to_text()
 
 
 def fetch_collections():
