@@ -32,7 +32,7 @@ Intelworks Python TAXII client implementation.
     :scale: 100%
     :target: https://readthedocs.org/projects/cabby/
 
-A simple Python client for interacting with TAXII servers.
+A simple Python library for interacting with TAXII servers.
 
 
 Feedback
