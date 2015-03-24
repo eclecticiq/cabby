@@ -31,6 +31,7 @@ cabby's key features are:
    news
    developer
    license
+   modules
 
 .. rubric:: External links
 
