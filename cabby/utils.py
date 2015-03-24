@@ -39,6 +39,21 @@ def configure_client_auth(tclient, cert_file=None, key_file=None,
     return tclient
 
 
+def pack_content_binding(content_binding, version):
+    if isinstance(content_binding, ContentBinding):
+        if version == 11:
+            binding = tm11.ContentBinding(binding_id=content_binding.id,
+                subtype_ids=content_binding.subtypes)
+        else:
+            binding = content_binding.id
+    else:
+        if version == 11:
+            binding = tm11.ContentBinding(binding_id=content_binding)
+        else:
+            binding = content_binding
+    return binding
+
+
 def pack_content_bindings(content_bindings, version):
 
     if not content_bindings:
@@ -47,14 +62,7 @@ def pack_content_bindings(content_bindings, version):
     bindings = []
 
     for b in content_bindings:
-        if isinstance(b, ContentBinding):
-            binding = tm11.ContentBinding(binding_id=b.id,
-                    subtype_ids=b.subtypes) if version == 11 else b.id
-        else:
-            binding = tm11.ContentBinding(binding_id=b) \
-                    if version == 11 else b
-
-        bindings.append(binding)
+        bindings.append(pack_content_binding(b, version))
 
     return bindings
 

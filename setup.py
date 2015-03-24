@@ -1,6 +1,9 @@
 from os.path import join, dirname
 from setuptools import setup, find_packages
 
+__version__ = None
+execfile('cabby/_version.py')
+
 CURRENT_DIR = dirname(__file__)
 
 def get_file_contents(filename):
@@ -9,14 +12,14 @@ def get_file_contents(filename):
 
 setup(
     name = "cabby",
-    description = "Client for interacting with TAXII servers",
+    description = "Python library for interacting with TAXII servers",
     long_description = get_file_contents('README.rst'),
     url = "https://github.com/Intelworks/cabby/",
     author = "Intelworks",
     author_email = "cabby@intelworks.com",
-    version = "0.0.3",
+    version = __version__,
     license = "BSD License",
-    packages = find_packages(),
+    packages = find_packages(exclude=['tests']),
     entry_points = {
         'console_scripts' : [
             'taxii-poll = cabby.cli:poll_content',

@@ -256,7 +256,7 @@ def test_unsubscribe():
 
     client = create_client_10()
 
-    response = client.unsubscribe(POLL_FEED, uri=FEED_MANAGEMENT_PATH)
+    response = client.unsubscribe(POLL_FEED, SUBSCRIPTION_ID, uri=FEED_MANAGEMENT_PATH)
 
     assert response.collection_name == POLL_FEED
     assert len(response.subscriptions) == 1

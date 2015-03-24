@@ -6,7 +6,7 @@ from colorlog import ColoredFormatter
 
 from libtaxii.clients import HttpClient
 
-from ..abstract import PROXY_TYPE_CHOICES
+from ..abstract import AbstractClient
 from .. import create_client
 
 log = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ def get_basic_arg_parser():
     parser.add_argument("--password", dest="password", help="password for authentication")
 
     parser.add_argument("--proxy-url", dest="proxy_url", help="proxy address formatted as URL. Can be set to 'noproxy' to force library to not use any proxy")
-    parser.add_argument("--proxy-type", dest="proxy_type", choices=PROXY_TYPE_CHOICES, help="proxy type")
+    parser.add_argument("--proxy-type", dest="proxy_type", choices=AbstractClient.PROXY_TYPE_CHOICES, help="proxy type")
 
     parser.add_argument("--header", dest="headers", action='append', help="headers to send with the requests, as header:value pairs")
 
