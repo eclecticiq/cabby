@@ -1,5 +1,6 @@
-cabby
-=====
+==================
+API documentation
+==================
 
 .. toctree::
    :maxdepth: 4

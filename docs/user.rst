@@ -4,49 +4,86 @@ User guide
 
 This user guide gives an overview of cabby. It covers:
 
-* Using cabby as a Python library and
-* Using cabby as a command line tool
+* using cabby as a Python library
+* using cabby as a command line tool
 
-Note: this document assumes basic familiarity with TAXII specification; visit the `TAXII
+Note: this document assumes basic familiarity with TAXII specifications. Visit the `TAXII
 homepage`_ for more information about its features.
 
 .. _`TAXII homepage`: http://taxii.mitre.org/
 
 
-Using Cabby as a Python library
+Using cabby as a Python library
 ===============================
 
 .. code-block:: python
 
   from cabby import create_client
 
-  client = create_client('taxiitest.mitre.org', port=80)
+  client = create_client('taxiitest.mitre.org', discovery_path='/services/discovery')
 
-  for service in client.discover_services(uri='/services/discovery'):
-      print(service.to_text())
+  # Discover advertised services
+  services = client.discover_services()
+  for service in services:
+      print 'Service type={s.type}, address={s.address}'.format(s=service)
 
-  # if only one POLL service advertised, client will use it automatically
-  content_blocks = client.poll('default')
+  # Poll content from a collection
+  content_blocks = client.poll(collection_name='default')
 
   for block in content_blocks:
-      print(block['content'])
+      print block.content
 
+  # Push content into Inbox Service
   content = '<some>content-text</some>'
   binding = 'urn:stix.mitre.org:xml:1.1.1'
 
-  # it is also possible to specify a path to a service
   client.push(content, binding, uri='/services/inbox/default')
 
-Using Cabby as a command line tool
+Forcing client to use `TAXII 1.0 <taxii.mitre.org/specifications/version1.0/TAXII_Services_Specification.pdf>`_ specifications:
+
+.. code-block:: python
+
+  from cabby import create_client
+
+  client = create_client('hailataxii.com', version='1.0')
+
+  # Discover advertised services
+  for service in client.discover_services(uri='/taxii-discovery-service'):
+      print 'Service type={s.type}, address={s.address}'.format(s=service)
+
+  # Poll data from a feed "guest.Abuse_ch"
+  content_blocks = client.poll(collection_name='guest.Abuse_ch', uri='/taxii-data')
+
+
+Using cabby as a command line tool
 ==================================
+
+During installation cabby adds a family of the commang line tools prefixed with `taxii-`:
 
 .. code-block:: console
 
-  $ taxii-discovery --host taxiitest.mitre.org
+  # Discover services
+  $ taxii-discovery --host taxiitest.mitre.org --path /services/discovery/
 
-  $ taxii-poll --host taxiitest.mitre.org --collection default --dest-dir /tmp/
+  # Poll content from a collection (with autodiscovery of a Polling Service)
+  $ taxii-poll --host taxiitest.mitre.org --collection default --discovery /services/discovery/
 
-  $ taxii-push --host taxiitest.mitre.org --file /tmp/samples/stix/watchlist-1.1.1.xml
+  # Fetch collections list from Collection Management Service
+  $ taxii-collections --path https://taxii.example.com/services/collection-management
+
+  # Push content into Inbox Service
+  $ taxii-push --host taxiitest.mitre.org \
+               --discovery /services/discovery \
+               --content-file /tmp/stuxnet.stix.xml \
+               --binding "urn:stix.mitre.org:xml:1.1.1" \
+               --subtype custom-subtype
+
+  # Create a subscription
+  $ taxii-subscription --host taxii.example.com \
+                       --https \
+                       --path /services/collection-management \
+                       --action subscribe \
+                       --collection test-collection
 
 Use ``--help`` to get more usage details.
 

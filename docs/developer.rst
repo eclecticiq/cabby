@@ -25,7 +25,7 @@ The opentaxii repository has the following layout:
 * ``docs/`` - Used to build the `documentation
   <http://cabby.readthedocs.org>`_.
 * ``cabby/`` - The main cabby source.
-* ``tests/`` - opentaxii tests.
+* ``tests/`` - cabby tests.
 
 
 Compiling from source
@@ -39,13 +39,12 @@ After cloning the Github repo, just run this::
 Running the tests
 =================
 
-Almost all cabby code is covered by the unit tests. cabby uses *pytest* and
-*tox* for running those tests. Type ``make test`` to run the unit tests, or run
-``tox`` to run the tests against multiple Python versions.
+Almost all cabby code is covered by the unit tests. cabby uses `py.test <http://pytest.org/latest/>`_ and
+`tox <http://tox.readthedocs.org/en/latest/>`_ for running tests. Type ``tox -r`` or ``py.test`` to run the unit tests.
 
 
 Generating the documentation
 ============================
 
-The documentation is written in ReStructuredText (reST) format and processed
-using *Sphinx*. Type ``make html`` to build the HTML documentation.
+The documentation is written in `ReStructuredText <http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html>`_ (reST) format and processed
+using `Sphinx <http://sphinx-doc.org/>`_. To build HTML documentation, go to ``docs`` and type ``make html``.
