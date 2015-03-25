@@ -22,16 +22,15 @@ Layout
 
 The opentaxii repository has the following layout:
 
-* ``docs/`` - Used to build the `documentation
-  <http://cabby.readthedocs.org>`_.
-* ``cabby/`` - The main cabby source.
-* ``tests/`` - cabby tests.
+* ``docs/`` - used to build the `documentation <http://cabby.readthedocs.org>`_;
+* ``cabby/`` - source code;
+* ``tests/`` - tests.
 
 
 Compiling from source
 =====================
 
-After cloning the Github repo, just run this::
+After cloning the Github repo, just run::
 
    $ python setup.py install
 

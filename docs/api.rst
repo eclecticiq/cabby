@@ -1,15 +1,9 @@
-cabby package
-=============
-
-Subpackages
------------
-
-.. toctree::
-
-    cabby.cli
+=======================
+Cabby API documentation
+=======================
 
 Submodules
-----------
+==========
 
 cabby.abstract module
 ---------------------
@@ -35,14 +29,6 @@ cabby.client11 module
     :undoc-members:
     :show-inheritance:
 
-cabby.converters module
------------------------
-
-.. automodule:: cabby.converters
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 cabby.entities module
 ---------------------
 
@@ -59,17 +45,9 @@ cabby.exceptions module
     :undoc-members:
     :show-inheritance:
 
-cabby.utils module
-------------------
-
-.. automodule:: cabby.utils
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
----------------
+===============
 
 .. automodule:: cabby
     :members:

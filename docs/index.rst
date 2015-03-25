@@ -1,19 +1,19 @@
 =====
-cabby
+Cabby
 =====
 
-cabby is Python TAXII client implementation from Intelworks.
+Cabby is Python TAXII client implementation from Intelworks.
 
-cabby's key features are:
+Cabby's key features are:
 
 * **Rich feature set**:
-  cabby supports all TAXII services according to TAXII specification (v1.0 and v1.1).
+  it supports all TAXII services according to TAXII specification (v1.0 and v1.1).
 
 * **Version agnostic**:
-  cabby abstracts specific implementation details and returns version agnostic entities.
+  it abstracts specific implementation details and returns version agnostic entities.
 
 * **Well designed from ground up**:
-  cabby is designed from ground up to act as a Python library and as a command line tool.
+  it is designed from ground up to act as a Python library and as a command line tool.
 
 
 .. rubric:: Documentation contents
@@ -23,10 +23,10 @@ cabby's key features are:
 
    installation
    user
-   news
+   api
    developer
+   news
    license
-   modules
 
 .. rubric:: External links
 
