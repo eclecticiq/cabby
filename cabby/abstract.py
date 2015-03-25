@@ -199,7 +199,7 @@ class AbstractClient(object):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -242,7 +242,7 @@ class AbstractClient(object):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:

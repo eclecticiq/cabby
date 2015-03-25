@@ -1,5 +1,3 @@
-from itertools import imap
-
 import libtaxii.messages_11 as tm11
 from libtaxii import constants as const
 
@@ -29,6 +27,7 @@ class Client11(AbstractClient):
 
     def __subscription_status_request(self, action, collection_name,
             subscription_id=None, uri=None):
+
         request_parameters = dict(
             message_id = self._generate_id(),
             action = action,
@@ -45,7 +44,7 @@ class Client11(AbstractClient):
     def get_subscription_status(self, collection_name, subscription_id=None, uri=None):
         '''Get subscription status from TAXII Collection Management service.
 
-        Sends a subscription request with action 'STATUS'.
+        Sends a subscription request with action `STATUS`.
         If no `subscription_id` is provided, server will return the list
         of all available subscriptions for a collection with a name
         specified in `collection_name`.
@@ -63,7 +62,7 @@ class Client11(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -80,7 +79,7 @@ class Client11(AbstractClient):
     def pause_subscription(self, collection_name, subscription_id, uri=None):
         '''Pause a subscription.
 
-        Sends a subscription request with action 'PAUSE'.
+        Sends a subscription request with action `PAUSE`.
         Subscription is identified by `collection_name` and `subscription_id`.
 
         if `uri` is not provided, client will try to discover services and
@@ -96,7 +95,7 @@ class Client11(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -112,7 +111,7 @@ class Client11(AbstractClient):
     def resume_subscription(self, collection_name, subscription_id, uri=None):
         '''Resume a subscription.
 
-        Sends a subscription request with action 'RESUME'.
+        Sends a subscription request with action `RESUME`.
         Subscription is identified by `collection_name` and `subscription_id`.
 
         if `uri` is not provided, client will try to discover services and
@@ -128,7 +127,7 @@ class Client11(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -144,7 +143,7 @@ class Client11(AbstractClient):
     def unsubscribe(self, collection_name, subscription_id, uri=None):
         '''Unsubscribe from a subscription.
 
-        Sends a subscription request with action 'UNSUBSCRIBE'.
+        Sends a subscription request with action `UNSUBSCRIBE`.
         Subscription is identified by `collection_name` and `subscription_id`.
 
         if `uri` is not provided, client will try to discover services and
@@ -160,7 +159,7 @@ class Client11(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -177,7 +176,7 @@ class Client11(AbstractClient):
             content_bindings=None, uri=None):
         '''Create a subscription.
 
-        Sends a subscription request with action 'SUBSCRIBE'.
+        Sends a subscription request with action `SUBSCRIBE`.
 
         if `uri` is not provided, client will try to discover services and
         find Collection Management Service among them.
@@ -197,7 +196,7 @@ class Client11(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -244,7 +243,7 @@ class Client11(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -280,7 +279,7 @@ class Client11(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -331,7 +330,7 @@ class Client11(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -373,8 +372,8 @@ class Client11(AbstractClient):
         request = tm11.PollRequest(**data)
         response = self._execute_request(request, uri=uri, service_type=const.SVC_POLL)
 
-        for block in imap(to_content_block_entity, response.content_blocks):
-            yield block
+        for block in response.content_blocks:
+            yield to_content_block_entity(block)
 
         while response.more:
             part = response.result_part_number + 1
@@ -397,7 +396,7 @@ class Client11(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -415,7 +414,7 @@ class Client11(AbstractClient):
 
         response = self._execute_request(request, uri=uri, service_type=const.SVC_POLL)
 
-        for block in imap(to_content_block_entity, response.content_blocks):
-            yield block
+        for block in response.content_blocks:
+            yield to_content_block_entity(block)
 
 

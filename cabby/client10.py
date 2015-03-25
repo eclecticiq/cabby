@@ -1,5 +1,3 @@
-from itertools import imap
-
 import libtaxii.messages_10 as tm10
 from libtaxii import constants as const
 
@@ -27,14 +25,13 @@ class Client10(AbstractClient):
         response = self._execute_request(request, uri=uri)
         return response
 
-
-    def __subscription_status_request(self, action, feed_name,
+    def __subscription_status_request(self, action, collection_name,
             subscription_id=None, uri=None):
 
         request_parameters = dict(
             message_id = self._generate_id(),
             action = action,
-            feed_name = feed_name,
+            feed_name = collection_name,
             subscription_id = subscription_id
         )
 
@@ -44,20 +41,19 @@ class Client10(AbstractClient):
 
         return to_subscription_response_entity(response, version=10)
 
-
-    def get_subscription_status(self, feed_name, subscription_id=None,
+    def get_subscription_status(self, collection_name, subscription_id=None,
             uri=None):
         '''Get subscription status from TAXII Feed Management service.
 
-        Sends a subscription request with action 'STATUS'.
+        Sends a subscription request with action `STATUS`.
         If no `subscription_id` is provided, server will return
         the list of all available subscriptions for feed with a name
-        specified in `feed_name`.
+        specified in `collection_name`.
 
         if `uri` is not provided, client will try to discover services and
         find Feed Management Service among them.
 
-        :param str feed_name: target feed name
+        :param str collection_name: target feed name
         :param str subscription_id: subscription ID (optional)
         :param str uri: URI path to a specific Collection Management service
 
@@ -67,7 +63,7 @@ class Client10(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -77,19 +73,18 @@ class Client10(AbstractClient):
         '''
 
         return self.__subscription_status_request(const.ACT_STATUS,
-                feed_name, subscription_id=subscription_id, uri=uri)
+                collection_name, subscription_id=subscription_id, uri=uri)
 
-
-    def unsubscribe(self, feed_name, subscription_id, uri=None):
+    def unsubscribe(self, collection_name, subscription_id, uri=None):
         '''Unsubscribe from a subscription.
 
-        Sends a subscription request with action 'UNSUBSCRIBE'.
-        Subscription is identified by `feed_name` and `subscription_id`.
+        Sends a subscription request with action `UNSUBSCRIBE`.
+        Subscription is identified by `collection_name` and `subscription_id`.
 
         if `uri` is not provided, client will try to discover services and
         find Collection Management Service among them.
 
-        :param str feed_name: target feed name
+        :param str collection_name: target feed name
         :param str subscription_id: subscription ID
         :param str uri: URI path to a specific TAXII service
 
@@ -99,7 +94,7 @@ class Client10(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -109,20 +104,20 @@ class Client10(AbstractClient):
         '''
 
         return self.__subscription_status_request(const.ACT_UNSUBSCRIBE,
-                feed_name, subscription_id=subscription_id, uri=uri)
+                collection_name, subscription_id=subscription_id, uri=uri)
 
-    def subscribe(self, feed_name, inbox_service=None, content_bindings=None,
+    def subscribe(self, collection_name, inbox_service=None, content_bindings=None,
             uri=None):
         '''Create a subscription.
 
-        Sends a subscription request with action 'SUBSCRIBE'.
+        Sends a subscription request with action `SUBSCRIBE`.
 
         if `uri` is not provided, client will try to discover services and
         find Collection Management Service among them.
 
         Content Binding subtypes are not supported in TAXII Specification v1.0.
 
-        :param str feed_name: target feed name
+        :param str collection_name: target feed name
         :param `cabby.entities.InboxService` inbox_service:
                 Inbox Service that will accept content pushed by TAXII Server
                 in the context of this subscription
@@ -136,7 +131,7 @@ class Client10(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -148,7 +143,7 @@ class Client10(AbstractClient):
         request_parameters = dict(
             message_id = self._generate_id(),
             action = const.ACT_SUBSCRIBE,
-            feed_name = feed_name,
+            feed_name = collection_name,
         )
 
         if inbox_service:
@@ -169,7 +164,6 @@ class Client10(AbstractClient):
 
         return to_subscription_response_entity(response, version=10)
 
-
     def push(self, content, content_binding, uri=None, timestamp=None):
         '''Push content into Inbox Service.
 
@@ -189,7 +183,7 @@ class Client10(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -212,7 +206,6 @@ class Client10(AbstractClient):
 
         self.log.debug("Content successfully pushed")
 
-
     def get_collections(self, uri=None):
         '''Get collections from Feed Management Service.
 
@@ -227,7 +220,7 @@ class Client10(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -241,15 +234,14 @@ class Client10(AbstractClient):
 
         return to_collection_entities(response.feed_informations, version=10)
 
-
-    def poll(self, feed_name, begin_date=None, end_date=None,
+    def poll(self, collection_name, begin_date=None, end_date=None,
             subscription_id=None, content_bindings=None, uri=None):
         '''Poll content from Polling Service.
 
         if `uri` is not provided, client will try to discover services and
         find Polling Service among them.
 
-        :param str feed_name: feed to poll
+        :param str collection_name: feed to poll
         :param datetime begin_date:
                 ask only for content blocks created after `begin_date` (exclusive)
         :param datetime end_date:
@@ -262,7 +254,7 @@ class Client10(AbstractClient):
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
-                if Status Message received and status_type is not 'SUCCESS'
+                if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
                 if no service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
@@ -271,10 +263,9 @@ class Client10(AbstractClient):
                 no URI provided and client can't discover services
         '''
 
-
         data = dict(
             message_id = self._generate_id(),
-            feed_name = feed_name,
+            feed_name = collection_name,
             exclusive_begin_timestamp_label = begin_date,
             inclusive_end_timestamp_label = end_date,
             content_bindings = pack_content_bindings(content_bindings, version=10)
@@ -286,6 +277,7 @@ class Client10(AbstractClient):
         request = tm10.PollRequest(**data)
         response = self._execute_request(request, uri=uri, service_type=const.SVC_POLL)
 
-        return imap(to_content_block_entity, response.content_blocks)
+        for block in response.content_blocks:
+            yield to_content_block_entity(block)
 
     # No poll fulfillment in TAXII 1.0
