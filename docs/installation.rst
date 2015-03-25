@@ -28,6 +28,6 @@ Releases of cabby are given major.minor.revision version numbers, where major an
 
 .. rubric:: Next steps
 
-Continue with the :doc:`user guide <user>` to see how to use cabby.
+Continue with the :doc:`User guide <user>` to see how to use cabby.
 
 .. vim: set spell spelllang=en:
