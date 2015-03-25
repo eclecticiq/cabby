@@ -23,7 +23,7 @@ def create_client(host=None, port=None, discovery_path=None, use_https=False,
     :param dict headers: additional headers to pass with TAXII messages
 
     :return: client instance
-    :rtype: :py:class:`cabby.Client11` or :py:class:`cabby.Client10`
+    :rtype: :py:class:`cabby.client11.Client11` or :py:class:`cabby.client10.Client10`
     '''
 
     params = dict(host=host, port=port, use_https=use_https,
