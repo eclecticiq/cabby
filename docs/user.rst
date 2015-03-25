@@ -60,7 +60,7 @@ Using cabby as a command line tool
 
 During installation cabby adds a family of the command line tools prefixed with ``taxii-`` to your path:
 
-.. highlight:: console
+.. highlight:: shell
 
 Discover services::
 
@@ -88,7 +88,7 @@ Create a subscription::
                        --https \
                        --path /services/collection-management \
                        --action subscribe \
-                       --collection test-collection
+                       --collection collection-A
 
 Use ``--help`` to get more usage details.
 
