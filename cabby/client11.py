@@ -45,11 +45,11 @@ class Client11(AbstractClient):
         '''Get subscription status from TAXII Collection Management service.
 
         Sends a subscription request with action `STATUS`.
-        If no `subscription_id` is provided, server will return the list
+        If no ``subscription_id`` is provided, server will return the list
         of all available subscriptions for a collection with a name
-        specified in `collection_name`.
+        specified in ``collection_name``.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Collection Management Service among them.
 
         :param str collection_name: target collection name
@@ -80,9 +80,9 @@ class Client11(AbstractClient):
         '''Pause a subscription.
 
         Sends a subscription request with action `PAUSE`.
-        Subscription is identified by `collection_name` and `subscription_id`.
+        Subscription is identified by ``collection_name`` and ``subscription_id``.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Collection Management Service among them.
 
         :param str collection_name: target collection name
@@ -112,9 +112,9 @@ class Client11(AbstractClient):
         '''Resume a subscription.
 
         Sends a subscription request with action `RESUME`.
-        Subscription is identified by `collection_name` and `subscription_id`.
+        Subscription is identified by ``collection_name`` and ``subscription_id``.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Collection Management Service among them.
 
         :param str collection_name: target collection name
@@ -144,9 +144,9 @@ class Client11(AbstractClient):
         '''Unsubscribe from a subscription.
 
         Sends a subscription request with action `UNSUBSCRIBE`.
-        Subscription is identified by `collection_name` and `subscription_id`.
+        Subscription is identified by ``collection_name`` and ``subscription_id``.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Collection Management Service among them.
 
         :param str collection_name: target collection name
@@ -178,7 +178,7 @@ class Client11(AbstractClient):
 
         Sends a subscription request with action `SUBSCRIBE`.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Collection Management Service among them.
 
         :param str collection_name: target collection name
@@ -232,7 +232,7 @@ class Client11(AbstractClient):
     def get_collections(self, uri=None):
         '''Get collections from Collection Management Service.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Collection Management Service among them.
 
         :param str uri: URI path to a specific Collection Management service
@@ -264,7 +264,7 @@ class Client11(AbstractClient):
             timestamp=None, uri=None):
         '''Push content into Inbox Service.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Inbox Service among them.
 
         :param str content: content to push
@@ -310,7 +310,7 @@ class Client11(AbstractClient):
             subscription_id=None, inbox_service=None, content_bindings=None, uri=None):
         '''Poll content from Polling Service.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Polling Service among them.
 
         :param str collection_name: collection to poll
@@ -385,7 +385,7 @@ class Client11(AbstractClient):
     def fulfilment(self, collection_name, result_id, part_number=1, uri=None):
         '''Poll content from Polling Service as a part of fulfilment process.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Polling Service among them.
 
         :param str collection_name: collection to poll

@@ -101,8 +101,8 @@ class AbstractClient(object):
     def _execute_request(self, request, uri=None, service_type=None):
         '''Execute generic TAXII request.
 
-        A service is defined by `uri` parameter or is chosen from pre-cached
-        services by `service_type`
+        A service is defined by ``uri`` parameter or is chosen from pre-cached
+        services by ``service_type``.
         '''
         
         if not uri and not service_type:
@@ -229,7 +229,7 @@ class AbstractClient(object):
     def discover_services(self, uri=None, cache=True):
         '''Discover services advertised by TAXII server.
 
-        This method will send discovery request to a service, defined by `uri`
+        This method will send discovery request to a service, defined by ``uri``
         or constructor's connection parameters.
 
         :param str uri: URI path to a specific TAXII service

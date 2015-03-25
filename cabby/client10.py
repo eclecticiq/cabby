@@ -46,11 +46,11 @@ class Client10(AbstractClient):
         '''Get subscription status from TAXII Feed Management service.
 
         Sends a subscription request with action `STATUS`.
-        If no `subscription_id` is provided, server will return
+        If no ``subscription_id`` is provided, server will return
         the list of all available subscriptions for feed with a name
-        specified in `collection_name`.
+        specified in ``collection_name``.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Feed Management Service among them.
 
         :param str collection_name: target feed name
@@ -79,9 +79,9 @@ class Client10(AbstractClient):
         '''Unsubscribe from a subscription.
 
         Sends a subscription request with action `UNSUBSCRIBE`.
-        Subscription is identified by `collection_name` and `subscription_id`.
+        Subscription is identified by ``collection_name`` and ``subscription_id``.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Collection Management Service among them.
 
         :param str collection_name: target feed name
@@ -112,7 +112,7 @@ class Client10(AbstractClient):
 
         Sends a subscription request with action `SUBSCRIBE`.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Collection Management Service among them.
 
         Content Binding subtypes are not supported in TAXII Specification v1.0.
@@ -167,7 +167,7 @@ class Client10(AbstractClient):
     def push(self, content, content_binding, uri=None, timestamp=None):
         '''Push content into Inbox Service.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Inbox Service among them.
 
         Content Binding subtypes and Destionation collections are not
@@ -209,7 +209,7 @@ class Client10(AbstractClient):
     def get_collections(self, uri=None):
         '''Get collections from Feed Management Service.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Feed Management Service among them.
 
         :param str uri: URI path to a specific Feed Management service
@@ -238,7 +238,7 @@ class Client10(AbstractClient):
             subscription_id=None, content_bindings=None, uri=None):
         '''Poll content from Polling Service.
 
-        if `uri` is not provided, client will try to discover services and
+        if ``uri`` is not provided, client will try to discover services and
         find Polling Service among them.
 
         :param str collection_name: feed to poll
