@@ -91,6 +91,9 @@ def run_client(parser, run_func):
         password = args.password
     )
 
+    if args.proxy_url:
+        client.set_proxy(args.proxy_url, proxy_type=args.proxy_type)
+
     try:
         run_func(client, args.uri, args)
     except Exception, e:

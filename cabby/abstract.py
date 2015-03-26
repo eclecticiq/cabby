@@ -78,16 +78,16 @@ class AbstractClient(object):
         if not proxy_url:
             return ValueError('proxy_url can not be None')
 
-        if (proxy_url != NO_PROXY and not proxy_type) or \
-                (proxy_type and proxy_type not in PROXY_TYPE_CHOICES):
-            types = ", ".join(PROXY_TYPE_CHOICES)
+        if (proxy_url != self.NO_PROXY and not proxy_type) or \
+                (proxy_type and proxy_type not in self.PROXY_TYPE_CHOICES):
+            types = ", ".join(self.PROXY_TYPE_CHOICES)
             return ValueError('proxy_type needs to to be one of: %s' % types)
 
         self.proxy_details = {
             'proxy_type' : proxy_type,
             'proxy_string' : proxy_url
         }
-
+        
     @staticmethod
     def _create_client(auth=None, use_https=False, proxy_details=None):
 
@@ -134,7 +134,8 @@ class AbstractClient(object):
             raise ValueError('Host name is not provided: %s' % full_path)
 
         client = AbstractClient._create_client(
-                auth=self.auth, use_https=use_https)
+                auth=self.auth, use_https=use_https,
+                proxy_details=self.proxy_details)
 
         request_body = request.to_xml(pretty_print=True)
 
