@@ -4,18 +4,21 @@ Installation guide
 
 .. highlight:: sh
 
-This guide provides installation instructions for cabby.
+This guide provides installation instructions for Cabby.
 
 
-Build and install cabby
+Build and install Cabby
 =======================
 
-You can automatically install the latest cabby release from the `Python
+You can automatically install the latest Cabby release from the `Python
 Package Index <http://pypi.python.org/>`_ (PyPI) using ``pip``::
 
-   (envname) $ pip install --process-dependency-links cabby
+   (envname) $ pip install cabby
 
-``--process-dependency-links`` is needed because currently cabby depends on `libtaxii <https://github.com/TAXIIProject/libtaxii>`_ trunk. This will be changed to a specific version with next release of `libtaxii`.
+.. note::
+    Since Cabby has `libtaxii <https://github.com/TAXIIProject/libtaxii>`_ as a dependency, the system libraries
+    libtaxii requires needs to be installed. Check
+    `libtaxii documentation <http://libtaxii.readthedocs.org/en/latest/installation.html#dependencies>`_ for the details.
 
 To install Cabby from source files: download a tarball, unpack it and install it manually with ``python setup.py install``.
 
