@@ -2,9 +2,9 @@
 Version history
 ===============
 
-cabby 0.0.3
+cabby 0.1.0
 ===========
 
-Release date: 2015-03-18
+Release date: 2015-03-26
 
 * Initial release
