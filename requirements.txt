@@ -1,3 +1,3 @@
-git+https://github.com/TAXIIProject/libtaxii.git#egg=libtaxii-1.1.105
+libtaxii>=1.1.106
 colorlog
 pytz==2014.10
