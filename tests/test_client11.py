@@ -52,7 +52,7 @@ def test_incorrect_path():
 
     client = create_client_11(discovery_path=DISCOVERY_PATH)
 
-    with pytest.raises(exc.UnsuccessfulStatusError):
+    with pytest.raises(exc.HTTPError):
         client.discover_services()
 
 
