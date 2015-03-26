@@ -7,6 +7,7 @@ from colorlog import ColoredFormatter
 from libtaxii.clients import HttpClient
 
 from ..abstract import AbstractClient
+from ..exceptions import HTTPError
 from .. import create_client
 
 log = logging.getLogger(__name__)

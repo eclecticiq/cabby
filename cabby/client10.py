@@ -62,6 +62,8 @@ class Client10(AbstractClient):
 
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
+        :raises `cabby.exceptions.HTTPError`:
+                if HTTP error happened
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
                 if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
@@ -93,6 +95,8 @@ class Client10(AbstractClient):
         
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
+        :raises `cabby.exceptions.HTTPError`:
+                if HTTP error happened
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
                 if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
@@ -130,6 +134,8 @@ class Client10(AbstractClient):
         
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
+        :raises `cabby.exceptions.HTTPError`:
+                if HTTP error happened
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
                 if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
@@ -182,6 +188,8 @@ class Client10(AbstractClient):
 
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
+        :raises `cabby.exceptions.HTTPError`:
+                if HTTP error happened
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
                 if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
@@ -219,6 +227,8 @@ class Client10(AbstractClient):
         
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
+        :raises `cabby.exceptions.HTTPError`:
+                if HTTP error happened
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
                 if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
@@ -253,6 +263,8 @@ class Client10(AbstractClient):
 
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
+        :raises `cabby.exceptions.HTTPError`:
+                if HTTP error happened
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
                 if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:

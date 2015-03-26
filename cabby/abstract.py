@@ -1,5 +1,6 @@
 import logging
 import urlparse
+import urllib2
 
 from libtaxii.clients import HttpClient
 from libtaxii.common import generate_message_id
@@ -10,7 +11,7 @@ from .converters import to_detailed_service_instance_entity
 from .utils import configure_client_auth
 from .exceptions import (
     NoURIProvidedError, UnsuccessfulStatusError, ServiceNotFoundError,
-    AmbiguousServicesError, ClientException
+    AmbiguousServicesError, ClientException, HTTPError
 )
 
 
@@ -147,6 +148,12 @@ class AbstractClient(object):
             host, path, self.taxii_version, request_body, port=port,
             headers=self.headers)
 
+        # https://github.com/TAXIIProject/libtaxii/issues/181
+        if isinstance(response_raw, urllib2.URLError):
+            error = response_raw
+            self.log.debug("%s: %s", error, error.read())
+            raise HTTPError(error)
+
         response = get_message_from_http_response(
             response_raw, in_response_to='0')
 
@@ -198,6 +205,8 @@ class AbstractClient(object):
         
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
+        :raises `cabby.exceptions.HTTPError`:
+                if HTTP error happened
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
                 if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
@@ -241,6 +250,8 @@ class AbstractClient(object):
 
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
+        :raises `cabby.exceptions.HTTPError`:
+                if HTTP error happened
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
                 if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:

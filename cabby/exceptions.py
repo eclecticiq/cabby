@@ -3,6 +3,8 @@
 class ClientException(Exception):
     pass
 
+class HTTPError(ClientException):
+    pass
 
 class UnsuccessfulStatusError(ClientException):
 

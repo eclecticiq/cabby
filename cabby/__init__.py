@@ -12,8 +12,8 @@ def create_client(host=None, port=None, discovery_path=None, use_https=False,
         version="1.1", headers=None):
     '''Create a client instance (TAXII version specific).
 
-    `host`, `discovery_path`, `port`, `use_https` values can be overridden
-    per request with `uri` argument passed to a client's methods.
+    ``host``, ``discovery_path``, ``port``, ``use_https`` values can be overridden
+    per request with ``uri`` argument passed to a client's method.
 
     :param str host: TAXII server hostname
     :param int port: TAXII server port
