@@ -78,9 +78,9 @@ def _runner(client, path, args):
         else:
             if args.as_raw:
                 if args.as_xml:
-                    print block.to_xml()
+                    print block.raw.to_xml()
                 else:
-                    print block.to_text()
+                    print block.raw.to_text()
             else:
                 print block.content
 
