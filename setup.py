@@ -34,4 +34,16 @@ setup(
         'colorlog',
         'libtaxii>=1.1.106'
     ],
+    classifiers = [
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Information Technology",
+        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 2 :: Only",
+        "Topic :: Internet",
+        "Topic :: Security",
+        "Topic :: Software Development :: Libraries :: Python Modules"
+    ]
 )
