@@ -39,7 +39,7 @@ def get_basic_arg_parser():
     parser.add_argument("--proxy-url", dest="proxy_url", help="proxy address formatted as URL. Can be set to 'noproxy' to force library to not use any proxy")
     parser.add_argument("--proxy-type", dest="proxy_type", choices=AbstractClient.PROXY_TYPE_CHOICES, help="proxy type")
 
-    parser.add_argument("--header", dest="headers", action='append', help="headers to send with the requests, as header:value pairs")
+    parser.add_argument("--header", dest="headers", action='append', help="header to send with the request, as header:value pair")
 
     parser.add_argument("-v", "--verbose", dest="verbose", action='store_true', help="verbose mode")
     parser.add_argument("-x", "--as-xml", dest="as_xml", action='store_true', help="output raw XML")
