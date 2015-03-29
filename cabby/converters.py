@@ -1,7 +1,7 @@
 from libtaxii import constants as const
 
 from .entities import (
-    ContentBinding, Collection, PushMethod, Subscription,
+    ContentBinding, Collection, PushMethod,
     Subscription, ServiceInstance,
     InboxDetailedService, DetailedServiceInstance, ContentBlock,
     InboxService, SubscriptionParameters, SubscriptionResponse
