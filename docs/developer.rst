@@ -47,3 +47,9 @@ Generating the documentation
 
 The documentation is written in `ReStructuredText <http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html>`_ (reST) format and processed
 using `Sphinx <http://sphinx-doc.org/>`_. To build HTML documentation, go to ``docs`` and type ``make html``.
+
+.. rubric:: Next steps
+
+Continue to :doc:`License <license>`.
+
+.. vim: set spell spelllang=en:
