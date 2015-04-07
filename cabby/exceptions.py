@@ -6,6 +6,9 @@ class ClientException(Exception):
 class HTTPError(ClientException):
     pass
 
+class InvalidResponseError(ClientException):
+    pass
+
 class UnsuccessfulStatusError(ClientException):
 
     def __init__(self, taxii_status, *args, **kwargs):
