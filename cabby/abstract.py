@@ -163,7 +163,8 @@ class AbstractClient(object):
             body = response_raw.read()
 
             self.log.debug("Invalid response:\n%s", headers + body)
-            raise InvalidResponseError("Invalid response received")
+            raise InvalidResponseError("Invalid response received from %s" %
+                    full_path)
 
         response = get_message_from_http_response(
             response_raw, in_response_to='0')
