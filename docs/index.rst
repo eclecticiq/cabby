@@ -4,7 +4,10 @@ Cabby
 
 Cabby is Python TAXII client implementation from Intelworks.
 
-Cabby's key features are:
+TAXII (Trusted Automated eXchange of Indicator Information) is a collection of specifications defining a set of services and message exchanges used for sharing cyber threat intelligence information between parties. Check `TAXII homepage <http://taxii.mitre.org/>`_ to get more information.
+
+
+Cabby is designed from the ground up to act as a Python library and as a command line tool, it's key features are:
 
 * **Rich feature set**:
   it supports all TAXII services according to TAXII specification (v1.0 and v1.1).
@@ -12,14 +15,11 @@ Cabby's key features are:
 * **Version agnostic**:
   it abstracts specific implementation details and returns version agnostic entities.
 
-* **Well designed from ground up**:
-  it is designed from ground up to act as a Python library and as a command line tool.
-
 
 .. rubric:: Documentation contents
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    installation
    user

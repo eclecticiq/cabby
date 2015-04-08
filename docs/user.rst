@@ -2,10 +2,10 @@
 User guide
 ==========
 
-This user guide gives an overview of cabby. It covers:
+This user guide gives an overview of Cabby. It covers using Cabby as a:
 
-* using cabby as a Python library
-* using cabby as a command line tool
+* Python library
+* command line tool
 
 Note: this document assumes basic familiarity with TAXII specifications. Visit the `TAXII
 homepage`_ for more information about its features.
@@ -13,8 +13,10 @@ homepage`_ for more information about its features.
 .. _`TAXII homepage`: http://taxii.mitre.org/
 
 
-Using cabby as a Python library
+Using Cabby as a Python library
 ===============================
+
+Below a few examples of how to use the Cabby in your code.
 
 Create a client::
 
@@ -52,31 +54,31 @@ To force client to use `TAXII 1.0 <taxii.mitre.org/specifications/version1.0/TAX
 
   client = create_client('hailataxii.com', version='1.0')
 
-Note: TAXII 1.0 client will have a slightly different method signatures (see :doc:`Cabby API documentation<api>` for details)
+.. note::
+	Cabby client instances configured for TAXII 1.0 or TAXII 1.1 we will have slightly different method signatures (see :doc:`Cabby API documentation<api>` for details).
 
-
-Using cabby as a command line tool
+Using Cabby as a command line tool
 ==================================
 
-During installation cabby adds a family of the command line tools prefixed with ``taxii-`` to your path:
+During installation Cabby adds a family of the command line tools prefixed with ``taxii-`` to your path:
 
 .. highlight:: shell
 
 Discover services::
 
-  $ taxii-discovery --host taxiitest.mitre.org --path /services/discovery/
+  (venv) $ taxii-discovery --host taxiitest.mitre.org --path /services/discovery/
 
 Poll content from a collection (Polling Service autodiscovered in advertised services)::
 
-  $ taxii-poll --host taxiitest.mitre.org --collection default --discovery /services/discovery/
+  (venv) $ taxii-poll --host taxiitest.mitre.org --collection default --discovery /services/discovery/
 
 Fetch collections list from Collection Management Service::
 
-  $ taxii-collections --path https://taxii.example.com/services/collection-management
+  (venv) $ taxii-collections --path https://taxii.example.com/services/collection-management
 
 Push content into Inbox Service::
 
-  $ taxii-push --host taxiitest.mitre.org \
+  (venv) $ taxii-push --host taxiitest.mitre.org \
                --discovery /services/discovery \
                --content-file /tmp/stuxnet.stix.xml \
                --binding "urn:stix.mitre.org:xml:1.1.1" \
@@ -84,7 +86,7 @@ Push content into Inbox Service::
 
 Create a subscription::
 
-  $ taxii-subscription --host taxii.example.com \
+  (venv) $ taxii-subscription --host taxii.example.com \
                        --https \
                        --path /services/collection-management \
                        --action subscribe \
