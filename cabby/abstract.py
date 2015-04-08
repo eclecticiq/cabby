@@ -1,5 +1,6 @@
 import logging
 import urlparse
+import urllib
 import urllib2
 
 from libtaxii.clients import HttpClient
@@ -11,7 +12,7 @@ from .converters import to_detailed_service_instance_entity
 from .utils import configure_client_auth
 from .exceptions import (
     NoURIProvidedError, UnsuccessfulStatusError, ServiceNotFoundError,
-    AmbiguousServicesError, ClientException, HTTPError
+    AmbiguousServicesError, ClientException, HTTPError, InvalidResponseError
 )
 
 
@@ -154,9 +155,24 @@ class AbstractClient(object):
             error = response_raw
             self.log.debug("%s: %s", error, error.read())
             raise HTTPError(error)
+        # https://github.com/TAXIIProject/libtaxii/issues/186
+        elif isinstance(response_raw, urllib.addinfourl) and \
+                not response_raw.info().getheader('X-TAXII-Content-Type'):
+
+            headers = ''.join(response_raw.info().headers)
+            body = response_raw.read()
+
+            self.log.debug("Invalid response:\n%s", headers + body)
+            raise InvalidResponseError("Invalid response received from %s" %
+                    full_path)
 
         response = get_message_from_http_response(
             response_raw, in_response_to='0')
+
+        if response.version != self.taxii_version:
+            raise InvalidResponseError("TAXII version in response message '%s' "
+                    "does not match client's configured version '%s'" %
+                    (response.version, self.taxii_version))
 
         self.log.info("Response received for %s from %s",
                 request.message_type, full_path)
