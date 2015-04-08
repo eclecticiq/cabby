@@ -2,6 +2,14 @@
 Version history
 ===============
 
+cabby 0.1.3
+===========
+
+Release date: 2015-04-08
+
+* Workaround for libtaxii issue #186 (wrapping incorrect response in Status Message) has been added.
+* Tests improved.
+
 cabby 0.1.2
 ===========
 
