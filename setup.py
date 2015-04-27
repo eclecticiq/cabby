@@ -30,7 +30,7 @@ setup(
         ]
     },
     install_requires = [
-        'pytz==2014.10',
+        'pytz',
         'colorlog',
         'libtaxii>=1.1.106'
     ],
