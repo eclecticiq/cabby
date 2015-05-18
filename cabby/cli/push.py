@@ -31,7 +31,7 @@ def _runner(client, path, args):
     else:
         binding = None
 
-    client.push(content, binding, collections_names=args.collections, uri=path)
+    client.push(content, binding, collection_names=args.collections, uri=path)
 
     log.info("Content pushed")
 

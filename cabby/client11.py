@@ -272,7 +272,7 @@ class Client11(AbstractClient):
 
 
 
-    def push(self, content, content_binding, collections_names=None,
+    def push(self, content, content_binding, collection_names=None,
             timestamp=None, uri=None):
         '''Push content into Inbox Service.
 
@@ -311,8 +311,8 @@ class Client11(AbstractClient):
         inbox_message = tm11.InboxMessage(message_id=self._generate_id(),
                 content_blocks=[content_block])
 
-        if collections_names:
-            inbox_message.destination_collection_names.extend(collections_names)
+        if collection_names:
+            inbox_message.destination_collection_names.extend(collection_names)
 
         self._execute_request(inbox_message, uri=uri, service_type=const.SVC_INBOX)
 

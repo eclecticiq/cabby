@@ -385,7 +385,7 @@ def test_push_with_destination():
     client = create_client_11()
     dest_collections = [POLL_COLLECTION]
 
-    response = client.push(CONTENT, CONTENT_BINDING, collections_names=dest_collections, uri=INBOX_URI)
+    response = client.push(CONTENT, CONTENT_BINDING, collection_names=dest_collections, uri=INBOX_URI)
 
     message = get_sent_message()
 
