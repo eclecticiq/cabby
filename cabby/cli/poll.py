@@ -24,6 +24,8 @@ def extend_arguments(parser):
     parser.add_argument("--begin", dest="begin", help="exclusive beginning of time window as ISO8601 formatted date")
     parser.add_argument("--end", dest="end", help="inclusive ending of time window as ISO8601 formatted date")
 
+    parser.add_argument("-b", "--bindings", dest="bindings", help="Only return data for the listed content bindings, using a string with multiple items seperated by a ','. Defauls to all content.")
+
     parser.add_argument("-s", "--subscription", dest="subscription_id", help="ID of an existing subscription")
 
     return parser
@@ -66,8 +68,17 @@ def _runner(client, path, args):
     begin = dateutil.parser.parse(args.begin) if args.begin else None
     end = dateutil.parser.parse(args.end) if args.end else None
 
-    blocks = client.poll(args.collection, begin_date=begin, end_date=end,
-            subscription_id=args.subscription_id, uri=path)
+    bindings = args.bindings.split(',') if args.bindings else None
+    log.info("Polling using data binding: {}".format(str(bindings) if bindings else "ALL"))
+
+    blocks = client.poll(
+        args.collection,
+        begin_date=begin,
+        end_date=end,
+        subscription_id=args.subscription_id,
+        uri=path,
+        content_bindings=bindings
+    )
 
     counter = 0
 
