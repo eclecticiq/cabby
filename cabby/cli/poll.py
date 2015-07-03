@@ -34,7 +34,7 @@ def generate_filename(collection, content_block):
     collection_name = re.sub(r"[^\w]+", "-", collection) if collection else ""
 
     md5 = hashlib.md5()
-    md5.update(content_block.to_xml())
+    md5.update(content_block.raw.to_xml())
 
     filename = '%s_%s' % (collection_name, md5.hexdigest())
 
@@ -48,7 +48,7 @@ def save_to_dir(dest_dir, collection, content_block, as_raw):
 
     with open(path, 'w') as f:
         if as_raw:
-            content = content_block.to_xml(pretty_print=True)
+            content = content_block.raw.to_xml(pretty_print=True)
         else:
             content = content_block.content
 
