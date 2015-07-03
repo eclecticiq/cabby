@@ -391,8 +391,9 @@ class Client11(AbstractClient):
         for block in response.content_blocks:
             yield to_content_block_entity(block)
 
+        part = response.result_part_number
         while response.more:
-            part = response.result_part_number + 1
+            part += 1
             for block in self.fulfilment(collection_name, response.result_id,
                     part_number=part, uri=uri):
                 yield block
