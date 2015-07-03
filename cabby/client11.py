@@ -391,12 +391,20 @@ class Client11(AbstractClient):
         for block in response.content_blocks:
             yield to_content_block_entity(block)
 
-        part = response.result_part_number
-        while response.more:
-            part += 1
-            for block in self.fulfilment(collection_name, response.result_id,
-                    part_number=part, uri=uri):
-                yield block
+        if response.more:
+            part = response.result_part_number
+
+            while True:
+                part += 1
+
+                has_data = False
+                for block in self.fulfilment(collection_name,
+                        response.result_id, part_number=part, uri=uri):
+                    has_data = True
+                    yield block
+
+                if not has_data:
+                    break
 
 
     def fulfilment(self, collection_name, result_id, part_number=1, uri=None):
