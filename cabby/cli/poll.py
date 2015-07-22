@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import pytz
 import logging
 import hashlib
 import dateutil.parser
@@ -65,8 +66,19 @@ def _runner(client, path, args):
     if args.limit == 0:
         return
 
-    begin = dateutil.parser.parse(args.begin) if args.begin else None
-    end = dateutil.parser.parse(args.end) if args.end else None
+    if args.begin:
+        begin = dateutil.parser.parse(args.begin)
+        if not begin.tzinfo:
+            begin = begin.replace(tzinfo=pytz.UTC)
+    else:
+        begin = None
+
+    if args.end:
+        end = dateutil.parser.parse(args.end)
+        if not end.tzinfo:
+            end = end.replace(tzinfo=pytz.UTC)
+    else:
+        end = None
 
     bindings = args.bindings.split(',') if args.bindings else None
     log.info("Polling using data binding: {}".format(str(bindings) if bindings else "ALL"))
