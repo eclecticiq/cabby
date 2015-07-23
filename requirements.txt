@@ -1,3 +1,5 @@
 libtaxii>=1.1.106
 colorlog
 pytz==2014.10
+furl==0.4.7
+requests==2.7.0
