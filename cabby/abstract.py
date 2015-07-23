@@ -1,7 +1,8 @@
 import logging
-import urlparse
 import urllib
 import urllib2
+from furl import furl
+import requests
 
 from libtaxii.clients import HttpClient
 from libtaxii.common import generate_message_id
@@ -9,7 +10,6 @@ from libtaxii import constants as const
 from libtaxii import get_message_from_http_response
 
 from .converters import to_detailed_service_instance_entity
-from .utils import configure_client_auth
 from .exceptions import (
     NoURIProvidedError, UnsuccessfulStatusError, ServiceNotFoundError,
     AmbiguousServicesError, ClientException, HTTPError, InvalidResponseError
@@ -27,8 +27,12 @@ class AbstractClient(object):
     PROXY_TYPE_CHOICES = [HttpClient.PROXY_HTTP, HttpClient.PROXY_HTTPS]
     SUPPORTED_SCHEMES = ['http', 'https']
 
+    AUTH_TYPE_BASIC = 'basic'
+    AUTH_TYPE_JWT = 'jwt'
+    AUTH_TYPES = [AUTH_TYPE_BASIC, AUTH_TYPE_JWT]
+
     def __init__(self, host=None, discovery_path=None, port=None,
-            use_https=False, headers=None):
+                 use_https=False, headers=None):
 
         self.host = host
         self.port = port or (443 if use_https else 80)
@@ -42,29 +46,45 @@ class AbstractClient(object):
 
         self.headers = headers
 
+        self.auth_type = None
+
+        self.auth_cert_file = None
+        self.auth_key_file = None
+
+        self.auth_username = None
+        self.auth_password = None
+
+        self.auth_jwt_url = None
+
         self.log = logging.getLogger("%s.%s" % (self.__module__,
             self.__class__.__name__))
 
-    def set_auth(self, cert_file=None, key_file=None, username=None,
-            password=None):
+    def set_auth(self, auth_type=AUTH_TYPE_BASIC, cert_file=None, key_file=None,
+                 username=None, password=None, jwt_auth_url=None):
         '''Set authentication credentials.
 
-        Authentication types can be combined. It is possible to use
-        only SSL authentication, only basic authentication, or 
-        basic authentication over SSL.
+        Basic/JWT auth method can be combined with SSL authentication.
 
+        :param str auth_type: authentication type
         :param str cert_file: a path to SSL certificate file
         :param str key_file: a path to SSL key file
-        :param str username: basic authentication username
-        :param str password: basic authentication password
+        :param str username: username, used in basic auth or JWT auth
+        :param str password: password, used in basic auth or JWT auth
+        :param str jwt_auth_url: URL used to obtain JWT token
         '''
 
-        self.auth = {
-            'cert_file' : cert_file,
-            'key_file' : key_file,
-            'username' : username,
-            'password' : password
-        }
+        if auth_type and auth_type not in self.AUTH_TYPES:
+            raise ValueError('Unknown auth_type value: {}'.format(auth_type))
+
+        self.auth_type = auth_type
+
+        self.auth_cert_file = cert_file
+        self.auth_key_file = key_file
+
+        self.auth_username = username
+        self.auth_password = password
+
+        self.auth_jwt_url = jwt_auth_url
 
     def set_proxy(self, proxy_url, proxy_type=None):
         '''Set proxy properties.
@@ -73,7 +93,7 @@ class AbstractClient(object):
                               :attr:`NO_PROXY` to force client not
                               to use proxy.
         :param str proxy_type: one of the values
-                              from :attr:`PROXY_TYPE_CHOICES`
+                               from :attr:`PROXY_TYPE_CHOICES`
         '''
 
         if not proxy_url:
@@ -88,17 +108,97 @@ class AbstractClient(object):
             'proxy_type' : proxy_type,
             'proxy_string' : proxy_url
         }
-        
-    @staticmethod
-    def _create_client(auth=None, use_https=False, proxy_details=None):
 
-        client = HttpClient(use_https=use_https)
-        client = configure_client_auth(client, **(auth or {}))
+    def _configure_auth_methods(self, tclient):
 
-        if proxy_details:
-            client.set_proxy(**proxy_details)
+        tls_auth = (self.auth_cert_file and self.auth_key_file)
 
-        return client
+        basic_auth = (self.auth_type == self.AUTH_TYPE_BASIC
+                      and self.auth_username
+                      and self.auth_password)
+
+        if tls_auth and basic_auth:
+            tclient.set_auth_type(HttpClient.AUTH_CERT_BASIC)
+            tclient.set_auth_credentials(dict(
+                key_file=self.auth_key_file,
+                cert_file=self.auth_cert_file,
+                username=self.auth_username,
+                password=self.auth_password
+            ))
+        elif tls_auth:
+            tclient.set_auth_type(HttpClient.AUTH_CERT)
+            tclient.set_auth_credentials(dict(
+                key_file=self.auth_key_file,
+                cert_file=self.auth_cert_file,
+            ))
+        elif basic_auth:
+            tclient.set_auth_type(HttpClient.AUTH_BASIC)
+            tclient.set_auth_credentials(dict(
+                username=self.auth_username,
+                password=self.auth_password
+            ))
+
+        return tclient
+
+    def _prepare_url(self, uri):
+
+        fu = furl(uri)
+
+        if fu.scheme and fu.scheme not in self.SUPPORTED_SCHEMES:
+            raise ValueError(
+                'Scheme "{}" is not supported. Use one of: {}'
+                .format(fu.scheme, ', '.join(self.SUPPORTED_SCHEMES)))
+
+        use_https = self.use_https or (fu.scheme == 'https')
+
+        fu.scheme = fu.scheme or ('https' if use_https else 'http')
+        fu.host = fu.host or self.host
+        fu.port = fu.port or (443 if use_https else self.port)
+
+        return {
+            'url': fu.url,
+            'host': fu.host,
+            'port': fu.port,
+            'use_https': use_https,
+            'path': str(fu.path),
+            'params': fu.query.params
+        }
+
+    def _obtain_jwt_token(self):
+
+        url_parts = self._prepare_url(self.auth_jwt_url)
+
+        if not url_parts['host']:
+            raise ValueError(
+                'Host name is not provided: {}'.format(url_parts['url']))
+
+        url = url_parts['url']
+
+        self.log.info("Obtaining JWT token from {}".format(url))
+
+        r = requests.post(url, data={
+            'username': self.auth_username,
+            'password': self.auth_password,
+        })
+        r.raise_for_status()
+        return r.json()['token']
+
+    def _send_taxii_request(self, url_parts, headers, request_body):
+        '''Send raw TAXII XML message to a service.'''
+
+        tclient = HttpClient(use_https=url_parts['use_https'])
+        tclient = self._configure_auth_methods(tclient)
+
+        if self.proxy_details:
+            tclient.set_proxy(**self.proxy_details)
+
+        response_raw = tclient.call_taxii_service2(
+            host=url_parts['host'], path=url_parts['path'],
+            port=url_parts['port'], get_params_dict=url_parts['params'],
+            message_binding=self.taxii_version, post_data=request_body,
+            headers=headers)
+
+        return response_raw
 
     def _execute_request(self, request, uri=None, service_type=None):
         '''Execute generic TAXII request.
@@ -113,48 +213,30 @@ class AbstractClient(object):
             service = self._get_service(service_type)
             uri = service.address
 
-        parsed = urlparse.urlparse(uri)
-        if not parsed.scheme:
-            # faking schema because otherwise urlparse gets confused
-            parsed = urlparse.urlparse("http://" + uri)
-        elif parsed.scheme not in self.SUPPORTED_SCHEMES:
-            raise ValueError('Scheme "%s" is not supported. Use one of: %s' % \
-                    (parsed.scheme, ', '.join(self.SUPPORTED_SCHEMES)))
+        url_parts = self._prepare_url(uri)
+        if not url_parts['host']:
+            raise ValueError(
+                'Host name is not provided: {}'.format(url_parts['url']))
 
-        use_https = self.use_https or (parsed.scheme == 'https')
+        _headers = dict(self.headers or {})
+        if self.auth_type == self.AUTH_TYPE_JWT:
+            jwt_token = self._obtain_jwt_token()
+            _headers['Authorization'] = 'Bearer {}'.format(jwt_token)
 
-        host = parsed.hostname or self.host
-        port = parsed.port or (443 if use_https else self.port)
-        path = parsed.path
-
-        full_path = "http%(https)s://%(host)s:%(port)s%(path)s" % dict(
-                https=('s' if use_https else ''), host=host, port=port,
-                path=path)
-
-        if not host:
-            raise ValueError('Host name is not provided: %s' % full_path)
-
-        client = AbstractClient._create_client(
-                auth=self.auth, use_https=use_https,
-                proxy_details=self.proxy_details)
+        self.log.info("Sending %s to %s", request.message_type,
+                      url_parts['url'])
 
         request_body = request.to_xml(pretty_print=True)
-
-        full_path = "http%(https)s://%(host)s:%(port)s%(path)s" % dict(
-                https=('s' if use_https else ''), host=host, port=port,
-                path=path)
-        self.log.info("Sending %s to %s", request.message_type, full_path)
         self.log.debug("Request:\n%s", request_body)
 
-        response_raw = client.call_taxii_service2(
-            host, path, self.taxii_version, request_body, port=port,
-            headers=self.headers)
+        response_raw = self._send_taxii_request(url_parts, _headers, request_body)
 
         # https://github.com/TAXIIProject/libtaxii/issues/181
         if isinstance(response_raw, urllib2.URLError):
             error = response_raw
             self.log.debug("%s: %s", error, error.read())
             raise HTTPError(error)
+
         # https://github.com/TAXIIProject/libtaxii/issues/186
         elif isinstance(response_raw, urllib.addinfourl) and \
                 not response_raw.info().getheader('X-TAXII-Content-Type'):
@@ -163,19 +245,20 @@ class AbstractClient(object):
             body = response_raw.read()
 
             self.log.debug("Invalid response:\n%s", headers + body)
-            raise InvalidResponseError("Invalid response received from %s" %
-                    full_path)
+            raise InvalidResponseError(
+                "Invalid response received from %s" % url_parts['url'])
 
-        response = get_message_from_http_response(
-            response_raw, in_response_to='0')
+        response = get_message_from_http_response(response_raw,
+                                                  in_response_to='0')
 
         if response.version != self.taxii_version:
-            raise InvalidResponseError("TAXII version in response message '%s' "
-                    "does not match client's configured version '%s'" %
-                    (response.version, self.taxii_version))
+            raise InvalidResponseError(
+                "TAXII version in response message '%s' "
+                "does not match client's configured version '%s'" %
+                (response.version, self.taxii_version))
 
         self.log.info("Response received for %s from %s",
-                request.message_type, full_path)
+                      request.message_type, url_parts['url'])
 
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug("Response:\n%s", response.to_xml(pretty_print=True))
@@ -183,23 +266,24 @@ class AbstractClient(object):
         if hasattr(response, 'status_type'):
             if response.status_type != const.ST_SUCCESS:
                 raise UnsuccessfulStatusError(response)
-        else:
-            return response
+            else:
+                return None
+        return response
 
     def _generate_id(self):
         return generate_message_id(version=self.services_version)
 
     def _get_service(self, service_type):
-
         candidates = self.get_services(service_type=service_type)
 
         if not candidates:
             raise ServiceNotFoundError(
                 "Service with type '%s' is not advertised" % service_type)
+
         elif len(candidates) > 1:
             raise AmbiguousServicesError(
-                "%d services found with type '%s'. Specify the exact URI" % (
-                    len(candidates), service_type))
+                "{} services found with type '{}'. Specify the exact URI"
+                .format(len(candidates), service_type))
 
         return candidates[0]
 
@@ -233,22 +317,21 @@ class AbstractClient(object):
         :raises `cabby.exceptions.NoURIProvidedError`:
                 no URI provided and client can't discover services
         '''
-        if not self.services:
+        if self.services:
+            services = self.services
+        else:
             try:
                 services = self.discover_services()
             except ClientException, e:
                 self.log.error('Can not autodiscover advertised services')
                 raise e
-        else:
-            services = self.services
-
-        if not service_type and not service_types:
-            return services
 
         if service_type:
             filter_func = lambda s: s.type == service_type
         elif service_types:
             filter_func = lambda s: s.type in service_types
+        else:
+            return services
 
         return filter(filter_func, services)
 
