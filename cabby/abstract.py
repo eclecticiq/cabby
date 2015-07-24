@@ -1,8 +1,8 @@
-import logging
 import urllib
 import urllib2
 from furl import furl
 import requests
+import logging
 
 from libtaxii.clients import HttpClient
 from libtaxii.common import generate_message_id
@@ -168,7 +168,7 @@ class AbstractClient(object):
 
         self.log.info("Obtaining JWT token from {}".format(url))
 
-        r = requests.post(url, data={
+        r = requests.post(url, json={
             'username': self.auth_username,
             'password': self.auth_password,
         })
