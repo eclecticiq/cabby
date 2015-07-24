@@ -13,7 +13,8 @@ from cabby import entities
 from fixtures10 import *
 
 
-### Utils
+# Utils
+
 
 def create_client_10(**kwargs):
     client = create_client(HOST, version="1.0", **kwargs)
@@ -21,8 +22,13 @@ def create_client_10(**kwargs):
 
 
 def register_uri(uri, body, **kwargs):
-    httpretty.register_uri(httpretty.POST, uri, body=body, content_type='application/xml',
-            adding_headers={'X-TAXII-Content-Type': VID_TAXII_XML_10}, **kwargs)
+    httpretty.register_uri(
+        httpretty.POST, uri, body=body,
+        content_type='application/xml',
+        adding_headers={
+            'X-TAXII-Content-Type': VID_TAXII_XML_10
+        },
+        **kwargs)
 
 
 def get_sent_message():
@@ -30,7 +36,8 @@ def get_sent_message():
     print body
     return tm10.get_message_from_xml(body)
 
-### Tests
+# Tests
+
 
 def test_no_discovery_path():
     client = create_client_10()
@@ -154,7 +161,9 @@ def test_poll_with_subscription():
     register_uri(POLL_URI, POLL_RESPONSE)
 
     client = create_client_10()
-    blocks = list(client.poll(POLL_FEED, subscription_id=SUBSCRIPTION_ID, uri=POLL_PATH))
+    blocks = list(client.poll(POLL_FEED,
+                              subscription_id=SUBSCRIPTION_ID,
+                              uri=POLL_PATH))
 
     assert len(blocks) == 2
 
@@ -233,13 +242,14 @@ def test_subscribe_with_push():
 
     inbox = next(ifilter(lambda s: s.type == SVC_INBOX, services))
 
-    response = client.subscribe(POLL_FEED, inbox_service=inbox, uri=FEED_MANAGEMENT_PATH)
+    response = client.subscribe(POLL_FEED, inbox_service=inbox,
+                                uri=FEED_MANAGEMENT_PATH)
 
     assert response.collection_name == POLL_FEED
     assert len(response.subscriptions) == 1
 
     subscription = response.subscriptions[0]
-    # TAXII 1.0 does not reply with 'status' field configured
+    # TAXII 1.0 reply lacks 'status' field
     assert subscription.status == subscription.STATUS_UNKNOWN
 
     message = get_sent_message()
@@ -256,12 +266,15 @@ def test_unsubscribe():
 
     client = create_client_10()
 
-    response = client.unsubscribe(POLL_FEED, SUBSCRIPTION_ID, uri=FEED_MANAGEMENT_PATH)
+    response = client.unsubscribe(POLL_FEED,
+                                  SUBSCRIPTION_ID,
+                                  uri=FEED_MANAGEMENT_PATH)
 
     assert response.collection_name == POLL_FEED
     assert len(response.subscriptions) == 1
     # TAXII 1.0 does not reply with 'status' field configured
-    assert response.subscriptions[0].status == entities.Subscription.STATUS_UNKNOWN
+    assert response.subscriptions[0].status == \
+        entities.Subscription.STATUS_UNKNOWN
 
     message = get_sent_message()
     assert type(message) == tm10.ManageFeedSubscriptionRequest

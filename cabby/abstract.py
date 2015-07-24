@@ -57,10 +57,11 @@ class AbstractClient(object):
         self.auth_jwt_url = None
 
         self.log = logging.getLogger("%s.%s" % (self.__module__,
-            self.__class__.__name__))
+                                                self.__class__.__name__))
 
-    def set_auth(self, auth_type=AUTH_TYPE_BASIC, cert_file=None, key_file=None,
-                 username=None, password=None, jwt_auth_url=None):
+    def set_auth(self, auth_type=AUTH_TYPE_BASIC, cert_file=None,
+                 key_file=None, username=None, password=None,
+                 jwt_auth_url=None):
         '''Set authentication credentials.
 
         Basic/JWT auth method can be combined with SSL authentication.
@@ -105,8 +106,8 @@ class AbstractClient(object):
             return ValueError('proxy_type needs to to be one of: %s' % types)
 
         self.proxy_details = {
-            'proxy_type' : proxy_type,
-            'proxy_string' : proxy_url
+            'proxy_type': proxy_type,
+            'proxy_string': proxy_url
         }
 
     def _configure_auth_methods(self, tclient):
@@ -206,9 +207,10 @@ class AbstractClient(object):
         A service is defined by ``uri`` parameter or is chosen from pre-cached
         services by ``service_type``.
         '''
-        
+
         if not uri and not service_type:
-            raise NoURIProvidedError('URI or service_type needs to be provided')
+            raise NoURIProvidedError('URI or service_type '
+                                     'needs to be provided')
         elif not uri:
             service = self._get_service(service_type)
             uri = service.address
@@ -229,7 +231,8 @@ class AbstractClient(object):
         request_body = request.to_xml(pretty_print=True)
         self.log.debug("Request:\n%s", request_body)
 
-        response_raw = self._send_taxii_request(url_parts, _headers, request_body)
+        response_raw = self._send_taxii_request(url_parts, _headers,
+                                                request_body)
 
         # https://github.com/TAXIIProject/libtaxii/issues/181
         if isinstance(response_raw, urllib2.URLError):
@@ -303,7 +306,7 @@ class AbstractClient(object):
         :return: list of service instances
         :rtype: list of :py:class:`cabby.entities.DetailedServiceInstance`
                 (or :py:class:`cabby.entities.InboxDetailedService`)
-        
+
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
         :raises `cabby.exceptions.HTTPError`:
@@ -338,8 +341,8 @@ class AbstractClient(object):
     def discover_services(self, uri=None, cache=True):
         '''Discover services advertised by TAXII server.
 
-        This method will send discovery request to a service, defined by ``uri``
-        or constructor's connection parameters.
+        This method will send discovery request to a service, defined
+        by ``uri`` or constructor's connection parameters.
 
         :param str uri: URI path to a specific TAXII service
         :param bool cache: if discovered services should be cached
@@ -370,7 +373,7 @@ class AbstractClient(object):
         response = self._discovery_request(uri)
 
         services = map(to_detailed_service_instance_entity,
-                response.service_instances)
+                       response.service_instances)
 
         self.log.info("%d services discovered", len(services))
 
@@ -378,4 +381,3 @@ class AbstractClient(object):
             self.services = services
 
         return services
-

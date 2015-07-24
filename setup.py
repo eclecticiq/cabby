@@ -11,30 +11,30 @@ def get_file_contents(filename):
         return fp.read()
 
 setup(
-    name = "cabby",
-    description = "Python library for interacting with TAXII servers",
-    long_description = get_file_contents('README.rst'),
-    url = "https://github.com/Intelworks/cabby/",
-    author = "Intelworks",
-    author_email = "cabby@intelworks.com",
-    version = __version__,
-    license = "BSD License",
-    packages = find_packages(exclude=['tests']),
-    entry_points = {
+    name="cabby",
+    description="Python library for interacting with TAXII servers",
+    long_description=get_file_contents('README.rst'),
+    url="https://github.com/Intelworks/cabby/",
+    author="Intelworks",
+    author_email="cabby@intelworks.com",
+    version=__version__,
+    license="BSD License",
+    packages=find_packages(exclude=['tests']),
+    entry_points={
         'console_scripts' : [
-            'taxii-poll = cabby.cli:poll_content',
-            'taxii-push = cabby.cli:push_content',
-            'taxii-discovery = cabby.cli:discover_services',
-            'taxii-collections = cabby.cli:fetch_collections',
-            'taxii-subscription = cabby.cli:manage_subscription',
+            'taxii-poll=cabby.cli:poll_content',
+            'taxii-push=cabby.cli:push_content',
+            'taxii-discovery=cabby.cli:discover_services',
+            'taxii-collections=cabby.cli:fetch_collections',
+            'taxii-subscription=cabby.cli:manage_subscription',
         ]
     },
-    install_requires = [
+    install_requires=[
         'pytz',
         'colorlog',
         'libtaxii>=1.1.106'
     ],
-    classifiers = [
+    classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Intended Audience :: Information Technology",
