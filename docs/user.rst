@@ -37,7 +37,7 @@ Poll content from a collection::
   for block in content_blocks:
       print block.content
 
-Fetch collections from Collection Management Serice (or Feed Management Service)::
+Fetch the collections from Collection Management Serice (or Feed Management Service)::
 
   collections = client.get_collections(uri='https://example.com/collection-management-service')
 
@@ -57,6 +57,40 @@ To force client to use `TAXII 1.0 <taxii.mitre.org/specifications/version1.0/TAX
 .. note::
 	Cabby client instances configured for TAXII 1.0 or TAXII 1.1 we will have slightly different method signatures (see :doc:`Cabby API documentation<api>` for details).
 
+
+Authentication methods
+======================
+It is possible to set authentication parameters for TAXII requests::
+
+  from cabby import create_client
+
+  client = create_client('taxii.example.com', discovery_path='/services/discovery')
+
+  # basic authentication
+  client.set_auth(username='client', password='password')
+
+  # JWT based authentication
+  client.set_auth(
+      username='client',
+      password='password',
+      jwt_auth_url='/management/auth'
+  )
+
+  # basic authentication with SSL
+  client.set_auth(
+      username='client',
+      password='password',
+      cert_file='/tmp/ssl.cert',
+      key_file='/tmp/ssl.key'
+  )
+
+  # only SSL authentication
+  client.set_auth(
+      cert_file='/tmp/ssl.cert',
+      key_file='/tmp/ssl.key'
+  )
+
+
 Using Cabby as a command line tool
 ==================================
 
@@ -72,7 +106,7 @@ Poll content from a collection (Polling Service autodiscovered in advertised ser
 
   (venv) $ taxii-poll --host taxiitest.mitre.org --collection default --discovery /services/discovery/
 
-Fetch collections list from Collection Management Service::
+Fetch the collections list from Collection Management Service::
 
   (venv) $ taxii-collections --path https://taxii.example.com/services/collection-management
 
@@ -91,6 +125,21 @@ Create a subscription::
                        --path /services/collection-management \
                        --action subscribe \
                        --collection collection-A
+
+
+Fetch the collections from a service protected by Basic authentication::
+
+  (venv) $ taxii-collections --path https://taxii.example.com/services/collections \
+                             --username test \
+                             --password test
+
+Fetch the collections from a service protected by JWT authentication::
+
+  (venv) $ taxii-collections --host taxii.example.com
+                             --path /services/collections \
+                             --username test \
+                             --password test \
+                             --jwt-auth /management/auth
 
 Use ``--help`` to get more usage details.
 

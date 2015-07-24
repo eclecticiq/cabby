@@ -31,6 +31,7 @@ def get_basic_arg_parser():
     parser.add_argument("--key", dest="key", help="private key file")
     parser.add_argument("--username", dest="username", help="username for authentication")
     parser.add_argument("--password", dest="password", help="password for authentication")
+    parser.add_argument("--jwt-auth", dest="jwt_auth_url", help="JWT authentication URL")
 
     parser.add_argument("--proxy-url", dest="proxy_url", help="proxy address formatted as URL. Can be set to 'noproxy' to force library to not use any proxy")
     parser.add_argument("--proxy-type", dest="proxy_type", choices=AbstractClient.PROXY_TYPE_CHOICES, help="proxy type")
@@ -77,14 +78,16 @@ def run_client(parser, run_func):
 
     headers = prepare_headers(args.headers) if args.headers else None
 
-    client = create_client(host=args.host, discovery_path=args.discovery, port=args.port,
-            use_https=args.https, version=args.version, headers=headers)
+    client = create_client(host=args.host, discovery_path=args.discovery,
+                           port=args.port, use_https=args.https,
+                           version=args.version, headers=headers)
 
     client.set_auth(
-        cert_file = args.cert,
-        key_file = args.key,
-        username = args.username,
-        password = args.password
+        cert_file=args.cert,
+        key_file=args.key,
+        username=args.username,
+        password=args.password,
+        jwt_auth_url=args.jwt_auth_url,
     )
 
     if args.proxy_url:
