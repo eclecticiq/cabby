@@ -9,7 +9,7 @@ Release date: 2015-07-24
 
 * ``--bindings`` option added for ``taxii-poll`` CLI command.
 * Pagination issue, triggered during processing of paged Poll response, was fixed.
-* CLI datetime parameters will have UTC timezone by default.
+* CLI datetime parameters have UTC timezone by default.
 * JWT based authentication method added.
 * Multiple naming, style and bug fixes.
 
