@@ -71,7 +71,6 @@ It is possible to set authentication parameters for TAXII requests::
 
   # JWT based authentication
   client.set_auth(
-      auth_type=client.AUTH_TYPE_JWT,
       username='client',
       password='password',
       jwt_auth_url='/management/auth'
@@ -81,6 +80,12 @@ It is possible to set authentication parameters for TAXII requests::
   client.set_auth(
       username='client',
       password='password',
+      cert_file='/tmp/ssl.cert',
+      key_file='/tmp/ssl.key'
+  )
+
+  # only SSL authentication
+  client.set_auth(
       cert_file='/tmp/ssl.cert',
       key_file='/tmp/ssl.key'
   )

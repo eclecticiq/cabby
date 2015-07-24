@@ -27,10 +27,6 @@ class AbstractClient(object):
     PROXY_TYPE_CHOICES = [HttpClient.PROXY_HTTP, HttpClient.PROXY_HTTPS]
     SUPPORTED_SCHEMES = ['http', 'https']
 
-    AUTH_TYPE_BASIC = 'basic'
-    AUTH_TYPE_JWT = 'jwt'
-    AUTH_TYPES = [AUTH_TYPE_BASIC, AUTH_TYPE_JWT]
-
     def __init__(self, host=None, discovery_path=None, port=None,
                  use_https=False, headers=None):
 
@@ -46,8 +42,6 @@ class AbstractClient(object):
 
         self.headers = headers
 
-        self.auth_type = None
-
         self.auth_cert_file = None
         self.auth_key_file = None
 
@@ -59,25 +53,23 @@ class AbstractClient(object):
         self.log = logging.getLogger("%s.%s" % (self.__module__,
                                                 self.__class__.__name__))
 
-    def set_auth(self, auth_type=AUTH_TYPE_BASIC, cert_file=None,
-                 key_file=None, username=None, password=None,
-                 jwt_auth_url=None):
+    def set_auth(self, cert_file=None, key_file=None, username=None,
+                 password=None, jwt_auth_url=None):
         '''Set authentication credentials.
 
-        Basic/JWT auth method can be combined with SSL authentication.
+        ``jwt_auth_url`` is required for JWT based authentication. If
+        it is not specified but ``username`` and ``password`` are provided,
+        client will configure Basic authentication.
 
-        :param str auth_type: authentication type
+        SSL authentication can be combined with JWT and Basic
+        authentication.
+
         :param str cert_file: a path to SSL certificate file
         :param str key_file: a path to SSL key file
         :param str username: username, used in basic auth or JWT auth
         :param str password: password, used in basic auth or JWT auth
         :param str jwt_auth_url: URL used to obtain JWT token
         '''
-
-        if auth_type and auth_type not in self.AUTH_TYPES:
-            raise ValueError('Unknown auth_type value: {}'.format(auth_type))
-
-        self.auth_type = auth_type
 
         self.auth_cert_file = cert_file
         self.auth_key_file = key_file
@@ -114,9 +106,8 @@ class AbstractClient(object):
 
         tls_auth = (self.auth_cert_file and self.auth_key_file)
 
-        basic_auth = (self.auth_type == self.AUTH_TYPE_BASIC
-                      and self.auth_username
-                      and self.auth_password)
+        basic_auth = (not self.auth_jwt_url
+                      and self.auth_username and self.auth_password)
 
         if tls_auth and basic_auth:
             tclient.set_auth_type(HttpClient.AUTH_CERT_BASIC)
@@ -221,7 +212,7 @@ class AbstractClient(object):
                 'Host name is not provided: {}'.format(url_parts['url']))
 
         _headers = dict(self.headers or {})
-        if self.auth_type == self.AUTH_TYPE_JWT:
+        if self.auth_jwt_url:
             jwt_token = self._obtain_jwt_token()
             _headers['Authorization'] = 'Bearer {}'.format(jwt_token)
 
