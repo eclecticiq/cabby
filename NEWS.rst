@@ -2,6 +2,17 @@
 Version history
 ===============
 
+cabby 0.1.4
+===========
+
+Release date: 2015-07-24
+
+* ``--bindings`` option added for ``taxii-poll`` CLI command.
+* Pagination issue, triggered during processing of paged Poll response, was fixed.
+* CLI datetime parameters will have UTC timezone by default.
+* JWT based authentication method added.
+* Multiple naming, style and bug fixes.
+
 cabby 0.1.3
 ===========
 
