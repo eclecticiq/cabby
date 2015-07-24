@@ -82,18 +82,12 @@ def run_client(parser, run_func):
                            port=args.port, use_https=args.https,
                            version=args.version, headers=headers)
 
-    if args.jwt_auth_url:
-        auth_type = client.AUTH_TYPE_JWT
-    else:
-        auth_type = client.AUTH_TYPE_BASIC
-
     client.set_auth(
         cert_file=args.cert,
         key_file=args.key,
         username=args.username,
         password=args.password,
         jwt_auth_url=args.jwt_auth_url,
-        auth_type=auth_type
     )
 
     if args.proxy_url:
