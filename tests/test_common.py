@@ -1,10 +1,10 @@
-from __future__ import absolute_import
-from __future__ import print_function
-from itertools import ifilter
+
+
+
 
 import httpretty
 import pytest
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import json
 
 from libtaxii import messages_11 as tm11

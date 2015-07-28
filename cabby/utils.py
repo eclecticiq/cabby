@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 import pytz
 from datetime import datetime
 from libtaxii.clients import HttpClient

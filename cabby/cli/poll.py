@@ -1,5 +1,5 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import os
 import sys
 import re
@@ -17,7 +17,7 @@ def extend_arguments(parser):
     parser.add_argument("-c", "--collection", dest="collection", help="collection to poll", required=True)
     parser.add_argument("--dest-dir", dest="dest_dir", help="directory to save polled content")
 
-    parser.add_argument("-l", "--limit", dest="limit", type=int, default=sys.maxint,
+    parser.add_argument("-l", "--limit", dest="limit", type=int, default=sys.maxsize,
             help="limit the number of content blocks returned")
 
     parser.add_argument("-r", "--raw", dest="as_raw", action='store_true',

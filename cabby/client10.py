@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 import libtaxii.messages_10 as tm10
 from libtaxii import constants as const
 

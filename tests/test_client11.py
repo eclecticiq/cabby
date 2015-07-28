@@ -1,8 +1,8 @@
-from __future__ import absolute_import
+
 import pytest
 import httpretty
 
-from itertools import ifilter
+
 
 from libtaxii import messages_11 as tm11
 from libtaxii.constants import (
@@ -180,7 +180,7 @@ def test_poll_with_delivery():
 
     services = client.discover_services()
 
-    inbox = next(ifilter(lambda s: s.type == SVC_INBOX, services))
+    inbox = next(filter(lambda s: s.type == SVC_INBOX, services))
 
     blocks = list(client.poll(POLL_COLLECTION,
                               inbox_service=inbox,
@@ -289,7 +289,7 @@ def test_subscribe_with_push():
 
     services = client.discover_services()
 
-    inbox = next(ifilter(lambda s: s.type == SVC_INBOX, services))
+    inbox = next(filter(lambda s: s.type == SVC_INBOX, services))
 
     response = client.subscribe(POLL_COLLECTION,
                                 inbox_service=inbox,

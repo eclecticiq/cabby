@@ -1,9 +1,9 @@
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 import pytest
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import httpretty
-from itertools import ifilter
+
 
 from libtaxii import messages_10 as tm10
 from libtaxii.constants import *
@@ -242,7 +242,7 @@ def test_subscribe_with_push():
 
     services = client.discover_services()
 
-    inbox = next(ifilter(lambda s: s.type == SVC_INBOX, services))
+    inbox = next(filter(lambda s: s.type == SVC_INBOX, services))
 
     response = client.subscribe(POLL_FEED, inbox_service=inbox,
                                 uri=FEED_MANAGEMENT_PATH)

@@ -1,6 +1,6 @@
-from __future__ import absolute_import
-import urllib
-import urllib2
+
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 from furl import furl
 import requests
 import logging
@@ -229,7 +229,7 @@ class AbstractClient(object):
                                                 request_body)
 
         # https://github.com/TAXIIProject/libtaxii/issues/181
-        if isinstance(response_raw, urllib2.URLError):
+        if isinstance(response_raw, urllib.error.URLError):
             error = response_raw
             self.log.debug("%s: %s", error, error.read())
             raise HTTPError(error)
