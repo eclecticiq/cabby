@@ -1,7 +1,5 @@
-
-import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
 from furl import furl
+from six.moves import urllib
 import requests
 import logging
 
@@ -235,7 +233,7 @@ class AbstractClient(object):
             raise HTTPError(error)
 
         # https://github.com/TAXIIProject/libtaxii/issues/186
-        elif isinstance(response_raw, urllib.addinfourl) and \
+        elif isinstance(response_raw, urllib.response.addinfourl) and \
                 not response_raw.info().getheader('X-TAXII-Content-Type'):
 
             headers = ''.join(response_raw.info().headers)
