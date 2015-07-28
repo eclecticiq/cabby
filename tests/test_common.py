@@ -110,7 +110,7 @@ def test_invalid_response(version):
     print(version, get_fix(version).DISCOVERY_RESPONSE)
 
     def jwt_request_callback(request, uri, headers):
-        body = json.loads(request.body)
+        body = json.loads(request.body.decode('utf-8'))
 
         assert body['username'] == username
         assert body['password'] == password
