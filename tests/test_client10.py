@@ -242,7 +242,7 @@ def test_subscribe_with_push():
 
     services = client.discover_services()
 
-    inbox = next(filter(lambda s: s.type == SVC_INBOX, services))
+    inbox = next((s for s in services if s.type == SVC_INBOX), None)
 
     response = client.subscribe(POLL_FEED, inbox_service=inbox,
                                 uri=FEED_MANAGEMENT_PATH)

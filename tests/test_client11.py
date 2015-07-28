@@ -180,7 +180,7 @@ def test_poll_with_delivery():
 
     services = client.discover_services()
 
-    inbox = next(filter(lambda s: s.type == SVC_INBOX, services))
+    inbox = next((s for s in services if s.type == SVC_INBOX), None)
 
     blocks = list(client.poll(POLL_COLLECTION,
                               inbox_service=inbox,
@@ -289,7 +289,7 @@ def test_subscribe_with_push():
 
     services = client.discover_services()
 
-    inbox = next(filter(lambda s: s.type == SVC_INBOX, services))
+    inbox = next((s for s in services if s.type == SVC_INBOX), None)
 
     response = client.subscribe(POLL_COLLECTION,
                                 inbox_service=inbox,
