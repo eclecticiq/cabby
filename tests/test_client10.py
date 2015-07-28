@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 import pytest
 import urllib2
 import httpretty
@@ -33,7 +35,7 @@ def register_uri(uri, body, **kwargs):
 
 def get_sent_message():
     body = httpretty.last_request().body
-    print body
+    print(body)
     return tm10.get_message_from_xml(body)
 
 # Tests
@@ -75,8 +77,8 @@ def test_discovery():
 
     assert len(services) == 4
 
-    assert len(filter(lambda s: s.type == SVC_INBOX, services)) == 1
-    assert len(filter(lambda s: s.type == SVC_DISCOVERY, services)) == 2
+    assert len([s for s in services if s.type == SVC_INBOX]) == 1
+    assert len([s for s in services if s.type == SVC_DISCOVERY]) == 2
 
     message = get_sent_message()
 
@@ -184,7 +186,7 @@ def test_poll_with_content_bindings():
             content_bindings=[CONTENT_BINDING])
 
     block_1 = next(gen)
-    print gen, block_1.content, CONTENT_BLOCKS
+    print(gen, block_1.content, CONTENT_BLOCKS)
     assert block_1.content == CONTENT_BLOCKS[0]
 
     message = get_sent_message()

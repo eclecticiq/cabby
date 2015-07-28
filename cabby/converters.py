@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from libtaxii import constants as const
 
 from .entities import (
@@ -6,10 +7,12 @@ from .entities import (
     InboxDetailedService, DetailedServiceInstance, ContentBlock,
     InboxService, SubscriptionParameters, SubscriptionResponse
 )
+import six
+from six.moves import map
 
 
 def to_collection_entities(collections, version):
-    return map(lambda c: to_collection_entity(c, version), collections)
+    return [to_collection_entity(c, version) for c in collections]
 
 
 def to_collection_entity(collection, version):
@@ -87,7 +90,7 @@ def to_collection_entity(collection, version):
 
 def to_content_binding_entity(raw_binding):
 
-    if isinstance(raw_binding, basestring):
+    if isinstance(raw_binding, six.string_types):
         binding = ContentBinding(raw_binding)
     else:
         binding = ContentBinding(id=raw_binding.binding_id,
@@ -98,7 +101,7 @@ def to_content_binding_entity(raw_binding):
 
 
 def to_content_binding_entities(raw_bindings):
-    return map(to_content_binding_entity, raw_bindings)
+    return list(map(to_content_binding_entity, raw_bindings))
 
 
 def to_detailed_service_instance_entity(service):

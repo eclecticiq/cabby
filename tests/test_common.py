@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from itertools import ifilter
 
 import httpretty
@@ -110,7 +112,7 @@ def test_invalid_response(version):
         discovery_uri,
         get_fix(version).DISCOVERY_RESPONSE,
         version)
-    print version, get_fix(version).DISCOVERY_RESPONSE
+    print(version, get_fix(version).DISCOVERY_RESPONSE)
 
     def jwt_request_callback(request, uri, headers):
         body = json.loads(request.body)

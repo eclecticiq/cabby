@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import urllib
 import urllib2
 from furl import furl
@@ -14,6 +15,8 @@ from .exceptions import (
     NoURIProvidedError, UnsuccessfulStatusError, ServiceNotFoundError,
     AmbiguousServicesError, ClientException, HTTPError, InvalidResponseError
 )
+from six.moves import filter
+from six.moves import map
 
 
 class AbstractClient(object):
@@ -316,7 +319,7 @@ class AbstractClient(object):
         else:
             try:
                 services = self.discover_services()
-            except ClientException, e:
+            except ClientException as e:
                 self.log.error('Can not autodiscover advertised services')
                 raise e
 
@@ -327,7 +330,7 @@ class AbstractClient(object):
         else:
             return services
 
-        return filter(filter_func, services)
+        return list(filter(filter_func, services))
 
     def discover_services(self, uri=None, cache=True):
         '''Discover services advertised by TAXII server.
@@ -363,8 +366,8 @@ class AbstractClient(object):
 
         response = self._discovery_request(uri)
 
-        services = map(to_detailed_service_instance_entity,
-                       response.service_instances)
+        services = list(map(to_detailed_service_instance_entity,
+                       response.service_instances))
 
         self.log.info("%d services discovered", len(services))
 
