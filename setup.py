@@ -2,7 +2,7 @@ from os.path import join, dirname
 from setuptools import setup, find_packages
 
 __version__ = None
-execfile('cabby/_version.py')
+exec(open('cabby/_version.py').read())
 
 CURRENT_DIR = dirname(__file__)
 
