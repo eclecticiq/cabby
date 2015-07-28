@@ -1,10 +1,5 @@
-
-
-
-
 import httpretty
 import pytest
-import urllib.request, urllib.error, urllib.parse
 import json
 
 from libtaxii import messages_11 as tm11

@@ -1,9 +1,7 @@
 
 
 import pytest
-import urllib.request, urllib.error, urllib.parse
 import httpretty
-
 
 from libtaxii import messages_10 as tm10
 from libtaxii.constants import *
@@ -297,7 +295,5 @@ def test_push():
 
     assert type(message) == tm10.InboxMessage
     assert len(message.content_blocks) == 1
-    assert message.content_blocks[0].content == CONTENT 
+    assert message.content_blocks[0].content == CONTENT
     assert message.content_blocks[0].content_binding == CONTENT_BINDING
-
-
