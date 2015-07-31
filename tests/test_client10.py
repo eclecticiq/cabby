@@ -1,7 +1,7 @@
+
+
 import pytest
-import urllib2
 import httpretty
-from itertools import ifilter
 
 from libtaxii import messages_10 as tm10
 from libtaxii.constants import *
@@ -33,7 +33,7 @@ def register_uri(uri, body, **kwargs):
 
 def get_sent_message():
     body = httpretty.last_request().body
-    print body
+    print(body)
     return tm10.get_message_from_xml(body)
 
 # Tests
@@ -75,8 +75,8 @@ def test_discovery():
 
     assert len(services) == 4
 
-    assert len(filter(lambda s: s.type == SVC_INBOX, services)) == 1
-    assert len(filter(lambda s: s.type == SVC_DISCOVERY, services)) == 2
+    assert len([s for s in services if s.type == SVC_INBOX]) == 1
+    assert len([s for s in services if s.type == SVC_DISCOVERY]) == 2
 
     message = get_sent_message()
 
@@ -184,7 +184,7 @@ def test_poll_with_content_bindings():
             content_bindings=[CONTENT_BINDING])
 
     block_1 = next(gen)
-    print gen, block_1.content, CONTENT_BLOCKS
+    print(gen, block_1.content, CONTENT_BLOCKS)
     assert block_1.content == CONTENT_BLOCKS[0]
 
     message = get_sent_message()
@@ -240,7 +240,7 @@ def test_subscribe_with_push():
 
     services = client.discover_services()
 
-    inbox = next(ifilter(lambda s: s.type == SVC_INBOX, services))
+    inbox = next((s for s in services if s.type == SVC_INBOX), None)
 
     response = client.subscribe(POLL_FEED, inbox_service=inbox,
                                 uri=FEED_MANAGEMENT_PATH)
@@ -295,7 +295,5 @@ def test_push():
 
     assert type(message) == tm10.InboxMessage
     assert len(message.content_blocks) == 1
-    assert message.content_blocks[0].content == CONTENT 
+    assert message.content_blocks[0].content == CONTENT
     assert message.content_blocks[0].content_binding == CONTENT_BINDING
-
-

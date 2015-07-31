@@ -1,3 +1,4 @@
+
 import logging
 
 from libtaxii.constants import CB_STIX_XML_111

@@ -1,7 +1,8 @@
+
 import pytest
 import httpretty
 
-from itertools import ifilter
+
 
 from libtaxii import messages_11 as tm11
 from libtaxii.constants import (
@@ -79,12 +80,10 @@ def test_discovery():
     services = client.discover_services()
 
     assert len(services) == 4
-    assert all(map(
-        lambda s: isinstance(s, entities.DetailedServiceInstance),
-        services))
+    assert all([isinstance(s, entities.DetailedServiceInstance) for s in services])
 
-    assert len(filter(lambda s: s.type == SVC_INBOX, services)) == 1
-    assert len(filter(lambda s: s.type == SVC_DISCOVERY, services)) == 2
+    assert len([s for s in services if s.type == SVC_INBOX]) == 1
+    assert len([s for s in services if s.type == SVC_DISCOVERY]) == 2
 
     message = get_sent_message()
 
@@ -116,9 +115,7 @@ def test_collections():
     collections = client.get_collections(uri=COLLECTION_MANAGEMENT_PATH)
 
     assert len(collections) == 2
-    assert all(map(
-        lambda c: c.type == entities.Collection.TYPE_FEED,
-        collections))
+    assert all([c.type == entities.Collection.TYPE_FEED for c in collections])
 
     message = get_sent_message()
     assert type(message) == tm11.CollectionInformationRequest
@@ -183,7 +180,7 @@ def test_poll_with_delivery():
 
     services = client.discover_services()
 
-    inbox = next(ifilter(lambda s: s.type == SVC_INBOX, services))
+    inbox = next((s for s in services if s.type == SVC_INBOX), None)
 
     blocks = list(client.poll(POLL_COLLECTION,
                               inbox_service=inbox,
@@ -292,7 +289,7 @@ def test_subscribe_with_push():
 
     services = client.discover_services()
 
-    inbox = next(ifilter(lambda s: s.type == SVC_INBOX, services))
+    inbox = next((s for s in services if s.type == SVC_INBOX), None)
 
     response = client.subscribe(POLL_COLLECTION,
                                 inbox_service=inbox,

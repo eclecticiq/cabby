@@ -1,4 +1,5 @@
 
+
 from libtaxii import constants as const
 
 SERVICE_TYPES = set(const.SVC_TYPES_11 + const.SVC_TYPES_10)
