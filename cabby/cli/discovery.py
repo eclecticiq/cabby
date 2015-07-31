@@ -1,5 +1,6 @@
 from .commons import run_client, get_basic_arg_parser
 
+
 def _runner(client, path, args):
 
     services = client.discover_services(uri=path)
@@ -13,5 +14,3 @@ def _runner(client, path, args):
 
 def discover_services():
     run_client(get_basic_arg_parser(), _runner)
-
-

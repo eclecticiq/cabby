@@ -6,28 +6,51 @@ import logging
 import hashlib
 import dateutil.parser
 
-from .commons import run_client, get_basic_arg_parser
+from .commons import run_client, get_basic_arg_parser, TAXII_11
 
 log = logging.getLogger(__name__)
 
 
 def extend_arguments(parser):
-    parser.add_argument("-c", "--collection", dest="collection", help="collection to poll", required=True)
-    parser.add_argument("--dest-dir", dest="dest_dir", help="directory to save polled content")
+    parser.add_argument(
+        "-c", "--collection", dest="collection",
+        help="collection to poll", required=True)
 
-    parser.add_argument("-l", "--limit", dest="limit", type=int, default=sys.maxint,
-            help="limit the number of content blocks returned")
+    parser.add_argument(
+        "--dest-dir", dest="dest_dir",
+        help="directory to save polled content")
 
-    parser.add_argument("-r", "--raw", dest="as_raw", action='store_true',
-            help="output raw TAXII messages "\
-                 "(use in combination with -x to see them as XML)")
+    parser.add_argument(
+        "-l", "--limit", dest="limit", type=int,
+        default=sys.maxint,
+        help="limit the number of content blocks returned")
 
-    parser.add_argument("--begin", dest="begin", help="exclusive beginning of time window as ISO8601 formatted date")
-    parser.add_argument("--end", dest="end", help="inclusive ending of time window as ISO8601 formatted date")
+    parser.add_argument(
+        "-r", "--raw", dest="as_raw", action='store_true',
+        help=("output raw TAXII messages "
+              "(use in combination with -x to see them as XML)"))
 
-    parser.add_argument("-b", "--bindings", dest="bindings", help="Only return data for the listed content bindings, using a string with multiple items seperated by a ','. Defauls to all content.")
+    parser.add_argument(
+        "--begin", dest="begin",
+        help="exclusive beginning of time window as ISO8601 formatted date")
 
-    parser.add_argument("-s", "--subscription", dest="subscription_id", help="ID of an existing subscription")
+    parser.add_argument(
+        "--end", dest="end",
+        help="inclusive ending of time window as ISO8601 formatted date")
+
+    parser.add_argument(
+        "-b", "--bindings", dest="bindings",
+        help=("Only return data for the listed content bindings, using "
+              "a string with multiple items seperated by a ','. "
+              "Defauls to all content."))
+
+    parser.add_argument(
+        "-s", "--subscription", dest="subscription_id",
+        help="ID of an existing subscription")
+
+    parser.add_argument(
+        "--count-only", dest="count_only", action='store_true',
+        help="retrieve only count of content blocks")
 
     return parser
 
@@ -60,7 +83,6 @@ def save_to_dir(dest_dir, collection, content_block, as_raw):
     log.info("Content block saved to %s", path)
 
 
-
 def _runner(client, path, args):
 
     if args.limit == 0:
@@ -81,15 +103,17 @@ def _runner(client, path, args):
         end = None
 
     bindings = args.bindings.split(',') if args.bindings else None
-    log.info("Polling using data binding: {}".format(str(bindings) if bindings else "ALL"))
+    log.info("Polling using data binding: {}".format(
+        str(bindings) if bindings else "ALL"))
 
     blocks = client.poll(
-        args.collection,
+        collection_name=args.collection,
         begin_date=begin,
         end_date=end,
         subscription_id=args.subscription_id,
         uri=path,
-        content_bindings=bindings
+        content_bindings=bindings,
+        count_only=args.count_only
     )
 
     counter = 0
@@ -115,5 +139,3 @@ def _runner(client, path, args):
 
 def poll_content():
     run_client(extend_arguments(get_basic_arg_parser()), _runner)
-
-

@@ -2,6 +2,7 @@ from libtaxii.constants import SVC_COLLECTION_MANAGEMENT, SVC_FEED_MANAGEMENT
 
 from .commons import run_client, get_basic_arg_parser
 
+
 def _runner(client, path, args):
 
     collections = []
@@ -23,5 +24,3 @@ def _runner(client, path, args):
 
 def fetch_collections():
     run_client(get_basic_arg_parser(), _runner)
-
-

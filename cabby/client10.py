@@ -113,7 +113,7 @@ class Client10(AbstractClient):
             subscription_id=subscription_id, uri=uri)
 
     def subscribe(self, collection_name, inbox_service=None,
-                  content_bindings=None, uri=None):
+                  content_bindings=None, uri=None, count_only=False):
         '''Create a subscription.
 
         Sends a subscription request with action `SUBSCRIBE`.
@@ -130,6 +130,8 @@ class Client10(AbstractClient):
         :param list content_bindings: a list of strings or
                 :py:class:`cabby.entities.ContentBinding` entities
         :param str uri: URI path to a specific Collection Management service
+        :param bool count_only: IGNORED. Count Only is not supported in
+               TAXII 1.0 and added here only for method unification purpose.
 
         :return: subscription information response
         :rtype: :py:class:`cabby.entities.SubscriptionResponse`
@@ -251,7 +253,8 @@ class Client10(AbstractClient):
         return to_collection_entities(response.feed_informations, version=10)
 
     def poll(self, collection_name, begin_date=None, end_date=None,
-             subscription_id=None, content_bindings=None, uri=None):
+             subscription_id=None, content_bindings=None, uri=None,
+             count_only=False):
         '''Poll content from Polling Service.
 
         if ``uri`` is not provided, client will try to discover services and
@@ -269,6 +272,8 @@ class Client10(AbstractClient):
                list of stings or
                :py:class:`cabby.entities.ContentBinding` objects
         :param str uri: URI path to a specific Inbox Service
+        :param bool count_only: IGNORED. Count Only is not supported in
+               TAXII 1.0 and added here only for method unification purpose.
 
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
