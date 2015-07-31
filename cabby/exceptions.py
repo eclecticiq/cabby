@@ -49,6 +49,6 @@ def _status_to_message(status):
 
 def _dict_to_pairs(d):
     pairs = []
-    for k, v in d.items():
+    for k, v in list(d.items()):
         pairs.append('%s=%s' % (k, v))
     return ", ".join(pairs)

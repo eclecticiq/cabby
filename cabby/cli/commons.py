@@ -1,3 +1,4 @@
+
 import logging
 import sys
 import argparse
@@ -95,7 +96,7 @@ def run_client(parser, run_func):
 
     try:
         run_func(client, args.uri, args)
-    except Exception, e:
+    except Exception as e:
         log.error(e, exc_info=args.verbose)
 
 

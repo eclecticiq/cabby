@@ -1,4 +1,5 @@
 
+
 from .commons import run_client, get_basic_arg_parser, TAXII_10
 
 ACTIONS = ['subscribe', 'status', 'pause', 'resume', 'unsubscribe']
@@ -52,9 +53,9 @@ def _runner(client, uri, args):
                 args.subscription_id, uri=uri)
 
     if args.as_xml:
-        print response.raw.to_xml(pretty_print=True)
+        print(response.raw.to_xml(pretty_print=True))
     else:
-        print response.raw.to_text()
+        print(response.raw.to_text())
 
 
 def manage_subscription():
