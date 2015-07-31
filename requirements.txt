@@ -1,4 +1,4 @@
-libtaxii>=1.1.106
+libtaxii>=1.1.107
 colorlog
 pytz==2014.10
 furl==0.4.7
