@@ -4,9 +4,9 @@ from libtaxii import constants as const
 
 SERVICE_TYPES = set(const.SVC_TYPES_11 + const.SVC_TYPES_10)
 
+
 class Entity(object):
-    '''Generic entity.
-    '''
+    '''Generic entity.'''
     raw = None
 
 
@@ -19,20 +19,24 @@ class ContentBlockCount(Entity):
 
 class Collection(Entity):
     '''Collection entity.
-    
+
     Represents TAXII Collection and TAXII Feed objects.
-    
+
     :param str name: name of the collection
     :param str description: description message
     :param str type: type of a collection. Supported values are
-                 :attr:`TYPE_FEED` and :attr:`TYPE_SET`
+           :attr:`TYPE_FEED` and :attr:`TYPE_SET`
     :param bool available: if a collection marked as available
     :param list push_methods: availavle push methods for a collection,
-                 a list of :py:class:`cabby.entities.PushMethods`
-    :param list content_bindings: a list of :py:class:`cabby.entities.ContentBinding`
-    :param list polling_services: a list of :py:class:`cabby.entities.ServiceInstance`
-    :param list subscription_methods: a list of :py:class:`cabby.entities.ServiceInstance`
-    :param list receiving_inboxes: a list of :py:class:`cabby.entities.InboxService`
+           a list of :py:class:`cabby.entities.PushMethods`
+    :param list content_bindings: a list of
+           :py:class:`cabby.entities.ContentBinding`
+    :param list polling_services: a list of
+           :py:class:`cabby.entities.ServiceInstance`
+    :param list subscription_methods: a list of
+           :py:class:`cabby.entities.ServiceInstance`
+    :param list receiving_inboxes: a list of
+           :py:class:`cabby.entities.InboxService`
     :param int volume: collection's volume
     '''
 
@@ -40,8 +44,11 @@ class Collection(Entity):
     TYPE_SET = const.CT_DATA_SET
 
     def __init__(self, name, description, type=TYPE_FEED, available=None,
-            push_methods=None, content_bindings=None, polling_services=None,
-            subscription_methods=None, receiving_inboxes=None, volume=None):
+                 push_methods=None, content_bindings=None,
+                 polling_services=None, subscription_methods=None,
+                 receiving_inboxes=None, volume=None):
+
+        assert type in [self.TYPE_FEED, self.TYPE_SET]
 
         self.name = name
         self.description = description
@@ -61,9 +68,9 @@ class Collection(Entity):
 
 class ContentBinding(Entity):
     '''Content Binding entity.
-    
+
     Represents TAXII Content Binding.
-    
+
     :param str id: Content Binding ID
     :param str subtypes: Content Subtypes IDs
     '''
@@ -92,14 +99,17 @@ class InboxService(ServiceInstance):
     '''Inbox Service entity.
 
     Represents TAXII Inbox Service.
-    
+
     :param str protocol: service Protocol Binding value
     :param str address: service network address
     :param list message_bindings: service Message Bindings, as list of strings
-    :param list content_bindings: a list of :py:class:`cabby.entities.ContentBinding`
+    :param list content_bindings: a list of
+                :py:class:`cabby.entities.ContentBinding`
     '''
 
-    def __init__(self, protocol, address, message_bindings, content_bindings=None):
+    def __init__(self, protocol, address, message_bindings,
+                 content_bindings=None):
+
         super(InboxService, self).__init__(protocol, address, message_bindings)
 
         self.content_bindings = content_bindings or []
@@ -109,7 +119,7 @@ class PushMethod(Entity):
     '''Push Method entity.
 
     Represents TAXII Push Method.
-    
+
     :param str protocol: service Protocol Binding value
     :param list message_bindings: service Message Bindings, as list of strings
     '''
@@ -123,10 +133,11 @@ class SubscriptionParameters(Entity):
     '''Subscription Parameters Entity.
 
     Represents TAXII Subscription Parameters.
-    
+
     :param str response_type: response type. Supported values are
-                              :attr:`TYPE_FULL` and :attr:`TYPE_COUNTS`
-    :param list content_bindings: a list of :py:class:`cabby.entities.ContentBinding`
+               :attr:`TYPE_FULL` and :attr:`TYPE_COUNTS`
+    :param list content_bindings: a list of
+               :py:class:`cabby.entities.ContentBinding`
     '''
 
     TYPE_FULL = const.RT_FULL
@@ -204,7 +215,7 @@ class ContentBlock(Entity):
     :param `cabby.entities.ContentBinding` content_binding: Content Binding
     :param datetime timestamp: content block timestamp label
     '''
-    
+
     def __init__(self, content, content_binding, timestamp):
         self.content = content
         self.binding = content_binding
@@ -229,7 +240,7 @@ class Subscription(Entity):
     '''Subscription entity.
 
     :param str subscription_id: subscription ID
-    :param str status: subscription status. Supported values are 
+    :param str status: subscription status. Supported values are
                  :attr:`STATUS_UNKNOWN`, :attr:`STATUS_ACTIVE`,
                  :attr:`STATUS_PAUSED`, :attr:`STATUS_UNSUBSCRIBED`
     :param list delivery_parameters: a list of `cabby.entities.InboxService`
@@ -254,4 +265,3 @@ class Subscription(Entity):
         self.delivery_parameters = delivery_parameters
         self.subscription_parameters = subscription_parameters
         self.poll_instances = poll_instances
-

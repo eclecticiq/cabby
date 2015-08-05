@@ -364,8 +364,9 @@ class AbstractClient(object):
 
         response = self._discovery_request(uri)
 
-        services = list(map(to_detailed_service_instance_entity,
-                       response.service_instances))
+        services = list(map(
+            to_detailed_service_instance_entity,
+            response.service_instances))
 
         self.log.info("%d services discovered", len(services))
 

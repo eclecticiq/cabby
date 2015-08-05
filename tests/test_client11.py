@@ -2,8 +2,6 @@
 import pytest
 import httpretty
 
-
-
 from libtaxii import messages_11 as tm11
 from libtaxii.constants import (
     VID_TAXII_XML_11,
@@ -81,7 +79,9 @@ def test_discovery():
     services = client.discover_services()
 
     assert len(services) == 4
-    assert all([isinstance(s, entities.DetailedServiceInstance) for s in services])
+    assert all([
+        isinstance(s, entities.DetailedServiceInstance) for s in services
+    ])
 
     assert len([s for s in services if s.type == SVC_INBOX]) == 1
     assert len([s for s in services if s.type == SVC_DISCOVERY]) == 2

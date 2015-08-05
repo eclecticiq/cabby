@@ -3,11 +3,14 @@
 class ClientException(Exception):
     pass
 
+
 class HTTPError(ClientException):
     pass
 
+
 class InvalidResponseError(ClientException):
     pass
+
 
 class UnsuccessfulStatusError(ClientException):
 
@@ -49,7 +52,7 @@ def _status_to_message(status):
 
     if status.extended_headers:
         l.append(_dict_to_pairs(status.extended_headers))
-    
+
     if status.message:
         l.append(status.message)
 

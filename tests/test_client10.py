@@ -4,13 +4,16 @@ import pytest
 import httpretty
 
 from libtaxii import messages_10 as tm10
-from libtaxii.constants import *
+from libtaxii.constants import (
+    VID_TAXII_XML_10,
+    SVC_INBOX, SVC_DISCOVERY,
+)
 
 from cabby import create_client
 from cabby import exceptions as exc
 from cabby import entities
 
-from fixtures10 import *
+from fixtures10 import *  # noqa: importing all fixtures
 
 
 # Utils
@@ -154,6 +157,7 @@ def test_poll():
     assert type(message) == tm10.PollRequest
     assert message.feed_name == POLL_FEED
 
+
 @httpretty.activate
 def test_poll_count_only():
 
@@ -162,7 +166,7 @@ def test_poll_count_only():
     client = create_client_10()
 
     with pytest.raises(exc.NotSupportedError):
-        count = client.get_content_count(POLL_FEED, uri=POLL_PATH)
+        client.get_content_count(POLL_FEED, uri=POLL_PATH)
 
 
 @httpretty.activate
@@ -190,8 +194,9 @@ def test_poll_with_content_bindings():
 
     client = create_client_10()
 
-    gen = client.poll(POLL_FEED, uri=POLL_PATH,
-            content_bindings=[CONTENT_BINDING])
+    gen = client.poll(
+        POLL_FEED, uri=POLL_PATH,
+        content_bindings=[CONTENT_BINDING])
 
     block_1 = next(gen)
     print(gen, block_1.content, CONTENT_BLOCKS)
@@ -205,8 +210,9 @@ def test_poll_with_content_bindings():
     assert message.content_bindings[0] == CONTENT_BINDING
 
     binding = entities.ContentBinding(CONTENT_BINDING, subtypes=['substype-a'])
-    gen = client.poll(POLL_FEED, uri=POLL_PATH,
-            content_bindings=[binding])
+    gen = client.poll(
+        POLL_FEED, uri=POLL_PATH,
+        content_bindings=[binding])
 
     block_1 = next(gen)
     assert block_1.content == CONTENT_BLOCKS[0]
@@ -216,7 +222,6 @@ def test_poll_with_content_bindings():
 
     assert len(message.content_bindings) == 1
     assert message.content_bindings[0] == binding.id
-
 
 
 @httpretty.activate
@@ -298,8 +303,7 @@ def test_push():
     register_uri(INBOX_URI, INBOX_RESPONSE)
 
     client = create_client_10()
-
-    response = client.push(CONTENT, CONTENT_BINDING, uri=INBOX_URI)
+    client.push(CONTENT, CONTENT_BINDING, uri=INBOX_URI)
 
     message = get_sent_message()
 

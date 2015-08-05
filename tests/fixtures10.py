@@ -1,4 +1,4 @@
-
+# flake8: noqa
 
 HOST = 'example.com'
 

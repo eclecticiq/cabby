@@ -1,10 +1,10 @@
 
 import pytz
 from datetime import datetime
-from libtaxii.clients import HttpClient
 import libtaxii.messages_11 as tm11
 
 from .entities import ContentBinding
+
 
 def get_utc_now():
     return datetime.utcnow().replace(tzinfo=pytz.UTC)
@@ -13,7 +13,8 @@ def get_utc_now():
 def pack_content_binding(content_binding, version):
     if isinstance(content_binding, ContentBinding):
         if version == 11:
-            binding = tm11.ContentBinding(binding_id=content_binding.id,
+            binding = tm11.ContentBinding(
+                binding_id=content_binding.id,
                 subtype_ids=content_binding.subtypes)
         else:
             binding = content_binding.id
@@ -36,4 +37,3 @@ def pack_content_bindings(content_bindings, version):
         bindings.append(pack_content_binding(b, version))
 
     return bindings
-

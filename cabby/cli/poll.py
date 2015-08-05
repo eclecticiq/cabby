@@ -8,7 +8,7 @@ import logging
 import hashlib
 import dateutil.parser
 
-from .commons import run_client, get_basic_arg_parser, TAXII_11
+from .commons import run_client, get_basic_arg_parser
 
 log = logging.getLogger(__name__)
 
@@ -105,8 +105,8 @@ def _runner(client, path, args):
         end = None
 
     bindings = args.bindings.split(',') if args.bindings else None
-    log.info("Polling using data binding: {}".format(
-        str(bindings) if bindings else "ALL"))
+    log.info("Polling using data binding: %s",
+             str(bindings) if bindings else "ALL")
 
     if args.count_only:
         count = client.get_content_count(
@@ -118,9 +118,8 @@ def _runner(client, path, args):
             content_bindings=bindings,
         )
         if count:
-            log.info(("Content blocks count: {count.count}, "
-                      "is partial: {count.is_partial}")
-                     .format(count=count))
+            log.info("Content blocks count: %s, is partial: %s",
+                     count.count, count.is_partial)
         else:
             log.warning("Count value was not returned")
 

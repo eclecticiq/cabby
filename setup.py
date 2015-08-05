@@ -6,6 +6,7 @@ exec(open('cabby/_version.py').read())
 
 CURRENT_DIR = dirname(__file__)
 
+
 def get_file_contents(filename):
     with open(join(CURRENT_DIR, filename)) as fp:
         return fp.read()
@@ -21,7 +22,7 @@ setup(
     license="BSD License",
     packages=find_packages(exclude=['tests']),
     entry_points={
-        'console_scripts' : [
+        'console_scripts': [
             'taxii-poll=cabby.cli:poll_content',
             'taxii-push=cabby.cli:push_content',
             'taxii-discovery=cabby.cli:discover_services',

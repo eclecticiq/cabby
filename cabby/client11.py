@@ -333,9 +333,10 @@ class Client11(AbstractClient):
 
         self.log.debug("Content block successfully pushed")
 
-    def _prepare_poll_request(self, collection_name, begin_date=None, end_date=None,
-                              subscription_id=None, inbox_service=None,
-                              content_bindings=None, count_only=False):
+    def _prepare_poll_request(self, collection_name, begin_date=None,
+                              end_date=None, subscription_id=None,
+                              inbox_service=None, content_bindings=None,
+                              count_only=False):
         data = dict(
             message_id=self._generate_id(),
             collection_name=collection_name,
@@ -370,9 +371,9 @@ class Client11(AbstractClient):
 
         return tm11.PollRequest(**data)
 
-    def get_content_count(self, collection_name, begin_date=None, end_date=None,
-                          subscription_id=None, inbox_service=None,
-                          content_bindings=None, uri=None):
+    def get_content_count(self, collection_name, begin_date=None,
+                          end_date=None, subscription_id=None,
+                          inbox_service=None, content_bindings=None, uri=None):
         '''Get content blocks count for a query.
 
         if ``uri`` is not provided, client will try to discover services and
