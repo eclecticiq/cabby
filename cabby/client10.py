@@ -7,6 +7,7 @@ from .converters import (
     to_subscription_response_entity, to_content_block_entity,
     to_collection_entities
 )
+from .exceptions import NotSupportedError
 from .utils import (
     pack_content_bindings, get_utc_now, pack_content_binding
 )
@@ -253,9 +254,15 @@ class Client10(AbstractClient):
 
         return to_collection_entities(response.feed_informations, version=10)
 
+    def get_content_count(self, *args, **kwargs):
+        '''Not supported in TAXII 1.0
+
+        :raises `cabby.exceptions.NotSupportedError`:
+        '''
+        raise NotSupportedError(self.taxii_version)
+
     def poll(self, collection_name, begin_date=None, end_date=None,
-             subscription_id=None, content_bindings=None, uri=None,
-             count_only=False):
+             subscription_id=None, content_bindings=None, uri=None):
         '''Poll content from Polling Service.
 
         if ``uri`` is not provided, client will try to discover services and
@@ -273,8 +280,6 @@ class Client10(AbstractClient):
                list of stings or
                :py:class:`cabby.entities.ContentBinding` objects
         :param str uri: URI path to a specific Inbox Service
-        :param bool count_only: IGNORED. Count Only is not supported in
-               TAXII 1.0 and added here only for method unification purpose.
 
         :raises ValueError:
                 if URI provided is invalid or schema is not supported
@@ -290,23 +295,28 @@ class Client10(AbstractClient):
                 no URI provided and client can't discover services
         '''
 
+        _bindings = pack_content_bindings(content_bindings, version=10)
         data = dict(
             message_id=self._generate_id(),
             feed_name=collection_name,
             exclusive_begin_timestamp_label=begin_date,
             inclusive_end_timestamp_label=end_date,
-            content_bindings=pack_content_bindings(content_bindings,
-                                                   version=10)
+            content_bindings=_bindings
         )
 
         if subscription_id:
             data['subscription_id'] = subscription_id
 
         request = tm10.PollRequest(**data)
-        response = self._execute_request(request, uri=uri,
-                                         service_type=const.SVC_POLL)
+        response = self._execute_request(
+            request, uri=uri, service_type=const.SVC_POLL)
 
         for block in response.content_blocks:
             yield to_content_block_entity(block)
 
-    # No poll fulfillment in TAXII 1.0
+    def fulfilment(self, *args, **kwargs):
+        '''Not supported in TAXII 1.0
+
+        :raises `cabby.exceptions.NotSupportedError`:
+        '''
+        raise NotSupportedError(self.taxii_version)

@@ -108,6 +108,24 @@ def _runner(client, path, args):
     log.info("Polling using data binding: {}".format(
         str(bindings) if bindings else "ALL"))
 
+    if args.count_only:
+        count = client.get_content_count(
+            collection_name=args.collection,
+            begin_date=begin,
+            end_date=end,
+            subscription_id=args.subscription_id,
+            uri=path,
+            content_bindings=bindings,
+        )
+        if count:
+            log.info(("Content blocks count: {count.count}, "
+                      "is partial: {count.is_partial}")
+                     .format(count=count))
+        else:
+            log.warning("Count value was not returned")
+
+        return
+
     blocks = client.poll(
         collection_name=args.collection,
         begin_date=begin,
@@ -115,7 +133,6 @@ def _runner(client, path, args):
         subscription_id=args.subscription_id,
         uri=path,
         content_bindings=bindings,
-        count_only=args.count_only
     )
 
     counter = 0

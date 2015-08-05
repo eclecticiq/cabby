@@ -7,8 +7,14 @@ SERVICE_TYPES = set(const.SVC_TYPES_11 + const.SVC_TYPES_10)
 class Entity(object):
     '''Generic entity.
     '''
-
     raw = None
+
+
+class ContentBlockCount(Entity):
+
+    def __init__(self, count, is_partial=False):
+        self.count = count
+        self.is_partial = is_partial
 
 
 class Collection(Entity):
@@ -124,9 +130,10 @@ class SubscriptionParameters(Entity):
     '''
 
     TYPE_FULL = const.RT_FULL
-    TYPE_COUNTS = const.RT_COUNT_ONLY
+    TYPE_COUNT = const.RT_COUNT_ONLY
 
     def __init__(self, response_type, content_bindings=None):
+        assert response_type in [self.TYPE_FULL, self.TYPE_COUNT]
         self.response_type = response_type
         self.content_bindings = content_bindings or []
 
@@ -152,7 +159,10 @@ class DetailedServiceInstance(Entity):
     PROTOCOL_HTTPS = const.VID_TAXII_HTTPS_10
 
     def __init__(self, type, version, protocol, address, message_bindings,
-            available=None, message=None):
+                 available=None, message=None):
+
+        assert version in [self.VERSION_10, self.VERSION_11]
+        assert protocol in [self.PROTOCOL_HTTP, self.PROTOCOL_HTTPS]
 
         self.type = type
         self.version = version
@@ -167,20 +177,21 @@ class DetailedServiceInstance(Entity):
 class InboxDetailedService(DetailedServiceInstance):
     '''Detailed description of TAXII Inbox Service.
 
-    :param str type: service type. Supported values are in :py:data:`cabby.entities.SERVICE_TYPES`
+    :param str type: service type. Supported values are
+                     in :py:data:`cabby.entities.SERVICE_TYPES`
     :param str version: service version. Supported values are
                         :attr:`VERSION_10` and :attr:`VERSION_11`
     :param str protocol: service Protocol Binding value
     :param str address: service network address
     :param list message_bindings: service Message Bindings, as list of strings
-    :param list content_bindings: a list of :py:class:`cabby.entities.ContentBinding`
+    :param list content_bindings: a list of
+                                  :py:class:`cabby.entities.ContentBinding`
     :param bool available: if service is marked as available
     :param str message: message attached to a service
     '''
 
     def __init__(self, content_bindings, **kwargs):
         super(InboxDetailedService, self).__init__(**kwargs)
-
         self.content_bindings = content_bindings
 
 
@@ -195,7 +206,6 @@ class ContentBlock(Entity):
     '''
     
     def __init__(self, content, content_binding, timestamp):
-
         self.content = content
         self.binding = content_binding
         self.timestamp = timestamp
@@ -210,7 +220,6 @@ class SubscriptionResponse(Entity):
     '''
 
     def __init__(self, collection_name, message=None, subscriptions=None):
-
         self.collection_name = collection_name
         self.message = message
         self.subscriptions = subscriptions or []
@@ -224,7 +233,8 @@ class Subscription(Entity):
                  :attr:`STATUS_UNKNOWN`, :attr:`STATUS_ACTIVE`,
                  :attr:`STATUS_PAUSED`, :attr:`STATUS_UNSUBSCRIBED`
     :param list delivery_parameters: a list of `cabby.entities.InboxService`
-    :param list subscription_parameters: a list of `cabby.entities.SubscriptionParameters`
+    :param list subscription_parameters:
+                a list of `cabby.entities.SubscriptionParameters`
     :param list poll_instances: a list of `cabby.entities.ServiceInstance`
     '''
     STATUS_UNKNOWN = 'UNKNOWN'
@@ -232,8 +242,12 @@ class Subscription(Entity):
     STATUS_PAUSED = const.SS_PAUSED
     STATUS_UNSUBSCRIBED = const.SS_UNSUBSCRIBED
 
-    def __init__(self, subscription_id, status=STATUS_UNKNOWN, delivery_parameters=None,
-            subscription_parameters=None, poll_instances=None):
+    def __init__(self, subscription_id, status=STATUS_UNKNOWN,
+                 delivery_parameters=None, subscription_parameters=None,
+                 poll_instances=None):
+
+        assert status in [self.STATUS_UNKNOWN, self.STATUS_ACTIVE,
+                          self.STATUS_PAUSED, self.STATUS_UNSUBSCRIBED]
 
         self.id = subscription_id
         self.status = status

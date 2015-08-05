@@ -228,9 +228,9 @@ class AbstractClient(object):
 
         # https://github.com/TAXIIProject/libtaxii/issues/181
         if isinstance(response_raw, urllib.error.URLError):
-            error = response_raw
-            self.log.debug("%s: %s", error, error.read())
-            raise HTTPError(error)
+            body = response_raw.read()
+            self.log.debug("%s: %s", response_raw, body)
+            raise HTTPError(body)
 
         # https://github.com/TAXIIProject/libtaxii/issues/186
         elif isinstance(response_raw, urllib.response.addinfourl) and \
@@ -350,7 +350,7 @@ class AbstractClient(object):
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
                 if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
-                if no service found
+                if no Discovery servicefound
         :raises `cabby.exceptions.AmbiguousServicesError`:
                 more than one service with type specified
         :raises `cabby.exceptions.NoURIProvidedError`:

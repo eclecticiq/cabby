@@ -3,6 +3,7 @@ import libtaxii.messages_11 as tm11
 from libtaxii import constants as const
 
 from .abstract import AbstractClient
+from .entities import ContentBlockCount
 from .converters import (
     to_subscription_response_entity, to_content_block_entity,
     to_collection_entities
@@ -69,7 +70,7 @@ class Client11(AbstractClient):
         :raises `cabby.exceptions.UnsuccessfulStatusError`:
                 if Status Message received and status_type is not `SUCCESS`
         :raises `cabby.exceptions.ServiceNotFoundError`:
-                if no service found
+                if no Collection Management service found
         :raises `cabby.exceptions.AmbiguousServicesError`:
                 more than one service with type specified
         :raises `cabby.exceptions.NoURIProvidedError`:
@@ -332,20 +333,117 @@ class Client11(AbstractClient):
 
         self.log.debug("Content block successfully pushed")
 
-    def poll(self, collection_name, begin_date=None, end_date=None,
-             count_only=False, subscription_id=None, inbox_service=None,
-             content_bindings=None, uri=None):
-        '''Poll content from Polling Service.
+    def _prepare_poll_request(self, collection_name, begin_date=None, end_date=None,
+                              subscription_id=None, inbox_service=None,
+                              content_bindings=None, count_only=False):
+        data = dict(
+            message_id=self._generate_id(),
+            collection_name=collection_name,
+            exclusive_begin_timestamp_label=begin_date,
+            inclusive_end_timestamp_label=end_date
+        )
+
+        if subscription_id:
+            data['subscription_id'] = subscription_id
+        else:
+            _bindings = pack_content_bindings(content_bindings, version=11)
+            poll_params = {'content_bindings': _bindings}
+
+            if inbox_service:
+                message_bindings = inbox_service.message_bindings[0] \
+                    if inbox_service.message_bindings else []
+
+                poll_params['delivery_parameters'] = tm11.DeliveryParameters(
+                    inbox_protocol=inbox_service.protocol,
+                    inbox_address=inbox_service.address,
+                    delivery_message_binding=message_bindings
+                )
+                poll_params['allow_asynch'] = True
+
+            if count_only:
+                poll_params['response_type'] = const.RT_COUNT_ONLY
+            else:
+                poll_params['response_type'] = const.RT_FULL
+
+            data['poll_parameters'] = \
+                tm11.PollRequest.PollParameters(**poll_params)
+
+        return tm11.PollRequest(**data)
+
+    def get_content_count(self, collection_name, begin_date=None, end_date=None,
+                          subscription_id=None, inbox_service=None,
+                          content_bindings=None, uri=None):
+        '''Get content blocks count for a query.
 
         if ``uri`` is not provided, client will try to discover services and
         find Polling Service among them.
+
+        If ``subscription_id`` provided, arguments ``content_bindings`` and
+        ``inbox_service`` are ignored.
 
         :param str collection_name: collection to poll
         :param datetime begin_date: ask only for content blocks created
                after `begin_date` (exclusive)
         :param datetime end_date: ask only for content blocks created
                before `end_date` (inclusive)
-        :param bool count_only: ask only for counts and not full content
+        :param str subsctiption_id: ID of the existing subscription
+        :param `cabby.entities.InboxService` inbox_service:
+               Inbox Service that will accept content pushed by TAXII Server
+               in the context of this Poll Request
+        :param list content_bindings: list of stings or
+               :py:class:`cabby.entities.ContentBinding` objects
+        :param str uri: URI path to a specific Inbox Service
+
+        :raises ValueError:
+                if URI provided is invalid or schema is not supported
+        :raises `cabby.exceptions.HTTPError`:
+                if HTTP error happened
+        :raises `cabby.exceptions.UnsuccessfulStatusError`:
+                if Status Message received and status_type is not `SUCCESS`
+        :raises `cabby.exceptions.ServiceNotFoundError`:
+                if no service found
+        :raises `cabby.exceptions.AmbiguousServicesError`:
+                more than one service with type specified
+        :raises `cabby.exceptions.NoURIProvidedError`:
+                no URI provided and client can't discover services
+
+        :return: `cabby.entities.ContentBlockCount`
+        '''
+
+        request = self._prepare_poll_request(
+            collection_name,
+            begin_date=begin_date,
+            end_date=end_date,
+            subscription_id=subscription_id,
+            inbox_service=inbox_service,
+            content_bindings=content_bindings,
+            count_only=True
+        )
+        response = self._execute_request(
+            request, uri=uri, service_type=const.SVC_POLL)
+
+        if response.record_count:
+            return ContentBlockCount(
+                count=response.record_count.record_count,
+                is_partial=response.record_count.partial_count
+            )
+
+    def poll(self, collection_name, begin_date=None, end_date=None,
+             subscription_id=None, inbox_service=None,
+             content_bindings=None, uri=None):
+        '''Poll content from Polling Service.
+
+        if ``uri`` is not provided, client will try to discover services and
+        find Polling Service among them.
+
+        If ``subscription_id`` provided, arguments ``content_bindings`` and
+        ``inbox_service`` are ignored.
+
+        :param str collection_name: collection to poll
+        :param datetime begin_date: ask only for content blocks created
+               after `begin_date` (exclusive)
+        :param datetime end_date: ask only for content blocks created
+               before `end_date` (inclusive)
         :param str subsctiption_id: ID of the existing subscription
         :param `cabby.entities.InboxService` inbox_service:
                Inbox Service that will accept content pushed by TAXII Server
@@ -368,41 +466,18 @@ class Client11(AbstractClient):
                 no URI provided and client can't discover services
         '''
 
-        data = dict(
-            message_id=self._generate_id(),
-            collection_name=collection_name,
-            exclusive_begin_timestamp_label=begin_date,
-            inclusive_end_timestamp_label=end_date
+        request = self._prepare_poll_request(
+            collection_name,
+            begin_date=begin_date,
+            end_date=end_date,
+            subscription_id=subscription_id,
+            inbox_service=inbox_service,
+            content_bindings=content_bindings,
+            count_only=False
         )
 
-        if subscription_id:
-            data['subscription_id'] = subscription_id
-        else:
-            poll_params = {
-                'content_bindings': pack_content_bindings(content_bindings,
-                                                          version=11)
-            }
-
-            if inbox_service:
-                message_bindings = inbox_service.message_bindings[0] \
-                    if inbox_service.message_bindings else []
-
-                poll_params['delivery_parameters'] = tm11.DeliveryParameters(
-                    inbox_protocol=inbox_service.protocol,
-                    inbox_address=inbox_service.address,
-                    delivery_message_binding=message_bindings
-                )
-                poll_params['allow_asynch'] = True
-
-            if count_only:
-                poll_params['response_type'] = const.RT_COUNT_ONLY
-
-            data['poll_parameters'] = \
-                tm11.PollRequest.PollParameters(**poll_params)
-
-        request = tm11.PollRequest(**data)
-        response = self._execute_request(request, uri=uri,
-                                         service_type=const.SVC_POLL)
+        response = self._execute_request(
+            request, uri=uri, service_type=const.SVC_POLL)
 
         for block in response.content_blocks:
             yield to_content_block_entity(block)
@@ -412,12 +487,11 @@ class Client11(AbstractClient):
 
             while True:
                 part += 1
-
                 has_data = False
 
                 fulfilment_stream = self.fulfilment(
-                    collection_name, response.result_id, part_number=part,
-                    uri=uri)
+                    collection_name, response.result_id,
+                    part_number=part, uri=uri)
 
                 for block in fulfilment_stream:
                     has_data = True
