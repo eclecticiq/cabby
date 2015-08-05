@@ -7,7 +7,8 @@ import httpretty
 from libtaxii import messages_11 as tm11
 from libtaxii.constants import (
     VID_TAXII_XML_11,
-    SVC_INBOX, SVC_DISCOVERY
+    SVC_INBOX, SVC_DISCOVERY,
+    RT_COUNT_ONLY
 )
 
 from cabby import create_client
@@ -150,6 +151,23 @@ def test_poll():
     message = get_sent_message()
     assert type(message) == tm11.PollRequest
     assert message.collection_name == POLL_COLLECTION
+
+
+@httpretty.activate
+def test_poll_count_only():
+
+    register_uri(POLL_URI, POLL_RESPONSE)
+
+    client = create_client_11()
+    count = client.get_content_count(POLL_COLLECTION, uri=POLL_PATH)
+
+    assert count.count == 2
+    assert not count.is_partial
+
+    message = get_sent_message()
+    assert type(message) == tm11.PollRequest
+    assert message.collection_name == POLL_COLLECTION
+    assert message.poll_parameters.response_type == RT_COUNT_ONLY
 
 
 @httpretty.activate

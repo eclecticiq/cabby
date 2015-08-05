@@ -154,6 +154,16 @@ def test_poll():
     assert type(message) == tm10.PollRequest
     assert message.feed_name == POLL_FEED
 
+@httpretty.activate
+def test_poll_count_only():
+
+    register_uri(POLL_URI, POLL_RESPONSE)
+
+    client = create_client_10()
+
+    with pytest.raises(exc.NotSupportedError):
+        count = client.get_content_count(POLL_FEED, uri=POLL_PATH)
+
 
 @httpretty.activate
 def test_poll_with_subscription():

@@ -74,6 +74,7 @@ COLLECTION_MANAGEMENT_RESPONSE = '''
 POLL_RESPONSE = '''
 <taxii_11:Poll_Response xmlns:taxii="http://taxii.mitre.org/messages/taxii_xml_binding-1.1" xmlns:taxii_11="http://taxii.mitre.org/messages/taxii_xml_binding-1.1" xmlns:tdq="http://taxii.mitre.org/query/taxii_default_query-1.1" message_id="375" in_response_to="65684" collection_name="%(collection_name)s" more="false" result_part_number="1">
     <taxii_11:Inclusive_End_Timestamp>2015-01-22T15:28:49.931734+00:00</taxii_11:Inclusive_End_Timestamp>
+    <taxii_11:Record_Count partial_count="false">2</taxii_11:Record_Count>
     <taxii_11:Content_Block>
         <taxii_11:Content_Binding binding_id="urn:stix.mitre.org:xml:1.1.1"/>
         <taxii_11:Content>%(block_1)s</taxii_11:Content>
