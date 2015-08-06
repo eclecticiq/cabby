@@ -24,7 +24,7 @@ def extend_arguments(parser):
 
     parser.add_argument(
         "-l", "--limit", dest="limit", type=int,
-        default=sys.maxint,
+        default=None,
         help="limit the number of content blocks returned")
 
     parser.add_argument(
@@ -149,7 +149,7 @@ def _runner(client, path, args):
             else:
                 print(block.content)
 
-        if counter >= args.limit:
+        if args.limit and counter >= args.limit:
             break
 
     log.info("%d blocks polled", counter)
