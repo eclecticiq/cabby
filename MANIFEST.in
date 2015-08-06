@@ -1,0 +1,6 @@
+include LICENSE.rst
+include CHANGES.rst
+include README.rst
+include requirements.txt
+recursive-include docs *
+global-exclude *.pyc
