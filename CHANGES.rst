@@ -1,7 +1,7 @@
 Changelog for cabby
 ===================
 
-0.1.5 (unreleased)
+0.1.5 (2015-08-06)
 ------------------
 
 * Added Python 3 compatibility
