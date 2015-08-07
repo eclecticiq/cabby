@@ -308,11 +308,11 @@ class Client10(AbstractClient):
             data['subscription_id'] = subscription_id
 
         request = tm10.PollRequest(**data)
-        response = self._execute_request(
-            request, uri=uri, service_type=const.SVC_POLL)
-
-        for block in response.content_blocks:
-            yield to_content_block_entity(block)
+        stream = self._execute_request(request, uri=uri,
+                                       service_type=const.SVC_POLL)
+        for obj in stream:
+            if isinstance(obj, tm10.ContentBlock):
+                yield to_content_block_entity(obj)
 
     def fulfilment(self, *args, **kwargs):
         '''Not supported in TAXII 1.0

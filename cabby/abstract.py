@@ -1,18 +1,15 @@
 from furl import furl
-from six.moves import urllib
-import requests
 import logging
 
 from libtaxii.clients import HttpClient
 from libtaxii.common import generate_message_id
-from libtaxii import constants as const
-from libtaxii import get_message_from_http_response
 
 from .converters import to_detailed_service_instance_entity
 from .exceptions import (
-    NoURIProvidedError, UnsuccessfulStatusError, ServiceNotFoundError,
-    AmbiguousServicesError, ClientException, HTTPError, InvalidResponseError
+    NoURIProvidedError, ServiceNotFoundError,
+    AmbiguousServicesError, ClientException
 )
+from .dispatcher import send_taxii_request
 from six.moves import filter
 from six.moves import map
 
@@ -38,18 +35,10 @@ class AbstractClient(object):
         self.discovery_path = discovery_path
         self.services = None
 
-        self.auth = None
         self.proxy_details = None
+        self.auth_details = {}
 
-        self.headers = headers
-
-        self.auth_cert_file = None
-        self.auth_key_file = None
-
-        self.auth_username = None
-        self.auth_password = None
-
-        self.auth_jwt_url = None
+        self.headers = headers or {}
 
         self.log = logging.getLogger("%s.%s" % (self.__module__,
                                                 self.__class__.__name__))
@@ -72,13 +61,13 @@ class AbstractClient(object):
         :param str jwt_auth_url: URL used to obtain JWT token
         '''
 
-        self.auth_cert_file = cert_file
-        self.auth_key_file = key_file
-
-        self.auth_username = username
-        self.auth_password = password
-
-        self.auth_jwt_url = jwt_auth_url
+        self.auth_details = {
+            'cert_file': cert_file,
+            'key_file': key_file,
+            'username': username,
+            'password': password,
+            'jwt_url': jwt_auth_url
+        }
 
     def set_proxy(self, proxy_url, proxy_type=None):
         '''Set proxy properties.
@@ -103,36 +92,6 @@ class AbstractClient(object):
             'proxy_string': proxy_url
         }
 
-    def _configure_auth_methods(self, tclient):
-
-        tls_auth = (self.auth_cert_file and self.auth_key_file)
-
-        basic_auth = (not self.auth_jwt_url
-                      and self.auth_username and self.auth_password)
-
-        if tls_auth and basic_auth:
-            tclient.set_auth_type(HttpClient.AUTH_CERT_BASIC)
-            tclient.set_auth_credentials(dict(
-                key_file=self.auth_key_file,
-                cert_file=self.auth_cert_file,
-                username=self.auth_username,
-                password=self.auth_password
-            ))
-        elif tls_auth:
-            tclient.set_auth_type(HttpClient.AUTH_CERT)
-            tclient.set_auth_credentials(dict(
-                key_file=self.auth_key_file,
-                cert_file=self.auth_cert_file,
-            ))
-        elif basic_auth:
-            tclient.set_auth_type(HttpClient.AUTH_BASIC)
-            tclient.set_auth_credentials(dict(
-                username=self.auth_username,
-                password=self.auth_password
-            ))
-
-        return tclient
-
     def _prepare_url(self, uri):
 
         fu = furl(uri)
@@ -148,50 +107,10 @@ class AbstractClient(object):
         fu.host = fu.host or self.host
         fu.port = fu.port or (443 if use_https else self.port)
 
-        return {
-            'url': fu.url,
-            'host': fu.host,
-            'port': fu.port,
-            'use_https': use_https,
-            'path': str(fu.path),
-            'params': fu.query.params
-        }
+        if not fu.host:
+            raise ValueError('Host name is not provided: {}'.format(fu.url))
 
-    def _obtain_jwt_token(self):
-
-        url_parts = self._prepare_url(self.auth_jwt_url)
-
-        if not url_parts['host']:
-            raise ValueError(
-                'Host name is not provided: {}'.format(url_parts['url']))
-
-        url = url_parts['url']
-
-        self.log.info("Obtaining JWT token from {}".format(url))
-
-        r = requests.post(url, json={
-            'username': self.auth_username,
-            'password': self.auth_password,
-        })
-        r.raise_for_status()
-        return r.json()['token']
-
-    def _send_taxii_request(self, url_parts, headers, request_body):
-        '''Send raw TAXII XML message to a service.'''
-
-        tclient = HttpClient(use_https=url_parts['use_https'])
-        tclient = self._configure_auth_methods(tclient)
-
-        if self.proxy_details:
-            tclient.set_proxy(**self.proxy_details)
-
-        response_raw = tclient.call_taxii_service2(
-            host=url_parts['host'], path=url_parts['path'],
-            port=url_parts['port'], get_params_dict=url_parts['params'],
-            message_binding=self.taxii_version, post_data=request_body,
-            headers=headers)
-
-        return response_raw
+        return fu.url
 
     def _execute_request(self, request, uri=None, service_type=None):
         '''Execute generic TAXII request.
@@ -201,69 +120,24 @@ class AbstractClient(object):
         '''
 
         if not uri and not service_type:
-            raise NoURIProvidedError('URI or service_type '
-                                     'needs to be provided')
+            raise NoURIProvidedError('URI or service_type needed')
         elif not uri:
             service = self._get_service(service_type)
             uri = service.address
 
-        url_parts = self._prepare_url(uri)
-        if not url_parts['host']:
-            raise ValueError(
-                'Host name is not provided: {}'.format(url_parts['url']))
+#        import resource
+#        print("1", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+        if self.auth_details.get('jwt_url'):
+            self.auth_details['jwt_url_prepared'] = self._prepare_url(
+                self.auth_details['jwt_url'])
 
-        _headers = dict(self.headers or {})
-        if self.auth_jwt_url:
-            jwt_token = self._obtain_jwt_token()
-            _headers['Authorization'] = 'Bearer {}'.format(jwt_token)
+        url = self._prepare_url(uri)
+        message = send_taxii_request(url, request,
+                                     headers=self.headers,
+                                     auth_details=self.auth_details,
+                                     proxy_details=self.proxy_details)
 
-        self.log.info("Sending %s to %s", request.message_type,
-                      url_parts['url'])
-
-        request_body = request.to_xml(pretty_print=True)
-        self.log.debug("Request:\n%s", request_body)
-
-        response_raw = self._send_taxii_request(url_parts, _headers,
-                                                request_body)
-
-        # https://github.com/TAXIIProject/libtaxii/issues/181
-        if isinstance(response_raw, urllib.error.URLError):
-            body = response_raw.read()
-            self.log.debug("%s: %s", response_raw, body)
-            raise HTTPError(body)
-
-        # https://github.com/TAXIIProject/libtaxii/issues/186
-        elif isinstance(response_raw, urllib.response.addinfourl) and \
-                not response_raw.info().getheader('X-TAXII-Content-Type'):
-
-            headers = ''.join(response_raw.info().headers)
-            body = response_raw.read()
-
-            self.log.debug("Invalid response:\n%s", headers + body)
-            raise InvalidResponseError(
-                "Invalid response received from %s" % url_parts['url'])
-
-        response = get_message_from_http_response(response_raw,
-                                                  in_response_to='0')
-
-        if response.version != self.taxii_version:
-            raise InvalidResponseError(
-                "TAXII version in response message '%s' "
-                "does not match client's configured version '%s'" %
-                (response.version, self.taxii_version))
-
-        self.log.info("Response received for %s from %s",
-                      request.message_type, url_parts['url'])
-
-        if self.log.isEnabledFor(logging.DEBUG):
-            self.log.debug("Response:\n%s", response.to_xml(pretty_print=True))
-
-        if hasattr(response, 'status_type'):
-            if response.status_type != const.ST_SUCCESS:
-                raise UnsuccessfulStatusError(response)
-            else:
-                return None
-        return response
+        return message
 
     def _generate_id(self):
         return generate_message_id(version=self.services_version)
@@ -273,7 +147,8 @@ class AbstractClient(object):
 
         if not candidates:
             raise ServiceNotFoundError(
-                "Service with type '%s' is not advertised" % service_type)
+                "Service with type '{}' is not advertised"
+                .format(service_type))
 
         elif len(candidates) > 1:
             raise AmbiguousServicesError(
