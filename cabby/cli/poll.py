@@ -1,7 +1,5 @@
 
-
 import os
-import sys
 import re
 import pytz
 import logging
@@ -143,11 +141,13 @@ def _runner(client, path, args):
         else:
             if args.as_raw:
                 if args.as_xml:
-                    print(block.raw.to_xml())
+                    value = block.raw.to_xml()
                 else:
-                    print(block.raw.to_text())
+                    value = block.raw.to_text()
             else:
-                print(block.content)
+                value = block.content
+
+            print(value.decode('utf-8'))
 
         if args.limit and counter >= args.limit:
             break

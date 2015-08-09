@@ -423,11 +423,15 @@ class Client11(AbstractClient):
         response = self._execute_request(
             request, uri=uri, service_type=const.SVC_POLL)
 
-        if response.record_count:
-            return ContentBlockCount(
-                count=response.record_count.record_count,
-                is_partial=response.record_count.partial_count
-            )
+        for obj in response:
+            if isinstance(obj, tm11.PollResponse):
+                if obj.record_count:
+                    return ContentBlockCount(
+                        count=obj.record_count.record_count,
+                        is_partial=obj.record_count.partial_count
+                    )
+                else:
+                    return None
 
     def poll(self, collection_name, begin_date=None, end_date=None,
              subscription_id=None, inbox_service=None,
@@ -477,13 +481,17 @@ class Client11(AbstractClient):
             count_only=False
         )
 
-        response = self._execute_request(
-            request, uri=uri, service_type=const.SVC_POLL)
+        stream = self._execute_request(request, uri=uri,
+                                       service_type=const.SVC_POLL)
+        response = None
+        for obj in stream:
+            if isinstance(obj, tm11.ContentBlock):
+                yield to_content_block_entity(obj)
+            else:
+                response = obj
+                break
 
-        for block in response.content_blocks:
-            yield to_content_block_entity(block)
-
-        if response.more:
+        if response and response.more:
             part = response.result_part_number
 
             while True:
@@ -533,8 +541,9 @@ class Client11(AbstractClient):
             result_part_number=part_number
         )
 
-        response = self._execute_request(request, uri=uri,
-                                         service_type=const.SVC_POLL)
+        stream = self._execute_request(request, uri=uri,
+                                       service_type=const.SVC_POLL)
 
-        for block in response.content_blocks:
-            yield to_content_block_entity(block)
+        for obj in stream:
+            if isinstance(obj, tm11.ContentBlock):
+                yield to_content_block_entity(obj)
