@@ -8,7 +8,7 @@ Changelog for cabby
 * XML stream parsing for Poll Response messages.
 * Bugfixes.
 
-0.1.4 (2015-08-06)
+0.1.4 (2015-07-24)
 ------------------
 
 * ``--bindings`` option added for ``taxii-poll`` CLI command.
