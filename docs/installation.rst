@@ -7,14 +7,14 @@ Installation guide
 Install Python
 ==============
 
-OpenTAXII works with Python version 2.7, which you can download `here <http://www.python.org/download/>`_ or with your operating system’s package manager. 
+OpenTAXII works with both latest Python version and version 2.7. You you can install Python with your operating system’s package manager or download it directly `here <http://www.python.org/download/>`_.
 
 You can verify that Python is installed by typing ``python`` from your shell; you should see something like::
 
 	$ python
-	Python 2.7.6 (default, Sep  9 2014, 15:04:36) 
-	[GCC 4.2.1 Compatible Apple LLVM 6.0 (clang-600.0.39)] on darwin
-	Type "help", "copyright", "credits" or "license" for more information.
+    Python 2.7.8 (default, Oct 19 2014, 16:02:00)
+    [GCC 4.2.1 Compatible Apple LLVM 6.0 (clang-600.0.54)] on darwin
+    Type "help", "copyright", "credits" or "license" for more information.
 	>>> 
 
 Install Cabby
@@ -54,6 +54,6 @@ Releases of Cabby are given major.minor.revision version numbers, where major an
 
 .. rubric:: Next steps
 
-Continue with the :doc:`User guide <user>` to see how to use cabby.
+Continue with the :doc:`User guide <user>` to see how to use Cabby.
 
 .. vim: set spell spelllang=en:
