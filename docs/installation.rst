@@ -30,7 +30,7 @@ Where ``venv`` is a directory to place the new environment
 
 Activate this environment::
 
-   $ source venv/bin/activate
+   $ . venv/bin/activate
    (venv) $
    
 You can now install the latest Cabby release from the `Python
