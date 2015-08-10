@@ -258,6 +258,7 @@ class Client10(AbstractClient):
         '''Not supported in TAXII 1.0
 
         :raises `cabby.exceptions.NotSupportedError`:
+                not supported in TAXII 1.0
         '''
         raise NotSupportedError(self.taxii_version)
 

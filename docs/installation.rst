@@ -20,7 +20,7 @@ You can verify that Python is installed by typing ``python`` from your shell; yo
 Install Cabby
 =======================
 
-To sandbox the project and protect system-wide python it is recommended to install Cabby into a `virtual environment <https://virtualenv.pypa.io/en/latest/installation.html>`_ (*virtualenv*)::
+To sandbox the project and protect system-wide python it is recommended to install Cabby into a `virtual environment <https://virtualenv.pypa.io/en/latest/installation.html>`_ (*virtualenv*):
 
 Create a virtual environment named venv::
 

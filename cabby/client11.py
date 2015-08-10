@@ -408,7 +408,7 @@ class Client11(AbstractClient):
         :raises `cabby.exceptions.NoURIProvidedError`:
                 no URI provided and client can't discover services
 
-        :return: `cabby.entities.ContentBlockCount`
+        :rtype: :py:class:`cabby.entities.ContentBlockCount`
         '''
 
         request = self._prepare_poll_request(

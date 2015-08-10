@@ -11,7 +11,16 @@ class Entity(object):
 
 
 class ContentBlockCount(Entity):
+    '''Content Block count.
 
+    Represents an amount of content blocks in a poll query result.
+
+    :param int count: amount of content blocks in a poll query result.
+    :param bool is_partial:
+           indicates whether the provided Record Count is the exact number
+           of applicable records, or if the provided number is a lower bound
+           and there may be more records than stated.
+    '''
     def __init__(self, count, is_partial=False):
         self.count = count
         self.is_partial = is_partial
