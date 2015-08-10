@@ -6,7 +6,7 @@ Changelog for cabby
 
 * Added Python 3 compatibility.
 * XML stream parsing for Poll Response messages.
-* Bugfixes
+* Bugfixes.
 
 0.1.4 (2015-08-06)
 ------------------
@@ -33,9 +33,9 @@ Changelog for cabby
 0.1.1 (2015-03-26)
 ------------------
 
-* Tidying up packaging and distribution related configuration
+* Tidying up packaging and distribution related configuration.
 
 0.1.0 (2015-03-26)
 ------------------
 
-* Initial release
+* Initial release.
