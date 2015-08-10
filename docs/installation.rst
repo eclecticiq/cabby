@@ -11,11 +11,11 @@ OpenTAXII works with both latest Python version and version 2.7. You you can ins
 
 You can verify that Python is installed by typing ``python`` from your shell; you should see something like::
 
-	$ python
+    $ python
     Python 2.7.8 (default, Oct 19 2014, 16:02:00)
     [GCC 4.2.1 Compatible Apple LLVM 6.0 (clang-600.0.54)] on darwin
     Type "help", "copyright", "credits" or "license" for more information.
-	>>> 
+    >>> 
 
 Install Cabby
 =======================
