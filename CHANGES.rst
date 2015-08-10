@@ -4,8 +4,9 @@ Changelog for cabby
 0.1.5 (2015-08-06)
 ------------------
 
-* Added Python 3 compatibility
-
+* Added Python 3 compatibility.
+* XML stream parsing for Poll Response messages.
+* Bugfixes
 
 0.1.4 (2015-08-06)
 ------------------
