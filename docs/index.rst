@@ -25,7 +25,7 @@ Cabby is designed from the ground up to act as a Python library and as a command
    user
    api
    developer
-   news
+   changes
    license
 
 .. rubric:: External links
