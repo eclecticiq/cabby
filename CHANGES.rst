@@ -1,11 +1,14 @@
-===============
-Version history
-===============
+Changelog for cabby
+===================
 
-cabby 0.1.4
-===========
+0.1.5 (2015-08-06)
+------------------
 
-Release date: 2015-07-24
+* Added Python 3 compatibility
+
+
+0.1.4 (2015-08-06)
+------------------
 
 * ``--bindings`` option added for ``taxii-poll`` CLI command.
 * Pagination issue, triggered during processing of paged Poll response, was fixed.
@@ -13,33 +16,25 @@ Release date: 2015-07-24
 * JWT based authentication method added.
 * Multiple naming, style and bug fixes.
 
-cabby 0.1.3
-===========
-
-Release date: 2015-04-08
+0.1.3 (2015-04-08)
+------------------
 
 * Workaround for libtaxii issue #186 (wrapping incorrect response in Status Message) has been added.
 * Tests improved.
 
-cabby 0.1.2
-===========
-
-Release date: 2015-03-31
+0.1.2 (2015-03-31)
+------------------
 
 * Issue with proxy arguments being ignored is fixed.
 * Issue with poll results print in CLI referencing wrong entity is fixed.
 * Wording and style fixes.
 
-cabby 0.1.1
-===========
-
-Release date: 2015-03-26
+0.1.1 (2015-03-26)
+------------------
 
 * Tidying up packaging and distribution related configuration
 
-cabby 0.1.0
-===========
-
-Release date: 2015-03-26
+0.1.0 (2015-03-26)
+------------------
 
 * Initial release

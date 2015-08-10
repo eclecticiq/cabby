@@ -2,3 +2,5 @@
 httpretty
 pytest
 pytest-cov
+setuptools-git
+zest.releaser
