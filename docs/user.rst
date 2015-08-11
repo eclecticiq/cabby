@@ -55,7 +55,7 @@ To force client to use `TAXII 1.0 <taxii.mitre.org/specifications/version1.0/TAX
   client = create_client('hailataxii.com', version='1.0')
 
 .. note::
-	Cabby client instances configured for TAXII 1.0 or TAXII 1.1 we will have slightly different method signatures (see :doc:`Cabby API documentation<api>` for details).
+  Cabby client instances configured for TAXII 1.0 or TAXII 1.1 we will have slightly different method signatures (see :doc:`Cabby API documentation<api>` for details).
 
 
 Authentication methods
@@ -142,6 +142,36 @@ Fetch the collections from a service protected by JWT authentication::
                              --jwt-auth /management/auth
 
 Use ``--help`` to get more usage details.
+
+Docker Quickstart
+=================
+
+To ease the threshold for trying out cabby, it is possible to use the Intelworks provided image.
+
+.. code-block:: shell
+
+    docker run cabby
+
+Running this will execute the help script, giving you all the possible options:
+
+.. code-block:: text
+
+     Commands to be run:
+
+        taxii-discovery
+        taxii-poll
+        taxii-collections
+        taxii-push
+        taxii-subscription
+
+        e.g. docker run -ti cabby taxii-discovery --host taxxii.server --path /services/discovery
+
+    More information available at: http://cabby.readthedocs.org
+
+    Or you can choose to drop back into a shell by providing: bash as the command:
+
+        docker run -ti cabby bash
+
 
 
 .. rubric:: Next steps
