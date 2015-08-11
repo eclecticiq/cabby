@@ -33,7 +33,9 @@ setup(
     install_requires=[
         'pytz',
         'colorlog',
-        'libtaxii>=1.1.107'
+        'libtaxii>=1.1.107',
+        'furl==0.4.7',
+        'requests==2.7.0'
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
