@@ -1,3 +1,6 @@
+# Git
+.git/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -53,6 +56,6 @@ docs/_build/
 # PyBuilder
 target/
 
-# Editor
+# Editor files
 *.iml
 .idea
