@@ -155,12 +155,28 @@ def send_taxii_request(url, request, headers, auth_details=None,
     return obj
 
 
+def _cleanup_batch(curr_elem, batch):
+    current_parent = curr_elem.getparent()
+
+    for elem in batch:
+        if elem.getparent() is not None:
+            parent = elem.getparent()
+        else:
+            parent = current_parent
+        parent.remove(elem)
+
+    del batch[:]
+
+
 def _stream_poll_response(namespace, stream):
 
     module = MODULES[namespace]
 
     block_cls = module.ContentBlock
     response_cls = MODULES[namespace].PollResponse
+
+    batch_max_size = 3
+    to_delete_batch = []
 
     for action, elem in stream:
         if action == 'end':
@@ -173,6 +189,7 @@ def _stream_poll_response(namespace, stream):
             # If current element is PollResponse
             # meaning that this is a last one
             elif tag == response_cls.message_type:
+                _cleanup_batch(elem, to_delete_batch)
                 obj = response_cls.from_etree(elem)
             else:
                 continue
@@ -180,12 +197,18 @@ def _stream_poll_response(namespace, stream):
             if log.isEnabledFor(logging.DEBUG):
                 log.debug("Stream element:\n%s", etree.tostring(elem))
 
+            yield obj
+
             # Cleaning up element to free up memory
             elem.clear()
-            if elem.getparent() is not None:
-                elem.getparent().remove(elem)
 
-            yield obj
+            # Removing all elements from a batch if it is time
+            if len(to_delete_batch) >= batch_max_size:
+                _cleanup_batch(elem, to_delete_batch)
+
+            # Postponing removal of the element from a tree
+            # to avoid memory corruption (libxml2 crashes)
+            to_delete_batch.append(elem)
 
 
 def _parse_response(response, version):
