@@ -1,7 +1,7 @@
 Changelog for cabby
 ===================
 
-0.1.7 (2015-09-16)
+0.1.7 (2015-09-18)
 ------------------
 
 * Fix for XML stream parser issue related to a race condition in libxml.
