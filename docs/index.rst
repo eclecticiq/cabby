@@ -35,3 +35,10 @@ Cabby is designed from the ground up to act as a Python library and as a command
    developer
    changes
    license
+
+.. rubric:: External links
+
+* `Online documentation <https://cabby.readthedocs.org/>`_ (Read the docs)
+* `Project page <https://github.com/Intelworks/cabby/>`_ with source code and issue tracker (Github)
+* `Python Package Index (PyPI) page <http://pypi.python.org/pypi/cabby/>`_ with released tarballs
+* `Intelworks <https://www.intelworks.com>`_
