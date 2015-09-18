@@ -15,6 +15,9 @@ Cabby is designed from the ground up to act as a Python library and as a command
 * **Version agnostic**:
   it abstracts specific implementation details and returns version agnostic entities.
 
+* **Stream parsing**:
+  Heavy TAXII Poll Response messages are parsed on the fly, reducing memory footprint and time untill first content block is available.
+
 
 .. rubric:: Documentation contents
 
