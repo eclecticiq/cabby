@@ -1,4 +1,4 @@
-Changelog for cabby
+Changelog
 ===================
 
 0.1.7 (2015-09-18)

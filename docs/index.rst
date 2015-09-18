@@ -2,6 +2,11 @@
 Cabby
 =====
 
+Release v0.1.7. (:doc:`Changelog <changes>`)
+
+..
+    Release v\ |release|. (:doc:`Changelog <changes>`)
+
 Cabby is Python TAXII client implementation from Intelworks.
 
 TAXII (Trusted Automated eXchange of Indicator Information) is a collection of specifications defining a set of services and message exchanges used for sharing cyber threat intelligence information between parties. Check `TAXII homepage <http://taxii.mitre.org/>`_ to get more information.
