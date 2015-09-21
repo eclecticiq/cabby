@@ -1,6 +1,9 @@
-
+import logging
 
 from libtaxii import constants as const
+
+
+log = logging.getLogger(__name__)
 
 SERVICE_TYPES = set(const.SVC_TYPES_11 + const.SVC_TYPES_10)
 
@@ -57,7 +60,8 @@ class Collection(Entity):
                  polling_services=None, subscription_methods=None,
                  receiving_inboxes=None, volume=None):
 
-        assert type in [self.TYPE_FEED, self.TYPE_SET]
+        if type not in [self.TYPE_FEED, self.TYPE_SET]:
+            log.error("Unknown collection type: %s", type)
 
         self.name = name
         self.description = description
@@ -153,7 +157,8 @@ class SubscriptionParameters(Entity):
     TYPE_COUNT = const.RT_COUNT_ONLY
 
     def __init__(self, response_type, content_bindings=None):
-        assert response_type in [self.TYPE_FULL, self.TYPE_COUNT]
+        if response_type not in [self.TYPE_FULL, self.TYPE_COUNT]:
+            log.error("Unknown response type: %s", response_type)
         self.response_type = response_type
         self.content_bindings = content_bindings or []
 
@@ -181,8 +186,10 @@ class DetailedServiceInstance(Entity):
     def __init__(self, type, version, protocol, address, message_bindings,
                  available=None, message=None):
 
-        assert version in [self.VERSION_10, self.VERSION_11]
-        assert protocol in [self.PROTOCOL_HTTP, self.PROTOCOL_HTTPS]
+        if version not in [self.VERSION_10, self.VERSION_11]:
+            log.error("Unknown service version: %s", version)
+        if protocol not in [self.PROTOCOL_HTTP, self.PROTOCOL_HTTPS]:
+            log.error("Unknown service protocol: %s", protocol)
 
         self.type = type
         self.version = version
