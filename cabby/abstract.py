@@ -43,8 +43,8 @@ class AbstractClient(object):
         self.log = logging.getLogger("%s.%s" % (self.__module__,
                                                 self.__class__.__name__))
 
-    def set_auth(self, cert_file=None, key_file=None, username=None,
-                 password=None, jwt_auth_url=None):
+    def set_auth(self, cert_file=None, key_file=None, key_password=None,
+                 username=None, password=None, jwt_auth_url=None):
         '''Set authentication credentials.
 
         ``jwt_auth_url`` is required for JWT based authentication. If
@@ -58,6 +58,11 @@ class AbstractClient(object):
         :param str key_file: a path to SSL key file
         :param str username: username, used in basic auth or JWT auth
         :param str password: password, used in basic auth or JWT auth
+        :param str key_password: same argument as in
+            ``ssl.SSLContext.load_cert_chain`` - may be a function to call
+            to get the password for decrypting the private key or
+            string/bytes/bytearray. It will only be called if the private
+            key is encrypted and a password is necessary.
         :param str jwt_auth_url: URL used to obtain JWT token
         '''
 
@@ -66,6 +71,7 @@ class AbstractClient(object):
             'key_file': key_file,
             'username': username,
             'password': password,
+            'key_password': key_password,
             'jwt_url': jwt_auth_url
         }
 

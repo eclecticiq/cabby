@@ -72,13 +72,15 @@ def save_to_dir(dest_dir, collection, content_block, as_raw):
     filename = generate_filename(collection, content_block)
     path = os.path.abspath(os.path.join(dest_dir, filename))
 
-    with open(path, 'w') as f:
+    with open(path, 'wb') as f:
         if as_raw:
             content = content_block.raw.to_xml(pretty_print=True)
         else:
             content = content_block.content
 
-        f.write(content)
+        f.write(
+            content if isinstance(content, bytes)
+            else content.encode('utf-8'))
 
     log.info("Content block saved to %s", path)
 

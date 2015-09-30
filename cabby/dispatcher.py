@@ -30,7 +30,9 @@ log = logging.getLogger(__name__)
 
 
 def _set_auth_details(tclient, cert_file=None, key_file=None,
-                      username=None, password=None, is_jwt=False):
+                      key_password=None, username=None,
+                      password=None, is_jwt=False):
+
     tls_auth = (cert_file and key_file)
     basic_auth = (not is_jwt and username and password)
 
@@ -41,13 +43,15 @@ def _set_auth_details(tclient, cert_file=None, key_file=None,
             'key_file': key_file,
             'cert_file': cert_file,
             'username': username,
-            'password': password
+            'password': password,
+            'key_password': key_password
         }
     elif tls_auth:
         tclient.set_auth_type(HttpClient.AUTH_CERT)
         credentials = {
             'key_file': key_file,
             'cert_file': cert_file,
+            'key_password': key_password
         }
     elif basic_auth:
         tclient.set_auth_type(HttpClient.AUTH_BASIC)
@@ -117,6 +121,7 @@ def send_taxii_request(url, request, headers, auth_details=None,
         key_file=auth_details.get('key_file'),
         username=auth_details.get('username'),
         password=auth_details.get('password'),
+        key_password=auth_details.get('key_password'),
         is_jwt=bool(auth_details.get('jwt_url'))
     )
 

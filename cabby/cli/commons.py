@@ -45,6 +45,9 @@ def get_basic_arg_parser():
 
     parser.add_argument("--cert", dest="cert", help="certificate file")
     parser.add_argument("--key", dest="key", help="private key file")
+    parser.add_argument(
+        "--key-password", dest="key_password",
+        help="private key password")
 
     parser.add_argument(
         "--username", dest="username",
@@ -132,6 +135,7 @@ def run_client(parser, run_func):
         key_file=args.key,
         username=args.username,
         password=args.password,
+        key_password=args.key_password,
         jwt_auth_url=args.jwt_auth_url,
     )
 
