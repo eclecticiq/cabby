@@ -23,6 +23,7 @@ setup(
     packages=find_packages(exclude=['tests']),
     entry_points={
         'console_scripts': [
+            'taxii-proxy=cabby.cli:proxy_content',
             'taxii-poll=cabby.cli:poll_content',
             'taxii-push=cabby.cli:push_content',
             'taxii-discovery=cabby.cli:discover_services',
