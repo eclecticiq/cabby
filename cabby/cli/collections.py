@@ -15,7 +15,7 @@ def _runner(client, path, args):
         service_types = [SVC_COLLECTION_MANAGEMENT, SVC_FEED_MANAGEMENT]
         for service in client.get_services(service_types=service_types):
             collections.extend(
-                client.get_collections(uri=service.service_address))
+                client.get_collections(uri=service.address))
 
     for c in collections:
         if args.as_xml:

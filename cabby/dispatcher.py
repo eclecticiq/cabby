@@ -226,7 +226,8 @@ def _parse_response(response, version):
 
     # https://github.com/TAXIIProject/libtaxii/issues/186
     if not content_type:
-        headers = ''.join(response.info().headers)
+        headers = '\n'.join([
+            '{}={}'.format(k, v) for k, v in response.headers.items()])
         body = response.read()
         log.debug("Invalid response:\n%s\n%s", headers, body)
         raise InvalidResponseError("Invalid response received")

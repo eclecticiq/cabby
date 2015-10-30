@@ -131,8 +131,6 @@ class AbstractClient(object):
             service = self._get_service(service_type)
             uri = service.address
 
-#        import resource
-#        print("1", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         if self.auth_details.get('jwt_url'):
             self.auth_details['jwt_url_prepared'] = self._prepare_url(
                 self.auth_details['jwt_url'])
