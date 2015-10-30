@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.1.9a
+------------------
+
+* Added taxii-proxy cli command to allow funneling of data from one taxii server to another.
+
+
 0.1.7 (2015-09-18)
 ------------------
 
