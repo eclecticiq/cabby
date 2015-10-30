@@ -1,15 +1,21 @@
-from os.path import join, dirname
+import os
 from setuptools import setup, find_packages
 
 __version__ = None
 exec(open('cabby/_version.py').read())
 
-CURRENT_DIR = dirname(__file__)
+
+def here(*path):
+    return os.path.join(os.path.dirname(__file__), *path)
 
 
 def get_file_contents(filename):
-    with open(join(CURRENT_DIR, filename)) as fp:
+    with open(here(filename)) as fp:
         return fp.read()
+
+# This is a quick and dirty way to include everything from
+# requirements.txt as package dependencies.
+install_requires = get_file_contents('requirements.txt').split()
 
 setup(
     name="cabby",
@@ -31,13 +37,7 @@ setup(
             'taxii-subscription=cabby.cli:manage_subscription',
         ]
     },
-    install_requires=[
-        'pytz',
-        'colorlog',
-        'libtaxii>=1.1.107',
-        'furl==0.4.7',
-        'requests==2.7.0'
-    ],
+    install_requires=install_requires,
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

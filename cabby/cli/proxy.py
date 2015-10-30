@@ -4,13 +4,14 @@ import dateutil
 import pytz
 from cabby import create_client
 
-from libtaxii.constants import CB_STIX_XML_111, CB_CAP_11, CB_SMIME, \
-    CB_STIX_XML_10, CB_STIX_XML_101, CB_STIX_XML_11, CB_XENC_122002
+from libtaxii.constants import (
+    CB_STIX_XML_111, CB_CAP_11, CB_SMIME,
+    CB_STIX_XML_10, CB_STIX_XML_101, CB_STIX_XML_11, CB_XENC_122002)
 
-from cabby.entities import ContentBinding
-
-from .commons import run_client, get_basic_arg_parser, DEFAULT_VERSION, \
-    VERSION_CHOICES, configure_color_logging, prepare_headers
+from .commons import (
+    DEFAULT_VERSION, VERSION_CHOICES,
+    configure_color_logging, prepare_headers
+)
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +28,6 @@ BINDING_CHOICES = [CB_STIX_XML_111, CB_CAP_11, CB_SMIME, CB_STIX_XML_12,
 #   * Content binding is similar
 #   * Message binding can be different
 #   * collection is different
-
 
 def service_arguments(parser, ident, descriptor):
     parser.add_argument(
@@ -130,16 +130,18 @@ def get_blocks(client, args):
     log.info("%d blocks polled", counter)
 
 
-
 def _runner(poll, inbox, args):
 
     # Get stuff from poll
-    blocks = get_blocks(poll,args)
+    blocks = get_blocks(poll, args)
 
     for block in blocks:
-        if args.verbose:
-            log.info("got block %s",block)
-        inbox.push(block, args.binding, collection_names=[args.inbox_collection], uri=args.inbox_path)
+        log.debug("got block %s", block)
+        inbox.push(
+            block,
+            args.binding,
+            collection_names=[args.inbox_collection],
+            uri=args.inbox_path)
 
     log.info("Content block successfully pushed")
 
@@ -166,10 +168,11 @@ def run_client(parser, run_func):
     level = logging.DEBUG if args.verbose else logging.INFO
     configure_color_logging(level=level)
 
-    poll_headers = prepare_headers(
-        args.poll_headers) if args.poll_headers else None
-    inbox_headers = prepare_headers(
-        args.inbox_headers) if args.inbox_headers else None
+    poll_headers = (prepare_headers(args.poll_headers)
+                    if args.poll_headers else None)
+
+    inbox_headers = (prepare_headers(args.inbox_headers)
+                     if args.inbox_headers else None)
 
     poll_client = create_client(version=args.poll_taxii_version,
                                 headers=poll_headers)
