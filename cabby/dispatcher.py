@@ -55,6 +55,11 @@ def raise_http_error(status_code, response_stream):
     raise HTTPError(status_code)
 
 
+def if_key_encrypted(key_file):
+    with open(key_file, 'r') as f:
+        return 'Proc-Type: 4,ENCRYPTED' in f.read()
+
+
 def send_taxii_request(url, request, headers=None, proxies=None, ca_cert=None,
                        tls_auth=None, jwt_url=None, username=None,
                        password=None, verify_ssl=True):
@@ -71,21 +76,39 @@ def send_taxii_request(url, request, headers=None, proxies=None, ca_cert=None,
             else const.VID_TAXII_HTTP_10)
     })
 
+    if not tls_auth:
+        cert_file = None
+        key_file = None
+        key_password = None
+    elif len(tls_auth) == 2:
+        cert_file, key_file = tls_auth
+        key_password = None
+    elif len(tls_auth) == 3:
+        cert_file, key_file, key_password = tls_auth
+    else:
+        raise ValueError('`tls_auth` is either None,'
+                         ' or (cert_file, key_file)'
+                         ' or (cert_file, key_file, key_password)')
+
+    if key_file and not key_password and if_key_encrypted(key_file):
+        raise ValueError(
+            'Key file is encrypted but key password was not provided')
+
     session_context = get_session(
         message_binding=request.version,
         proxies=proxies,
         username=username,
         password=password,
         jwt_url=jwt_url,
-        tls_auth=tls_auth,
+        cert_file=cert_file,
+        key_file=key_file,
         verify_ssl=(ca_cert or verify_ssl),
     )
 
     with session_context as session:
-        if tls_auth and len(tls_auth) == 3:  # key_password is provided
+        if key_password:
             # Workaround until
             # https://github.com/kennethreitz/requests/issues/2519 is fixed
-            cert_file, key_file, key_password = tls_auth
             try:
                 response = get_response_using_key_pass(
                     url, request_body, session,
@@ -296,8 +319,9 @@ class JWTAuth(AuthBase):
 
 
 def get_session(message_binding=const.VID_TAXII_XML_11, service_binding=None,
-                proxies=None, headers=None, tls_auth=None, content_type=None,
-                username=None, password=None, jwt_url=None, verify_ssl=True):
+                proxies=None, headers=None, cert_file=None, key_file=None,
+                content_type=None, username=None, password=None, jwt_url=None,
+                verify_ssl=True):
 
     session = requests.Session()
 
@@ -314,19 +338,8 @@ def get_session(message_binding=const.VID_TAXII_XML_11, service_binding=None,
         else:
             session.auth = HTTPBasicAuth(username, password)
 
-    if tls_auth:
-
-        if len(tls_auth) == 2:
-            cert_file, key_file = tls_auth
-        elif len(tls_auth) == 3:
-            cert_file, key_file, _ = tls_auth
-        else:
-            raise ValueError('`tls_auth` is either None,'
-                             ' or (cert_file, key_file)'
-                             ' or (cert_file, key_file, key_password)')
-
-        if cert_file and key_file:
-            session.cert = (cert_file, key_file)
+    if cert_file and key_file:
+        session.cert = (cert_file, key_file)
 
     if not content_type:
         if message_binding not in BINDINGS_TO_CONTENT_TYPE:
