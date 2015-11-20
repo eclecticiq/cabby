@@ -100,56 +100,55 @@ During installation Cabby adds a family of the command line tools prefixed with 
 
 Discover services::
 
-  (venv) $ taxii-discovery --host test.taxiistand.com --path /services/discovery/
-
-Poll content from a collection (Polling Service autodiscovered in advertised services)::
-
-  (venv) $ taxii-poll --host test.taxiistand.com --collection default --discovery /services/discovery/
+  (venv) $ taxii-discovery --host test.taxiistand.com --path /read-only/services/discovery --https
 
 Fetch the collections list from Collection Management Service::
 
-  (venv) $ taxii-collections --path https://taxii.example.com/services/collection-management
+  (venv) $ taxii-collections --path https://test.taxiistand.com/read-only/services/collection-management
+
+Poll content from a collection (Polling Service will be autodiscovered in advertised services)::
+
+  (venv) $ $ taxii-poll --host test.taxiistand.com --https --collection single-binding-slow --discovery /read-only/services/discovery
 
 Push content into Inbox Service::
 
   (venv) $ taxii-push --host test.taxiistand.com \
-               --discovery /read-write/services/discovery \
-               --content-file /tmp/stuxnet.stix.xml \
-               --binding "urn:stix.mitre.org:xml:1.1.1" \
-               --subtype custom-subtype
+                      --https \
+                      --discovery /read-write/services/discovery \
+                      --content-file /tmp/stuxnet.stix.xml \
+                      --binding "urn:stix.mitre.org:xml:1.1.1" \
+                      --subtype custom-subtype
 
 Create a subscription::
 
-  (venv) $ taxii-subscription --host taxii.example.com \
-                       --https \
-                       --path /read-write/services/collection-management \
-                       --action subscribe \
-                       --collection collection-A
-
+  (venv) $ taxii-subscription --host test.taxiistand.com \
+                              --https \
+                              --path /read-write/services/collection-management \
+                              --action subscribe \
+                              --collection collection-A
 
 Fetch the collections from a service protected by Basic authentication::
 
-  (venv) $ taxii-collections --path https://taxii.example.com/read-write/services/collections \
+  (venv) $ taxii-collections --path https://test.taxiistand.com/read-write-auth/services/collection-management \
                              --username test \
                              --password test
 
 Fetch the collections from a service protected by JWT authentication::
 
-  (venv) $ taxii-collections --host taxii.example.com
-                             --path /read-write/services/collections \
+  (venv) $ taxii-collections --host test.taxiistand.com \
+                             --https
+                             --path /read-write-auth/services/collection-management \
                              --username test \
                              --password test \
                              --jwt-auth /management/auth
 
-Copy content blocks from one server to another:
+Copy content blocks from one server to another::
 
-  (venv) $ $ taxii-proxy  \
-                --poll-path http://hailataxii.com:80/taxii-data \
-                --poll-collection guest.Abuse_ch  \
-                --inbox-path https://test.taxiistand.com/read-write/services/inbox-stix \
-                --inbox-collection stix-data \
-                --binding urn:stix.mitre.org:xml:1.1.1 \
-
+  (venv) $ taxii-proxy --poll-path http://hailataxii.com:80/taxii-data \
+                       --poll-collection guest.Abuse_ch  \
+                       --inbox-path https://test.taxiistand.com/read-write/services/inbox-stix \
+                       --inbox-collection stix-data \
+                       --binding urn:stix.mitre.org:xml:1.1.1
 
 Use ``--help`` to get more usage details.
 
@@ -182,7 +181,6 @@ Running this will execute the help script, giving you all the possible options:
     Or you can choose to drop back into a shell by providing: bash as the command:
 
         docker run -ti cabby bash
-
 
 
 .. rubric:: Next steps
