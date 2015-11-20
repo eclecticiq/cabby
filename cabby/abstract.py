@@ -1,7 +1,6 @@
 from furl import furl
 import logging
 
-from libtaxii.clients import HttpClient
 from libtaxii.common import generate_message_id
 
 from .converters import to_detailed_service_instance_entity
@@ -10,7 +9,6 @@ from .exceptions import (
     AmbiguousServicesError, ClientException
 )
 from .dispatcher import send_taxii_request
-from six.moves import filter
 from six.moves import map
 
 
@@ -21,8 +19,6 @@ class AbstractClient(object):
     to create client instances.
     '''
 
-    NO_PROXY = HttpClient.NO_PROXY
-    PROXY_TYPE_CHOICES = [HttpClient.PROXY_HTTP, HttpClient.PROXY_HTTPS]
     SUPPORTED_SCHEMES = ['http', 'https']
 
     def __init__(self, host=None, discovery_path=None, port=None,
@@ -35,8 +31,10 @@ class AbstractClient(object):
         self.discovery_path = discovery_path
         self.services = None
 
-        self.proxy_details = None
+        self.proxies = None
         self.auth_details = {}
+        self.tls_auth = None
+        self.verify_ssl = False
 
         self.headers = headers or {}
 
@@ -44,7 +42,8 @@ class AbstractClient(object):
                                                 self.__class__.__name__))
 
     def set_auth(self, cert_file=None, key_file=None, key_password=None,
-                 username=None, password=None, jwt_auth_url=None):
+                 username=None, password=None, jwt_auth_url=None,
+                 verify_ssl=True):
         '''Set authentication credentials.
 
         ``jwt_auth_url`` is required for JWT based authentication. If
@@ -64,39 +63,37 @@ class AbstractClient(object):
             string/bytes/bytearray. It will only be called if the private
             key is encrypted and a password is necessary.
         :param str jwt_auth_url: URL used to obtain JWT token
+        :param bool/str verify_ssl: set to False to skip checking host's SSL
+            certificate. Set to True to check certificate against public CAs or
+            set to filepath to check against custom CA bundle.
         '''
 
+        if cert_file and key_file:
+            if key_password:
+                self.tls_auth = (cert_file, key_file, key_password)
+            else:
+                self.tls_auth = (cert_file, key_file)
+        else:
+            self.tls_auth = None
+
+        self.verify_ssl = verify_ssl
+
         self.auth_details = {
-            'cert_file': cert_file,
-            'key_file': key_file,
             'username': username,
             'password': password,
-            'key_password': key_password,
             'jwt_url': jwt_auth_url
         }
 
-    def set_proxy(self, proxy_url, proxy_type=None):
+    def set_proxies(self, proxies):
         '''Set proxy properties.
 
-        :param str proxy_url: proxy address formated as an URL or
-                              :attr:`NO_PROXY` to force client not
-                              to use proxy.
-        :param str proxy_type: one of the values
-                               from :attr:`PROXY_TYPE_CHOICES`
+        Cause requests to go through a proxy.
+        Must be a dictionary mapping protocol names to URLs of proxies.
+
+        :param dir proxies: dictionary mapping protocol names to URLs
         '''
 
-        if not proxy_url:
-            return ValueError('proxy_url can not be None')
-
-        if (proxy_url != self.NO_PROXY and not proxy_type) or \
-                (proxy_type and proxy_type not in self.PROXY_TYPE_CHOICES):
-            types = ", ".join(self.PROXY_TYPE_CHOICES)
-            return ValueError('proxy_type needs to to be one of: %s' % types)
-
-        self.proxy_details = {
-            'proxy_type': proxy_type,
-            'proxy_string': proxy_url
-        }
+        self.proxies = proxies
 
     def _prepare_url(self, uri):
 
@@ -132,14 +129,16 @@ class AbstractClient(object):
             uri = service.address
 
         if self.auth_details.get('jwt_url'):
-            self.auth_details['jwt_url_prepared'] = self._prepare_url(
+            self.auth_details['jwt_url'] = self._prepare_url(
                 self.auth_details['jwt_url'])
 
         url = self._prepare_url(uri)
         message = send_taxii_request(url, request,
                                      headers=self.headers,
-                                     auth_details=self.auth_details,
-                                     proxy_details=self.proxy_details)
+                                     proxies=self.proxies,
+                                     tls_auth=self.tls_auth,
+                                     verify_ssl=self.verify_ssl,
+                                     **self.auth_details)
 
         return message
 
@@ -201,13 +200,11 @@ class AbstractClient(object):
                 raise e
 
         if service_type:
-            filter_func = lambda s: s.type == service_type
+            return [s for s in services if s.type == service_type]
         elif service_types:
-            filter_func = lambda s: s.type in service_types
+            return [s for s in services if s.type in service_types]
         else:
             return services
-
-        return list(filter(filter_func, services))
 
     def discover_services(self, uri=None, cache=True):
         '''Discover services advertised by TAXII server.

@@ -5,7 +5,10 @@ class ClientException(Exception):
 
 
 class HTTPError(ClientException):
-    pass
+
+    def __init__(self, status_code):
+        super(ClientException, self).__init__(
+            'HTTP Error: status code {}'.format(status_code))
 
 
 class InvalidResponseError(ClientException):
@@ -45,18 +48,18 @@ class NotSupportedError(ClientException):
 
 
 def _status_to_message(status):
-    l = [status.status_type]
+    details = []
 
     if status.status_detail:
-        l.append(_dict_to_pairs(status.status_detail))
+        details.append(_dict_to_pairs(status.status_detail))
 
     if status.extended_headers:
-        l.append(_dict_to_pairs(status.extended_headers))
+        details.append(_dict_to_pairs(status.extended_headers))
 
     if status.message:
-        l.append(status.message)
+        details.append(status.message)
 
-    return "; ".join(l)
+    return "{}: {}".format(status.status_type, "; ".join(details))
 
 
 def _dict_to_pairs(d):

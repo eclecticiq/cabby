@@ -1,11 +1,14 @@
+from collections import namedtuple
 import logging
+import ssl
+import sys
 
+import furl
 import requests
-from furl import furl
 from lxml import etree
 from six.moves import urllib
+from requests.auth import AuthBase, HTTPBasicAuth
 
-from libtaxii.clients import HttpClient
 from libtaxii import messages_11 as tm11
 from libtaxii import messages_10 as tm10
 from libtaxii import constants as const
@@ -13,6 +16,7 @@ from libtaxii import constants as const
 from .exceptions import (
     UnsuccessfulStatusError, HTTPError, InvalidResponseError
 )
+
 
 STREAM_MARKER = 'STREAM'
 
@@ -26,127 +30,83 @@ MODULES = {
     const.NS_MAP['taxii']: tm10
 }
 
+BINDINGS_TO_CONTENT_TYPE = {
+    const.VID_TAXII_XML_10: 'application/xml',
+    const.VID_TAXII_XML_11: 'application/xml',
+    const.VID_CERT_EU_JSON_10: 'application/json'
+}
+
+BINDINGS_TO_SERVICES = {
+    const.VID_TAXII_XML_10: const.VID_TAXII_SERVICES_10,
+    const.VID_TAXII_XML_11: const.VID_TAXII_SERVICES_11,
+    const.VID_CERT_EU_JSON_10: const.VID_TAXII_SERVICES_10
+}
+
+
 log = logging.getLogger(__name__)
 
 
-def _set_auth_details(tclient, cert_file=None, key_file=None,
-                      key_password=None, username=None,
-                      password=None, is_jwt=False):
+def raise_http_error(status_code, response_stream):
 
-    tls_auth = (cert_file and key_file)
-    basic_auth = (not is_jwt and username and password)
+    if log.isEnabledFor(logging.DEBUG):
+        body = response_stream.read()
+        log.debug("Response:\n%s", body.decode('utf-8'))
 
-    credentials = None
-    if tls_auth and basic_auth:
-        tclient.set_auth_type(HttpClient.AUTH_CERT_BASIC)
-        credentials = {
-            'key_file': key_file,
-            'cert_file': cert_file,
-            'username': username,
-            'password': password,
-            'key_password': key_password
-        }
-    elif tls_auth:
-        tclient.set_auth_type(HttpClient.AUTH_CERT)
-        credentials = {
-            'key_file': key_file,
-            'cert_file': cert_file,
-            'key_password': key_password
-        }
-    elif basic_auth:
-        tclient.set_auth_type(HttpClient.AUTH_BASIC)
-        credentials = {
-            'username': username,
-            'password': password
-        }
-
-    if credentials:
-        tclient.set_auth_credentials(credentials)
-
-    return tclient
+    raise HTTPError(status_code)
 
 
-def _obtain_jwt_token(url, username, password):
-
-    log.info("Obtaining JWT token from %s", url)
-
-    r = requests.post(url, json={
-        'username': username,
-        'password': password
-    })
-    r.raise_for_status()
-    body = r.json()
-
-    if 'token' not in body:
-        log.debug("Incorrect JWT response:\n%s", body)
-        raise ValueError("No token in JWT auth response")
-
-    return body['token']
-
-
-def _extend_headers(headers, auth_details):
-
-    jwt_url = auth_details.get('jwt_url_prepared')
-    username = auth_details.get('username')
-    password = auth_details.get('password')
-
-    _headers = dict(headers)
-
-    if jwt_url:
-        token = _obtain_jwt_token(jwt_url,
-                                  username=username,
-                                  password=password)
-        _headers['Authorization'] = 'Bearer {}'.format(token)
-
-    return _headers
-
-
-def send_taxii_request(url, request, headers, auth_details=None,
-                       proxy_details=None):
+def send_taxii_request(url, request, headers=None, proxies=None, ca_cert=None,
+                       tls_auth=None, jwt_url=None, username=None,
+                       password=None, verify_ssl=True):
     '''Send TAXII XML message to a service and parse response'''
 
     log.info("Sending %s to %s", request.message_type, url)
     request_body = request.to_xml(pretty_print=True)
+    log.debug("Request:\n%s", request_body.decode('utf-8'))
 
-    log.debug("Request:\n%s", request_body)
+    headers = (headers or {})
+    headers.update({
+        'X-TAXII-Protocol': (
+            const.VID_TAXII_HTTPS_10 if furl.furl(url).scheme == 'https'
+            else const.VID_TAXII_HTTP_10)
+    })
 
-    headers = _extend_headers(headers, auth_details or {})
-
-    fu = furl(url)
-
-    tclient = HttpClient(use_https=(fu.scheme == 'https'))
-    tclient = _set_auth_details(
-        tclient,
-        cert_file=auth_details.get('cert_file'),
-        key_file=auth_details.get('key_file'),
-        username=auth_details.get('username'),
-        password=auth_details.get('password'),
-        key_password=auth_details.get('key_password'),
-        is_jwt=bool(auth_details.get('jwt_url'))
-    )
-
-    if proxy_details:
-        tclient.set_proxy(**proxy_details)
-
-    response_raw = tclient.call_taxii_service2(
-        host=fu.host,
-        path=str(fu.path),
-        port=fu.port,
-        get_params_dict=fu.query.params,
+    session_context = get_session(
         message_binding=request.version,
-        post_data=request_body,
-        headers=headers
+        proxies=proxies,
+        username=username,
+        password=password,
+        jwt_url=jwt_url,
+        tls_auth=tls_auth,
+        verify_ssl=(ca_cert or verify_ssl),
     )
+
+    with session_context as session:
+        if tls_auth and len(tls_auth) == 3:  # key_password is provided
+            # Workaround until
+            # https://github.com/kennethreitz/requests/issues/2519 is fixed
+            cert_file, key_file, key_password = tls_auth
+            try:
+                response = get_response_using_key_pass(
+                    url, request_body, session,
+                    cert_file, key_file, key_password,
+                    ca_cert=ca_cert)
+            except urllib.error.HTTPError as e:
+                raise_http_error(e.getcode(), response)
+
+            stream, headers = response, response.headers
+        else:
+            response = session.post(
+                url, data=request_body, headers=headers, stream=True)
+
+            if not response.ok:
+                raise_http_error(response.status_code, response.raw)
+
+            stream, headers = response.raw, response.headers
 
     log.info("Response received for %s from %s", request.message_type, url)
 
-    if isinstance(response_raw, urllib.error.URLError):
-        desc = str(response_raw)
-        body = response_raw.read()
-        log.debug("%s: %s", desc, body)
-        raise HTTPError(desc)
-
-    gen = _parse_response(response_raw, version=request.version)
+    gen = _parse_response(stream, headers, version=request.version)
     obj = next(gen)
 
     if obj == STREAM_MARKER:
@@ -200,7 +160,8 @@ def _stream_poll_response(namespace, stream):
                 continue
 
             if log.isEnabledFor(logging.DEBUG):
-                log.debug("Stream element:\n%s", etree.tostring(elem))
+                log.debug("Stream element:\n%s",
+                          etree.tostring(elem).decode('utf-8'))
 
             yield obj
 
@@ -216,20 +177,18 @@ def _stream_poll_response(namespace, stream):
             to_delete_batch.append(elem)
 
 
-def _parse_response(response, version):
+def _parse_response(stream, headers, version):
 
-    try:
-        content_type = response.info().getheader('X-TAXII-Content-Type')
-    except AttributeError:
-        # http.client.HTTPResponse
-        content_type = response.getheader('X-TAXII-Content-Type')
+    content_type = headers.get('X-TAXII-Content-Type')
 
-    # https://github.com/TAXIIProject/libtaxii/issues/186
     if not content_type:
+        body = stream.read()
         headers = '\n'.join([
-            '{}={}'.format(k, v) for k, v in response.headers.items()])
-        body = response.read()
-        log.debug("Invalid response:\n%s\n%s", headers, body)
+            '{}={}'.format(k, v) for k, v in headers.items()])
+        log.debug(
+            "Invalid response:\n%s\n%s",
+            headers,
+            body)
         raise InvalidResponseError("Invalid response received")
 
     elif content_type not in [const.VID_TAXII_XML_10,
@@ -237,11 +196,11 @@ def _parse_response(response, version):
                               const.VID_CERT_EU_JSON_10]:
         raise ValueError('Unsupported X-TAXII-Content-Type: {}'
                          .format(content_type))
-
     elif content_type == const.VID_CERT_EU_JSON_10:
-        yield tm10.get_message_from_json(response.read())
+        body = stream.read()
+        yield tm10.get_message_from_json(body)
 
-    gen = etree.iterparse(response, events=('start', 'end'))
+    gen = etree.iterparse(stream, events=('start', 'end'))
 
     action, root = next(gen)
     namespace = etree.QName(root).namespace
@@ -269,13 +228,14 @@ def _parse_response(response, version):
         for _ in gen:
             pass
 
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug("Response:\n%s",
+                      etree.tostring(root, pretty_print=True).decode('utf-8'))
+
         yield _parse_full_tree(content_type, message_type, root)
 
 
 def _parse_full_tree(content_type, message_type, elem):
-
-    if log.isEnabledFor(logging.DEBUG):
-        log.debug("Response:\n%s", etree.tostring(elem, pretty_print=True))
 
     if content_type == const.VID_TAXII_XML_10:
         tm = tm10
@@ -322,3 +282,131 @@ def _parse_full_tree(content_type, message_type, elem):
             return tm.ManageFeedSubscriptionResponse.from_etree(elem)
 
     raise ValueError('Unknown message_type: %s' % message_type)
+
+
+class JWTAuth(AuthBase):
+
+    """Attaches JWT Authentication to the given Request object."""
+    def __init__(self, token):
+        self.token = token
+
+    def __call__(self, r):
+        r.headers['Authorization'] = 'Bearer {}'.format(self.token)
+        return r
+
+
+def get_session(message_binding=const.VID_TAXII_XML_11, service_binding=None,
+                proxies=None, headers=None, tls_auth=None, content_type=None,
+                username=None, password=None, jwt_url=None, verify_ssl=True):
+
+    session = requests.Session()
+
+    session.verify = verify_ssl
+
+    if proxies:
+        session.proxies = proxies
+
+    if username and password:
+        if jwt_url:
+            token = obtain_jwt_token(
+                jwt_url, username=username, password=password)
+            session.auth = JWTAuth(token)
+        else:
+            session.auth = HTTPBasicAuth(username, password)
+
+    if tls_auth:
+
+        if len(tls_auth) == 2:
+            cert_file, key_file = tls_auth
+        elif len(tls_auth) == 3:
+            cert_file, key_file, _ = tls_auth
+        else:
+            raise ValueError('`tls_auth` is either None,'
+                             ' or (cert_file, key_file)'
+                             ' or (cert_file, key_file, key_password)')
+
+        if cert_file and key_file:
+            session.cert = (cert_file, key_file)
+
+    if not content_type:
+        if message_binding not in BINDINGS_TO_CONTENT_TYPE:
+            raise ValueError('No content type provided')
+
+        content_type = BINDINGS_TO_CONTENT_TYPE[message_binding]
+
+    if not service_binding:
+        if message_binding not in BINDINGS_TO_SERVICES:
+            raise ValueError('No service binding provided')
+
+        service_bindings = BINDINGS_TO_SERVICES[message_binding]
+
+    _headers = {
+        'User-Agent': 'cabby',
+        'Content-Type': content_type,
+        'Accept': content_type,
+        'X-TAXII-Content-Type': message_binding,
+        'X-TAXII-Accept': message_binding,
+        'X-TAXII-Services': service_bindings,
+    }
+
+    if headers:
+        _headers.update(headers)
+
+    session.headers.update(_headers)
+
+    return session
+
+
+def obtain_jwt_token(url, username, password):
+
+    log.info("Obtaining JWT token from %s", url)
+
+    r = requests.post(url, json={
+        'username': username,
+        'password': password
+    })
+    r.raise_for_status()
+    body = r.json()
+
+    if 'token' not in body:
+        log.debug("Incorrect JWT response:\n%s", body)
+        raise ValueError("No token in JWT auth response")
+
+    return body['token']
+
+
+def get_response_using_key_pass(url, data, session, cert_file, key_file,
+                                key_password, ca_cert=None):
+
+    if sys.version_info < (2, 7, 9):
+        raise ValueError(
+            'Key password specification is not supported in Python <2.7.9')
+
+    # Using Requests Session's auth handlers to fill in proper headers
+    DummyRequest = namedtuple('DummyRequest', ['headers'])
+    headers = session.auth(DummyRequest(headers=session.headers)).headers
+
+    context = ssl.create_default_context(
+        ssl.Purpose.CLIENT_AUTH, cafile=ca_cert)
+
+    context.load_cert_chain(cert_file, key_file, password=key_password)
+
+    if not session.verify and not ca_cert:
+        context.verify_mode = ssl.CERT_NONE
+    elif session.verify:
+        context.verify_mode = ssl.CERT_REQUIRED
+
+        if not ca_cert:
+            context.set_default_verify_paths()
+
+    handlers = [urllib.request.HTTPSHandler(context=context)]
+
+    if session.proxies:
+        handlers.append(
+            urllib.request.ProxyHandler(session.proxies))
+
+    opener = urllib.request.build_opener(*handlers)
+
+    request = urllib.request.Request(url, data, headers)
+
+    return opener.open(request)
