@@ -1,7 +1,7 @@
 cabby
 =====
 
-Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com`_.
+Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com>`_.
 
 :Source: https://github.com/Intelworks/cabby
 :Documentation: http://cabby.readthedocs.org
