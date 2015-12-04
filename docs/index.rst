@@ -2,12 +2,12 @@
 Cabby
 =====
 
-Release v0.1.7. (:doc:`Changelog <changes>`)
+Release v0.1.9. (:doc:`Changelog <changes>`)
 
 ..
     Release v\ |release|. (:doc:`Changelog <changes>`)
 
-Cabby is Python TAXII client implementation from Intelworks.
+Cabby is Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com>`_.
 
 TAXII (Trusted Automated eXchange of Indicator Information) is a collection of specifications defining a set of services and message exchanges used for sharing cyber threat intelligence information between parties. Check `TAXII homepage <http://taxii.mitre.org/>`_ to get more information.
 
@@ -15,13 +15,13 @@ TAXII (Trusted Automated eXchange of Indicator Information) is a collection of s
 Cabby is designed from the ground up to act as a Python library and as a command line tool, it's key features are:
 
 * **Rich feature set**:
-  it supports all TAXII services according to TAXII specification (v1.0 and v1.1).
+  supports all TAXII services according to TAXII specification (v1.0 and v1.1).
 
 * **Version agnostic**:
-  it abstracts specific implementation details and returns version agnostic entities.
+  abstracts specific implementation details and returns version agnostic entities.
 
 * **Stream parsing**:
-  Heavy TAXII Poll Response messages are parsed on the fly, reducing memory footprint and time untill first content block is available.
+  heavy TAXII Poll Response messages are parsed on the fly, reducing memory footprint and time until first content block is available.
 
 
 .. rubric:: Documentation contents
@@ -41,4 +41,4 @@ Cabby is designed from the ground up to act as a Python library and as a command
 * `Online documentation <https://cabby.readthedocs.org/>`_ (Read the docs)
 * `Project page <https://github.com/Intelworks/cabby/>`_ with source code and issue tracker (Github)
 * `Python Package Index (PyPI) page <http://pypi.python.org/pypi/cabby/>`_ with released tarballs
-* `Intelworks <https://www.intelworks.com>`_
+* `EclecticIQ <https://www.eclecticiq.com>`_

@@ -1,11 +1,12 @@
 Changelog
 =========
 
-0.1.9a
+0.1.9
 ------------------
 
-* Added taxii-proxy cli command to allow funneling of data from one taxii server to another.
-
+* Own implementation of TAXII transport logic added, using `Requests <http://python-requests.org/>`_ library for most of the requests.
+* Added ``taxii-proxy`` CLI command to allow funneling of data from one taxii server to another.
+* Various bug fixes.
 
 0.1.7 (2015-09-18)
 ------------------

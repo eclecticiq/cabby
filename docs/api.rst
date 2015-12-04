@@ -5,6 +5,15 @@ Cabby API documentation
 Submodules
 ==========
 
+
+Module contents
+===============
+
+.. automodule:: cabby
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 cabby.abstract module
 ---------------------
 
@@ -41,15 +50,6 @@ cabby.exceptions module
 -----------------------
 
 .. automodule:: cabby.exceptions
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
-===============
-
-.. automodule:: cabby
     :members:
     :undoc-members:
     :show-inheritance:

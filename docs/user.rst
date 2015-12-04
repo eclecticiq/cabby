@@ -28,14 +28,14 @@ Discover advertised services::
 
   services = client.discover_services()
   for service in services:
-      print 'Service type={s.type}, address={s.address}'.format(s=service)
+      print('Service type={s.type}, address={s.address}'.format(s=service))
 
 Poll content from a collection::
 
   content_blocks = client.poll(collection_name='all-data')
 
   for block in content_blocks:
-      print block.content
+      print(block.content)
 
 Fetch the collections from Collection Management Serice (or Feed Management Service)::
 
@@ -52,7 +52,7 @@ To force client to use `TAXII 1.0 <taxii.mitre.org/specifications/version1.0/TAX
 
   from cabby import create_client
 
-  client = create_client('hailataxii.com', version='1.0')
+  client = create_client('open.taxiistand.com', version='1.1')
 
 .. note::
   Cabby client instances configured for TAXII 1.0 or TAXII 1.1 we will have slightly different method signatures (see :doc:`Cabby API documentation<api>` for details).
@@ -136,7 +136,7 @@ Fetch the collections from a service protected by Basic authentication::
 Fetch the collections from a service protected by JWT authentication::
 
   (venv) $ taxii-collections --host test.taxiistand.com \
-                             --https
+                             --https \
                              --path /read-write-auth/services/collection-management \
                              --username test \
                              --password test \
@@ -144,8 +144,8 @@ Fetch the collections from a service protected by JWT authentication::
 
 Copy content blocks from one server to another::
 
-  (venv) $ taxii-proxy --poll-path http://hailataxii.com:80/taxii-data \
-                       --poll-collection guest.Abuse_ch  \
+  (venv) $ taxii-proxy --poll-path https://open.taxiistand.com/services/poll \
+                       --poll-collection vxvault \
                        --inbox-path https://test.taxiistand.com/read-write/services/inbox-stix \
                        --inbox-collection stix-data \
                        --binding urn:stix.mitre.org:xml:1.1.1
@@ -155,7 +155,7 @@ Use ``--help`` to get more usage details.
 Docker Quickstart
 =================
 
-To ease the threshold for trying out cabby, it is possible to use the Intelworks provided image.
+To ease the threshold for trying out Cabby, it is possible to use the image provided by EclecticIQ:
 
 .. code-block:: shell
 

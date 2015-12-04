@@ -46,7 +46,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Cabby'
-copyright = u'2015, Intelworks'
+copyright = u'2015, EclecticIQ'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -207,7 +207,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'Cabby.tex', u'Cabby Documentation',
-   u'Intelworks', 'manual'),
+   u'EclecticIQ', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -237,7 +237,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'cabby', u'Cabby Documentation',
-     [u'Intelworks'], 1)
+     [u'EclecticIQ'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -251,7 +251,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'Cabby', u'Cabby Documentation',
-   u'Intelworks', 'Cabby', 'One line description of project.',
+   u'EclecticIQ', 'Cabby', 'One line description of project.',
    'Miscellaneous'),
 ]
 

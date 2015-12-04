@@ -7,7 +7,7 @@ Installation guide
 Install Python
 ==============
 
-OpenTAXII works with both latest Python version and version 2.7. You you can install Python with your operating system’s package manager or download it directly `here <http://www.python.org/download/>`_.
+OpenTAXII works with both latest Python version (3.4) and version 2.7. You can install Python with your operating system’s package manager or download it directly `here <http://www.python.org/download/>`_.
 
 You can verify that Python is installed by typing ``python`` from your shell; you should see something like::
 
@@ -18,7 +18,7 @@ You can verify that Python is installed by typing ``python`` from your shell; yo
     >>> 
 
 Install Cabby
-=======================
+=============
 
 To sandbox the project and protect system-wide python it is recommended to install Cabby into a `virtual environment <https://virtualenv.pypa.io/en/latest/installation.html>`_ (*virtualenv*):
 
@@ -26,15 +26,14 @@ Create a virtual environment named venv::
 
    $ virtualenv venv
 
-Where ``venv`` is a directory to place the new environment
+Where ``venv`` is a directory to place the new environment.
 
 Activate this environment::
 
    $ . venv/bin/activate
    (venv) $
    
-You can now install the latest Cabby release from the `Python
-Package Index <http://pypi.python.org/>`_ (PyPI) using ``pip``::
+You can now install the latest Cabby release from the `Python Package Index <http://pypi.python.org/>`_ (PyPI) using ``pip``::
 
    (venv) $ pip install cabby
 
@@ -49,7 +48,7 @@ To install Cabby from source files: download a tarball, unpack it and install it
 Versioning
 ==========
 
-Releases of Cabby are given major.minor.revision version numbers, where major and minor correspond to the roadmap Intelworks has. The revision number is used to indicate a bug fix only release.
+Releases of Cabby are given major.minor.revision version numbers, where major and minor correspond to the roadmap EclecticIQ has. The revision number is used to indicate a bug fix only release.
 
 
 .. rubric:: Next steps

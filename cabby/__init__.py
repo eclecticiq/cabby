@@ -12,7 +12,7 @@ def create_client(host=None, port=None, discovery_path=None, use_https=False,
                   version="1.1", headers=None):
     '''Create a client instance (TAXII version specific).
 
-    ``host``, ``discovery_path``, ``port``, ``use_https`` values
+    ``host``, ``port``, ``use_https``, ``discovery_path`` values
     can be overridden per request with ``uri`` argument passed to
     a client's method.
 
