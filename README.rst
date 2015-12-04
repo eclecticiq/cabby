@@ -1,11 +1,11 @@
 cabby
 =====
 
-Intelworks Python TAXII client implementation.
+Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com`_.
 
 :Source: https://github.com/Intelworks/cabby
 :Documentation: http://cabby.readthedocs.org
-:Information: http://www.intelworks.com
+:Information: https://www.eclecticiq.com
 :Download: https://pypi.python.org/pypi/cabby/
 
 |travis badge| |landscape.io badge| |coveralls.io badge| |version badge| |py.version badge| |downloads badge| |license badge| |docs badge|
@@ -39,5 +39,5 @@ Feedback
 --------
 
 You are encouraged to provide feedback by commenting on open issues or sending us 
-email at cabby@intelworks.com
+email at cabby@eclecticiq.com
 
