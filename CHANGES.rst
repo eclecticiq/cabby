@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.1.9
+0.1.9 (2015-12-04)
 ------------------
 
 * Own implementation of TAXII transport logic added, using `Requests <http://python-requests.org/>`_ library for most of the requests.
