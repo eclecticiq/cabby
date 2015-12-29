@@ -395,9 +395,12 @@ def get_response_using_key_pass(url, data, session, cert_file, key_file,
         raise ValueError(
             'Key password specification is not supported in Python <2.7.9')
 
-    # Using Requests Session's auth handlers to fill in proper headers
-    DummyRequest = namedtuple('DummyRequest', ['headers'])
-    headers = session.auth(DummyRequest(headers=session.headers)).headers
+    if session.auth:
+        # Using Requests Session's auth handlers to fill in proper headers
+        DummyRequest = namedtuple('DummyRequest', ['headers'])
+        headers = session.auth(DummyRequest(headers=session.headers)).headers
+    else:
+        headers = session.headers
 
     context = ssl.create_default_context(
         ssl.Purpose.CLIENT_AUTH, cafile=ca_cert)
