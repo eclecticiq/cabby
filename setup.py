@@ -19,7 +19,7 @@ install_requires = get_file_contents('requirements.txt').split()
 
 setup(
     name="cabby",
-    description="Python library for interacting with TAXII servers",
+    description="TAXII client library",
     long_description=get_file_contents('README.rst'),
     url="https://github.com/Intelworks/cabby/",
     author="EclecticIQ",
