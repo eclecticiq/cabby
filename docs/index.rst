@@ -39,6 +39,6 @@ Cabby is designed from the ground up to act as a Python library and as a command
 .. rubric:: External links
 
 * `Online documentation <https://cabby.readthedocs.org/>`_ (Read the docs)
-* `Project page <https://github.com/Intelworks/cabby/>`_ with source code and issue tracker (Github)
+* `Project page <https://github.com/EclecticIQ/cabby/>`_ with source code and issue tracker (Github)
 * `Python Package Index (PyPI) page <http://pypi.python.org/pypi/cabby/>`_ with released tarballs
 * `EclecticIQ <https://www.eclecticiq.com>`_

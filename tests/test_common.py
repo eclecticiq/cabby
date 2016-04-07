@@ -87,7 +87,7 @@ def test_invalid_response(version):
     # FIXME: httpretty returns body as byte string (utf-8 encoded)
     # and when libtaxii tries to join headers (unicode) with the body (binary)
     # error happens. Line in Libtaxii codebase
-    # https://github.com/Intelworks/libtaxii/blob/master/libtaxii/__init__.py#L118
+    # https://github.com/EclecticIQ/libtaxii/blob/master/libtaxii/__init__.py#L126
     return
 
     httpretty.register_uri(

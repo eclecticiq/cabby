@@ -21,7 +21,7 @@ setup(
     name="cabby",
     description="TAXII client library",
     long_description=get_file_contents('README.rst'),
-    url="https://github.com/Intelworks/cabby/",
+    url="https://github.com/EclecticIQ/cabby/",
     author="EclecticIQ",
     author_email="cabby@eclecticiq.com",
     version=__version__,

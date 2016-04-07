@@ -31,7 +31,7 @@ RUN {   echo '#!/bin/sh';\
         echo '      taxii-subscription';\
         echo '      taxii-proxy';\
         echo '';\
-        echo 'e.g. docker run -ti intelworks/cabby taxii-discovery --path https://test.taxiistand.com/read-write/services/discovery';\
+        echo 'e.g. docker run -ti eclecticiq/cabby taxii-discovery --path https://test.taxiistand.com/read-write/services/discovery';\
         echo '';\
         echo 'More information available at: http://cabby.readthedocs.org';\
         echo 'Or you can choose to drop back into a shell by providing: bash as the command:';\

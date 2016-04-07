@@ -2,7 +2,7 @@
 Contributing and developing
 ===========================
 
-.. _cabby project page: https://github.com/Intelworks/cabby
+.. _cabby project page: https://github.com/EclecticIQ/cabby
 
 
 Reporting issues
