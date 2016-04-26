@@ -59,7 +59,9 @@ To force client to use `TAXII 1.0 <taxii.mitre.org/specifications/version1.0/TAX
 
   from cabby import create_client
 
-  client = create_client('open.taxiistand.com', version='1.0') .. note::
+  client = create_client('open.taxiistand.com', version='1.0')
+  
+.. note::
   Cabby client instances configured for TAXII 1.0 or TAXII 1.1 we will have slightly different method signatures (see :doc:`Cabby API documentation<api>` for details).
 
 
