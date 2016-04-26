@@ -1,9 +1,13 @@
 Changelog
 =========
 
+0.1.11 (2016-04-27)
+-------------------
+* Documentation fixes.
+
 0.1.10 (2015-12-29)
 -------------------
-* Removing incorrect assumption that auth information always present
+* Removing incorrect assumption that auth details are always present.
 
 0.1.9 (2015-12-04)
 ------------------
