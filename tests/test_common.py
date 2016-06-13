@@ -103,6 +103,26 @@ def test_invalid_response(version):
 
 
 @pytest.mark.parametrize("version", [11, 10])
+def test_invalid_response_status(version):
+
+    httpretty.reset()
+    httpretty.enable()
+
+    uri = get_fix(version).DISCOVERY_URI_HTTP
+
+    httpretty.register_uri(
+        httpretty.POST, uri, status_code=404)
+
+    client = make_client(version)
+
+    with pytest.raises(exc.InvalidResponseError):
+        client.discover_services(uri=uri)
+
+    httpretty.disable()
+    httpretty.reset()
+
+
+@pytest.mark.parametrize("version", [11, 10])
 def test_jwt_auth_response(version):
 
     httpretty.reset()

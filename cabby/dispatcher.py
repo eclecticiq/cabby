@@ -46,9 +46,9 @@ BINDINGS_TO_SERVICES = {
 log = logging.getLogger(__name__)
 
 
-def raise_http_error(status_code, response_stream):
+def raise_http_error(status_code, response_stream=None):
 
-    if log.isEnabledFor(logging.DEBUG):
+    if log.isEnabledFor(logging.DEBUG) and response_stream:
         body = response_stream.read()
         log.debug("Response:\n%s", body.decode('utf-8'))
 
@@ -115,7 +115,10 @@ def send_taxii_request(url, request, headers=None, proxies=None, ca_cert=None,
                     cert_file, key_file, key_password,
                     ca_cert=ca_cert)
             except urllib.error.HTTPError as e:
-                raise_http_error(e.getcode(), response)
+                log.error(
+                    "Error while connecting to {}".format(url),
+                    exc_info=True)
+                raise_http_error(e.getcode())
 
             stream, headers = response, response.headers
         else:
