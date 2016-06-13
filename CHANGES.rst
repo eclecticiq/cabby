@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.1.12 (2016-06-13)
+-------------------
+* Fix for incorrect connection error handling issue, that was affecting invalid connections with TLS and key password.
+
 0.1.11 (2016-04-27)
 -------------------
 * Documentation fixes.
