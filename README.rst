@@ -35,6 +35,15 @@ Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com>
 A simple Python library for interacting with TAXII servers.
 
 
+Docker
+--------
+
+From version 0.1.13 (current latests), the docker image is based on 'Alpine' linux. This means the size of the Image was reduced from 311MB to 74MB
+
+To run cabby using docker, execute the following:
+
+  docker run --rm=true eclecticiq/cabby:latest taxii-discovery --path https://test.taxiistand.com/read-only/services/discovery
+
 Feedback
 --------
 
