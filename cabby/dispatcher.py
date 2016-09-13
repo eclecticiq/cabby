@@ -163,7 +163,6 @@ def _stream_poll_response(namespace, stream):
 
     module = MODULES[namespace]
 
-    block_cls = module.ContentBlock
     response_cls = MODULES[namespace].PollResponse
 
     batch_max_size = 3
@@ -174,8 +173,8 @@ def _stream_poll_response(namespace, stream):
             tag = elem.xpath('local-name()')
 
             # If current element is ContentBlock
-            if tag == block_cls.NAME:
-                obj = block_cls.from_etree(elem)
+            if tag == module.ContentBlock.NAME:
+                obj = module.ContentBlock.from_etree(elem)
 
             # If current element is PollResponse
             # meaning that this is a last one
@@ -327,7 +326,6 @@ def get_session(message_binding=const.VID_TAXII_XML_11, service_binding=None,
                 verify_ssl=True):
 
     session = requests.Session()
-
     session.verify = verify_ssl
 
     if proxies:
@@ -396,7 +394,7 @@ def get_response_using_key_pass(url, data, session, cert_file, key_file,
 
     if sys.version_info < (2, 7, 9):
         raise ValueError(
-            'Key password specification is not supported in Python <2.7.9')
+            'Key password specification is not supported in Python < v2.7.9')
 
     if session.auth:
         # Using Requests Session's auth handlers to fill in proper headers
