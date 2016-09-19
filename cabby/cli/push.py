@@ -1,9 +1,8 @@
 
 import logging
 
-from libtaxii.constants import CB_STIX_XML_111
-
 from cabby.entities import ContentBinding
+from cabby.constants import CB_STIX_XML_111
 
 from .commons import run_client, get_basic_arg_parser
 

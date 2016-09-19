@@ -1,7 +1,7 @@
 
 import libtaxii.messages_11 as tm11
-from libtaxii import constants as const
 
+from . import constants as const
 from .abstract import AbstractClient
 from .entities import ContentBlockCount
 from .converters import (
@@ -19,8 +19,8 @@ class Client11(AbstractClient):
     Use :py:meth:`cabby.create_client` to create client instances.
     '''
 
-    taxii_version = const.VID_TAXII_XML_11
-    services_version = const.VID_TAXII_SERVICES_11
+    taxii_binding = const.XML_11_BINDING
+    services_version = const.TAXII_SERVICES_11
 
     def _discovery_request(self, uri):
         request = tm11.DiscoveryRequest(message_id=self._generate_id())

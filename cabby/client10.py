@@ -1,7 +1,7 @@
 
 import libtaxii.messages_10 as tm10
-from libtaxii import constants as const
 
+from . import constants as const
 from .abstract import AbstractClient
 from .converters import (
     to_subscription_response_entity, to_content_block_entity,
@@ -19,8 +19,8 @@ class Client10(AbstractClient):
     Use :py:meth:`cabby.create_client` to create client instances.
     '''
 
-    taxii_version = const.VID_TAXII_XML_10
-    services_version = const.VID_TAXII_SERVICES_10
+    taxii_binding = const.XML_10_BINDING
+    services_version = const.TAXII_SERVICES_10
 
     def _discovery_request(self, uri):
         request = tm10.DiscoveryRequest(message_id=self._generate_id())

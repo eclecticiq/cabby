@@ -1,14 +1,12 @@
+import six
+from six.moves import map
 
-from libtaxii import constants as const
-
+from . import constants as const
 from .entities import (
     ContentBinding, Collection, PushMethod,
     Subscription, ServiceInstance,
     InboxDetailedService, DetailedServiceInstance, ContentBlock,
-    InboxService, SubscriptionParameters, SubscriptionResponse
-)
-import six
-from six.moves import map
+    InboxService, SubscriptionParameters, SubscriptionResponse)
 
 
 def to_collection_entities(collections, version):

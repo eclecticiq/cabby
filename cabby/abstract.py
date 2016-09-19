@@ -3,12 +3,12 @@ import logging
 
 from libtaxii.common import generate_message_id
 
+from . import dispatcher, utils
 from .converters import to_detailed_service_instance_entity
 from .exceptions import (
     NoURIProvidedError, ServiceNotFoundError,
     AmbiguousServicesError, ClientException
 )
-from .dispatcher import send_taxii_request
 from six.moves import map
 
 
@@ -21,6 +21,8 @@ class AbstractClient(object):
 
     SUPPORTED_SCHEMES = ['http', 'https']
 
+    taxii_version = None
+
     def __init__(self, host=None, discovery_path=None, port=None,
                  use_https=False, headers=None):
 
@@ -32,18 +34,25 @@ class AbstractClient(object):
         self.services = None
 
         self.proxies = None
-        self.auth_details = {}
-        self.tls_auth = None
-        self.verify_ssl = False
+        self.verify_ssl = True
+        self.ca_cert = None
+        self.cert_file = None
+        self.key_file = None
+        self.key_password = None
 
+        self.username = None
+        self.password = None
+        self.jwt_url = None
+
+        self.jwt_token = None
         self.headers = headers or {}
 
-        self.log = logging.getLogger("%s.%s" % (self.__module__,
-                                                self.__class__.__name__))
+        self.log = logging.getLogger(
+            "{}.{}".format(self.__module__, self.__class__.__name__))
 
-    def set_auth(self, cert_file=None, key_file=None, key_password=None,
-                 username=None, password=None, jwt_auth_url=None,
-                 verify_ssl=True):
+    def set_auth(self, ca_cert=None, cert_file=None, key_file=None,
+                 key_password=None, username=None, password=None,
+                 jwt_auth_url=None, verify_ssl=True):
         '''Set authentication credentials.
 
         ``jwt_auth_url`` is required for JWT based authentication. If
@@ -53,6 +62,7 @@ class AbstractClient(object):
         SSL authentication can be combined with JWT and Basic
         authentication.
 
+        :param str ca_cert: a path to CA SSL certificate file
         :param str cert_file: a path to SSL certificate file
         :param str key_file: a path to SSL key file
         :param str username: username, used in basic auth or JWT auth
@@ -68,21 +78,18 @@ class AbstractClient(object):
             set to filepath to check against custom CA bundle.
         '''
 
-        if cert_file and key_file:
-            if key_password:
-                self.tls_auth = (cert_file, key_file, key_password)
-            else:
-                self.tls_auth = (cert_file, key_file)
-        else:
-            self.tls_auth = None
+        self.ca_cert = ca_cert
+        self.cert_file = cert_file
+        self.key_file = key_file
+        self.key_password = self.key_password
+
+        self.username = username
+        self.password = password
+
+        if jwt_auth_url:
+            self.jwt_url = self._prepare_url(jwt_auth_url)
 
         self.verify_ssl = verify_ssl
-
-        self.auth_details = {
-            'username': username,
-            'password': password,
-            'jwt_url': jwt_auth_url
-        }
 
     def set_proxies(self, proxies):
         '''Set proxy properties.
@@ -92,7 +99,6 @@ class AbstractClient(object):
 
         :param dir proxies: dictionary mapping protocol names to URLs
         '''
-
         self.proxies = proxies
 
     def _prepare_url(self, uri):
@@ -115,6 +121,11 @@ class AbstractClient(object):
 
         return fu.url
 
+    def obtain_jwt_token(self, session, jwt_url, username, password):
+        self.jwt_token = dispatcher.obtain_jwt_token(
+            session, jwt_url, username, password)
+        return self.jwt_token
+
     def _execute_request(self, request, uri=None, service_type=None):
         '''Execute generic TAXII request.
 
@@ -128,17 +139,47 @@ class AbstractClient(object):
             service = self._get_service(service_type)
             uri = service.address
 
-        if self.auth_details.get('jwt_url'):
-            self.auth_details['jwt_url'] = self._prepare_url(
-                self.auth_details['jwt_url'])
+        if (self.key_file
+                and not self.key_password
+                and utils.if_key_encrypted(self.key_file)):
+            raise ValueError(
+                'Key file is encrypted but key password was not provided')
 
-        url = self._prepare_url(uri)
-        message = send_taxii_request(url, request,
-                                     headers=self.headers,
-                                     proxies=self.proxies,
-                                     tls_auth=self.tls_auth,
-                                     verify_ssl=self.verify_ssl,
-                                     **self.auth_details)
+        session = dispatcher.get_generic_session(
+            proxies=self.proxies,
+            headers=self.headers,
+            username=self.username,
+            password=self.password,
+            cert_file=self.cert_file,
+            key_file=self.key_file,
+            verify_ssl=(self.ca_cert or self.verify_ssl))
+
+        if self.jwt_url and self.username and self.password:
+            if not self.jwt_token:
+                self.obtain_jwt_token(
+                    session, self.jwt_url, self.username, self.password)
+            session = dispatcher.set_jwt_token(session, self.jwt_token)
+
+        if self.key_password:
+            # If key_password is provided
+            message = dispatcher.send_taxii_request(
+                session,
+                self._prepare_url(uri),
+                request,
+                taxii_binding=self.taxii_binding,
+                # Details in case key_password is provided
+                tls_details={
+                    'cert_file': self.cert_file,
+                    'key_file': self.key_file,
+                    'key_password': self.key_password,
+                    'ca_cert': self.ca_cert
+                })
+        else:
+            message = dispatcher.send_taxii_request(
+                session,
+                self._prepare_url(uri),
+                request,
+                taxii_binding=self.taxii_binding)
 
         return message
 

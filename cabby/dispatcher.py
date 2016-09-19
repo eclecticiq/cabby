@@ -11,138 +11,74 @@ from requests.auth import AuthBase, HTTPBasicAuth
 
 from libtaxii import messages_11 as tm11
 from libtaxii import messages_10 as tm10
-from libtaxii import constants as const
+
+from . import constants as const
+from ._version import __version__ as cabby_version
 
 from .exceptions import (
-    UnsuccessfulStatusError, HTTPError, InvalidResponseError
-)
-
-
-STREAM_MARKER = 'STREAM'
-
-VERSIONS = {
-    const.NS_MAP['taxii_11']: const.VID_TAXII_XML_11,
-    const.NS_MAP['taxii']: const.VID_TAXII_XML_10
-}
-
-MODULES = {
-    const.NS_MAP['taxii_11']: tm11,
-    const.NS_MAP['taxii']: tm10
-}
-
-BINDINGS_TO_CONTENT_TYPE = {
-    const.VID_TAXII_XML_10: 'application/xml',
-    const.VID_TAXII_XML_11: 'application/xml',
-    const.VID_CERT_EU_JSON_10: 'application/json'
-}
-
-BINDINGS_TO_SERVICES = {
-    const.VID_TAXII_XML_10: const.VID_TAXII_SERVICES_10,
-    const.VID_TAXII_XML_11: const.VID_TAXII_SERVICES_11,
-    const.VID_CERT_EU_JSON_10: const.VID_TAXII_SERVICES_10
-}
+    UnsuccessfulStatusError, HTTPError, InvalidResponseError)
 
 
 log = logging.getLogger(__name__)
 
 
 def raise_http_error(status_code, response_stream=None):
-
     if log.isEnabledFor(logging.DEBUG) and response_stream:
         body = response_stream.read()
         log.debug("Response:\n%s", body.decode('utf-8'))
-
     raise HTTPError(status_code)
 
 
-def if_key_encrypted(key_file):
-    with open(key_file, 'r') as f:
-        return 'Proc-Type: 4,ENCRYPTED' in f.read()
+def send_taxii_request(session, url, request, taxii_binding=None,
+                       tls_details=None):
+    '''
+    Send XML message to a TAXII service and parse a response.
+    '''
 
+    log.info("Sending {} to {}".format(request.message_type, url))
 
-def send_taxii_request(url, request, headers=None, proxies=None, ca_cert=None,
-                       tls_auth=None, jwt_url=None, username=None,
-                       password=None, verify_ssl=True):
-    '''Send TAXII XML message to a service and parse response'''
-
-    log.info("Sending %s to %s", request.message_type, url)
     request_body = request.to_xml(pretty_print=True)
+
     log.debug("Request:\n%s", request_body.decode('utf-8'))
 
-    headers = (headers or {})
-    headers.update({
-        'X-TAXII-Protocol': (
-            const.VID_TAXII_HTTPS_10 if furl.furl(url).scheme == 'https'
-            else const.VID_TAXII_HTTP_10)
-    })
+    session = get_taxii_session(
+        session,
+        url_scheme=furl.furl(url).scheme,
+        message_binding=taxii_binding)
 
-    if not tls_auth:
-        cert_file = None
-        key_file = None
-        key_password = None
-    elif len(tls_auth) == 2:
-        cert_file, key_file = tls_auth
-        key_password = None
-    elif len(tls_auth) == 3:
-        cert_file, key_file, key_password = tls_auth
+    if tls_details and tls_details.get('key_password'):
+        # Workaround until
+        # https://github.com/kennethreitz/requests/issues/2519 is fixed
+        try:
+            response = get_response_using_key_pass(
+                url, request_body, session, **tls_details)
+        except urllib.error.HTTPError as e:
+            log.error(
+                "Error while connecting to {}".format(url),
+                exc_info=True)
+            raise_http_error(e.getcode())
+
+        stream, headers = response, response.headers
     else:
-        raise ValueError('`tls_auth` is either None,'
-                         ' or (cert_file, key_file)'
-                         ' or (cert_file, key_file, key_password)')
+        response = session.post(url, data=request_body, stream=True)
+        if not response.ok:
+            raise_http_error(response.status_code, response.raw)
 
-    if key_file and not key_password and if_key_encrypted(key_file):
-        raise ValueError(
-            'Key file is encrypted but key password was not provided')
+        stream, headers = response.raw, response.headers
 
-    session_context = get_session(
-        message_binding=request.version,
-        proxies=proxies,
-        username=username,
-        password=password,
-        jwt_url=jwt_url,
-        cert_file=cert_file,
-        key_file=key_file,
-        verify_ssl=(ca_cert or verify_ssl),
-    )
-
-    with session_context as session:
-        if key_password:
-            # Workaround until
-            # https://github.com/kennethreitz/requests/issues/2519 is fixed
-            try:
-                response = get_response_using_key_pass(
-                    url, request_body, session,
-                    cert_file, key_file, key_password,
-                    ca_cert=ca_cert)
-            except urllib.error.HTTPError as e:
-                log.error(
-                    "Error while connecting to {}".format(url),
-                    exc_info=True)
-                raise_http_error(e.getcode())
-
-            stream, headers = response, response.headers
-        else:
-            response = session.post(
-                url, data=request_body, headers=headers, stream=True)
-
-            if not response.ok:
-                raise_http_error(response.status_code, response.raw)
-
-            stream, headers = response.raw, response.headers
-
-    log.info("Response received for %s from %s", request.message_type, url)
+    log.info("Response received for {} from {}"
+             .format(request.message_type, url))
 
     gen = _parse_response(stream, headers, version=request.version)
     obj = next(gen)
 
-    if obj == STREAM_MARKER:
+    if obj == const.STREAM_MARKER:
         return gen
     elif hasattr(obj, 'status_type'):
-        if obj.status_type != const.ST_SUCCESS:
+        if obj.status_type != 'SUCCESS':
             raise UnsuccessfulStatusError(obj)
         else:
             return None
-
     return obj
 
 
@@ -161,9 +97,9 @@ def _cleanup_batch(curr_elem, batch):
 
 def _stream_poll_response(namespace, stream):
 
-    module = MODULES[namespace]
+    module = const.MODULES[namespace]
 
-    response_cls = MODULES[namespace].PollResponse
+    response_cls = const.MODULES[namespace].PollResponse
 
     batch_max_size = 3
     to_delete_batch = []
@@ -185,8 +121,8 @@ def _stream_poll_response(namespace, stream):
                 continue
 
             if log.isEnabledFor(logging.DEBUG):
-                log.debug("Stream element:\n%s",
-                          etree.tostring(elem).decode('utf-8'))
+                log.debug("Stream element:\n{}"
+                          .format(etree.tostring(elem).decode('utf-8')))
 
             yield obj
 
@@ -211,17 +147,13 @@ def _parse_response(stream, headers, version):
         headers = '\n'.join([
             '{}={}'.format(k, v) for k, v in headers.items()])
         log.debug(
-            "Invalid response:\n%s\n%s",
-            headers,
-            body)
+            "Invalid response:\n{}\n{}".format(headers, body))
         raise InvalidResponseError("Invalid response received")
 
-    elif content_type not in [const.VID_TAXII_XML_10,
-                              const.VID_TAXII_XML_11,
-                              const.VID_CERT_EU_JSON_10]:
+    elif content_type not in const.SUPPORTED_CONTENT_BINDINGS:
         raise ValueError('Unsupported X-TAXII-Content-Type: {}'
                          .format(content_type))
-    elif content_type == const.VID_CERT_EU_JSON_10:
+    elif content_type == const.CERT_EU_JSON_10_BINDING:
         body = stream.read()
         yield tm10.get_message_from_json(body)
 
@@ -231,19 +163,19 @@ def _parse_response(stream, headers, version):
     namespace = etree.QName(root).namespace
     message_type = root.xpath('local-name()')
 
-    if namespace not in VERSIONS:
-        raise ValueError('Unsupported namespace: {}'
-                         .format(namespace))
-    elif version != VERSIONS[namespace]:
+    if namespace not in const.VERSIONS:
+        raise ValueError(
+            'Unsupported namespace: {}'.format(namespace))
+    elif version != const.VERSIONS[namespace]:
         raise InvalidResponseError(
-            "Response TAXII version '%s' "
-            "does not match request version '%s'" %
-            (VERSIONS[namespace], version))
+            "Response TAXII version '{}' "
+            "does not match request version '{}'"
+            .format(const.VERSIONS[namespace], version))
 
     if message_type in [tm11.PollResponse.message_type,
                         tm10.PollResponse.message_type]:
 
-        yield STREAM_MARKER
+        yield const.STREAM_MARKER
 
         for obj in _stream_poll_response(namespace, gen):
             yield obj
@@ -262,26 +194,26 @@ def _parse_response(stream, headers, version):
 
 def _parse_full_tree(content_type, message_type, elem):
 
-    if content_type == const.VID_TAXII_XML_10:
+    if content_type == const.XML_10_BINDING:
         tm = tm10
-    elif content_type == const.VID_TAXII_XML_11:
+    elif content_type == const.XML_11_BINDING:
         tm = tm11
     else:
-        raise ValueError("Unsupported content type {}" .format(content_type))
+        raise ValueError(
+            "Unsupported content type binding {}".format(content_type))
 
-    if tm == tm11 or tm == tm10:
-        if message_type == const.MSG_DISCOVERY_REQUEST:
-            return tm.DiscoveryRequest.from_etree(elem)
-        elif message_type == const.MSG_DISCOVERY_RESPONSE:
-            return tm.DiscoveryResponse.from_etree(elem)
-        elif message_type == const.MSG_POLL_REQUEST:
-            return tm.PollRequest.from_etree(elem)
-        elif message_type == const.MSG_POLL_RESPONSE:
-            return tm.PollResponse.from_etree(elem)
-        elif message_type == const.MSG_STATUS_MESSAGE:
-            return tm.StatusMessage.from_etree(elem)
-        elif message_type == const.MSG_INBOX_MESSAGE:
-            return tm.InboxMessage.from_etree(elem)
+    if message_type == const.MSG_DISCOVERY_REQUEST:
+        return tm.DiscoveryRequest.from_etree(elem)
+    elif message_type == const.MSG_DISCOVERY_RESPONSE:
+        return tm.DiscoveryResponse.from_etree(elem)
+    elif message_type == const.MSG_POLL_REQUEST:
+        return tm.PollRequest.from_etree(elem)
+    elif message_type == const.MSG_POLL_RESPONSE:
+        return tm.PollResponse.from_etree(elem)
+    elif message_type == const.MSG_STATUS_MESSAGE:
+        return tm.StatusMessage.from_etree(elem)
+    elif message_type == const.MSG_INBOX_MESSAGE:
+        return tm.InboxMessage.from_etree(elem)
 
     if tm == tm11:
         # TAXII 1.1 specific
@@ -320,10 +252,10 @@ class JWTAuth(AuthBase):
         return r
 
 
-def get_session(message_binding=const.VID_TAXII_XML_11, service_binding=None,
-                proxies=None, headers=None, cert_file=None, key_file=None,
-                content_type=None, username=None, password=None, jwt_url=None,
-                verify_ssl=True):
+def get_generic_session(proxies=None, headers=None,
+                        username=None, password=None,
+                        cert_file=None, key_file=None,
+                        verify_ssl=True):
 
     session = requests.Session()
     session.verify = verify_ssl
@@ -331,61 +263,69 @@ def get_session(message_binding=const.VID_TAXII_XML_11, service_binding=None,
     if proxies:
         session.proxies = proxies
 
+    if headers:
+        session.headers.update(headers)
+
     if username and password:
-        if jwt_url:
-            token = obtain_jwt_token(
-                jwt_url, username=username, password=password)
-            session.auth = JWTAuth(token)
-        else:
-            session.auth = HTTPBasicAuth(username, password)
+        session.auth = HTTPBasicAuth(username, password)
+
+    session.headers['User-Agent'] = 'Cabby {}'.format(cabby_version)
 
     if cert_file and key_file:
         session.cert = (cert_file, key_file)
 
-    if not content_type:
-        if message_binding not in BINDINGS_TO_CONTENT_TYPE:
-            raise ValueError('No content type provided')
+    return session
 
-        content_type = BINDINGS_TO_CONTENT_TYPE[message_binding]
+
+def set_jwt_token(session, jwt_token):
+    session.auth = JWTAuth(jwt_token)
+    return session
+
+
+def get_taxii_session(session, url_scheme='https', content_type=None,
+                      message_binding=const.XML_11_BINDING,
+                      service_binding=None):
+
+    if not content_type:
+        if message_binding not in const.BINDINGS_TO_CONTENT_TYPE:
+            raise ValueError('No content type provided')
+        content_type = const.BINDINGS_TO_CONTENT_TYPE[message_binding]
 
     if not service_binding:
-        if message_binding not in BINDINGS_TO_SERVICES:
+        if message_binding not in const.BINDINGS_TO_SERVICES:
             raise ValueError('No service binding provided')
+        service_bindings = const.BINDINGS_TO_SERVICES[message_binding]
 
-        service_bindings = BINDINGS_TO_SERVICES[message_binding]
+    if url_scheme not in const.SCHEMA_TO_PROTOCOL_BINDINGS:
+        raise ValueError(
+            'No known protocol bindings for scheme {}'.format(url_scheme))
 
-    _headers = {
-        'User-Agent': 'cabby',
+    session.headers.update({
         'Content-Type': content_type,
         'Accept': content_type,
         'X-TAXII-Content-Type': message_binding,
         'X-TAXII-Accept': message_binding,
         'X-TAXII-Services': service_bindings,
-    }
-
-    if headers:
-        _headers.update(headers)
-
-    session.headers.update(_headers)
-
+        'X-TAXII-Protocol': const.SCHEMA_TO_PROTOCOL_BINDINGS[url_scheme]
+    })
     return session
 
 
-def obtain_jwt_token(url, username, password):
+def obtain_jwt_token(session, jwt_url, username, password):
+    log.info("Obtaining JWT token from {}".format(jwt_url))
 
-    log.info("Obtaining JWT token from %s", url)
-
-    r = requests.post(url, json={
+    response = session.post(jwt_url, json={
         'username': username,
         'password': password
     })
-    r.raise_for_status()
-    body = r.json()
 
+    if not response.ok:
+        raise_http_error(response.status_code, response.raw)
+
+    body = response.json()
     if 'token' not in body:
-        log.debug("Incorrect JWT response:\n%s", body)
-        raise ValueError("No token in JWT auth response")
-
+        log.debug("Incorrect JWT response:\n{}".format(body))
+        raise ValueError("No token found in JWT auth response")
     return body['token']
 
 

@@ -4,16 +4,21 @@ import pytest
 import httpretty
 
 from libtaxii import messages_10 as tm10
-from libtaxii.constants import (
-    VID_TAXII_XML_10,
-    SVC_INBOX, SVC_DISCOVERY,
-)
 
 from cabby import create_client
 from cabby import exceptions as exc
 from cabby import entities
+from cabby.constants import (
+    XML_10_BINDING, SVC_INBOX, SVC_DISCOVERY,
+)
 
-from fixtures10 import *  # noqa: importing all fixtures
+from fixtures10 import (
+    HOST, POLL_RESPONSE, INBOX_RESPONSE, DISCOVERY_RESPONSE,
+    FEED_MANAGEMENT_RESPONSE, SUBSCRIPTION_RESPONSE, CONTENT_BLOCKS,
+    SUBSCRIPTION_ID, FEED_MANAGEMENT_PATH, POLL_FEED, CONTENT,
+    DISCOVERY_URI_HTTP, DISCOVERY_URI_HTTPS,
+    FEED_MANAGEMENT_URI, INBOX_URI, POLL_URI,
+    POLL_PATH, DISCOVERY_PATH, CONTENT_BINDING)
 
 
 # Utils
@@ -28,9 +33,7 @@ def register_uri(uri, body, **kwargs):
     httpretty.register_uri(
         httpretty.POST, uri, body=body,
         content_type='application/xml',
-        adding_headers={
-            'X-TAXII-Content-Type': VID_TAXII_XML_10
-        },
+        adding_headers={'X-TAXII-Content-Type': XML_10_BINDING},
         **kwargs)
 
 
@@ -200,7 +203,7 @@ def test_poll_with_content_bindings():
 
     block_1 = next(gen)
     print(gen, block_1.content, CONTENT_BLOCKS)
-    assert block_1.content == CONTENT_BLOCKS[0]
+    assert block_1.content.decode('utf-8') == CONTENT_BLOCKS[0]
 
     message = get_sent_message()
     assert type(message) == tm10.PollRequest
@@ -215,7 +218,7 @@ def test_poll_with_content_bindings():
         content_bindings=[binding])
 
     block_1 = next(gen)
-    assert block_1.content == CONTENT_BLOCKS[0]
+    assert block_1.content.decode('utf-8') == CONTENT_BLOCKS[0]
 
     message = get_sent_message()
     assert type(message) == tm10.PollRequest

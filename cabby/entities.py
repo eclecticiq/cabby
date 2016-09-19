@@ -1,11 +1,11 @@
 import logging
 
-from libtaxii import constants as const
+from . import constants as const
 
 
 log = logging.getLogger(__name__)
 
-SERVICE_TYPES = set(const.SVC_TYPES_11 + const.SVC_TYPES_10)
+SERVICE_TYPES = set(const.SVC_TYPES)
 
 
 class Entity(object):
@@ -177,11 +177,11 @@ class DetailedServiceInstance(Entity):
     :param str message: message attached to a service
     '''
 
-    VERSION_10 = const.VID_TAXII_SERVICES_10
-    VERSION_11 = const.VID_TAXII_SERVICES_11
+    VERSION_10 = const.TAXII_SERVICES_10
+    VERSION_11 = const.TAXII_SERVICES_11
 
-    PROTOCOL_HTTP = const.VID_TAXII_HTTP_10
-    PROTOCOL_HTTPS = const.VID_TAXII_HTTPS_10
+    PROTOCOL_HTTP = const.PROTOCOL_HTTP_10_BINDING
+    PROTOCOL_HTTPS = const.PROTOCOL_HTTPS_10_BINDING
 
     def __init__(self, type, version, protocol, address, message_bindings,
                  available=None, message=None):
