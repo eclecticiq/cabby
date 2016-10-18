@@ -13,7 +13,8 @@ from six.moves import map
 
 
 class AbstractClient(object):
-    '''Abstract client class.
+    '''
+    Abstract client class.
 
     This class can not be used directly, use :py:meth:`cabby.create_client`
     to create client instances.
@@ -53,7 +54,8 @@ class AbstractClient(object):
     def set_auth(self, ca_cert=None, cert_file=None, key_file=None,
                  key_password=None, username=None, password=None,
                  jwt_auth_url=None, verify_ssl=True):
-        '''Set authentication credentials.
+        '''
+        Set authentication credentials.
 
         ``jwt_auth_url`` is required for JWT based authentication. If
         it is not specified but ``username`` and ``password`` are provided,
@@ -92,7 +94,8 @@ class AbstractClient(object):
         self.verify_ssl = verify_ssl
 
     def set_proxies(self, proxies):
-        '''Set proxy properties.
+        '''
+        Set proxy properties.
 
         Cause requests to go through a proxy.
         Must be a dictionary mapping protocol names to URLs of proxies.
@@ -114,20 +117,45 @@ class AbstractClient(object):
 
         fu.scheme = fu.scheme or ('https' if use_https else 'http')
         fu.host = fu.host or self.host
-        fu.port = fu.port or (443 if use_https else self.port)
+        fu.port = self.port if self.port else (
+            fu.port or (443 if use_https else 80))
 
         if not fu.host:
             raise ValueError('Host name is not provided: {}'.format(fu.url))
 
         return fu.url
 
-    def obtain_jwt_token(self, session, jwt_url, username, password):
+    def refresh_jwt_token(self, session=None):
+        '''
+        Obtain JWT token using provided JWT session,
+        url, username and password.
+        '''
+        session = session or self.prepare_generic_session()
         self.jwt_token = dispatcher.obtain_jwt_token(
-            session, jwt_url, username, password)
+            session,
+            self._prepare_url(self.jwt_url),
+            self.username,
+            self.password)
         return self.jwt_token
 
+    def prepare_generic_session(self):
+        '''
+        Prepare basic generic session with configured
+        proxies, headers, username/password (if no JWT url configured),
+        cert file, key file and SSL verification flags.
+        '''
+        return dispatcher.get_generic_session(
+            proxies=self.proxies,
+            headers=self.headers,
+            username=self.username if not self.jwt_url else None,
+            password=self.password if not self.jwt_url else None,
+            cert_file=self.cert_file,
+            key_file=self.key_file,
+            verify_ssl=(self.ca_cert or self.verify_ssl))
+
     def _execute_request(self, request, uri=None, service_type=None):
-        '''Execute generic TAXII request.
+        '''
+        Execute generic TAXII request.
 
         A service is defined by ``uri`` parameter or is chosen from pre-cached
         services by ``service_type``.
@@ -145,19 +173,11 @@ class AbstractClient(object):
             raise ValueError(
                 'Key file is encrypted but key password was not provided')
 
-        session = dispatcher.get_generic_session(
-            proxies=self.proxies,
-            headers=self.headers,
-            username=self.username,
-            password=self.password,
-            cert_file=self.cert_file,
-            key_file=self.key_file,
-            verify_ssl=(self.ca_cert or self.verify_ssl))
+        session = self.prepare_generic_session()
 
         if self.jwt_url and self.username and self.password:
             if not self.jwt_token:
-                self.obtain_jwt_token(
-                    session, self.jwt_url, self.username, self.password)
+                self.refresh_jwt_token(session=session)
             session = dispatcher.set_jwt_token(session, self.jwt_token)
 
         if self.key_password:
@@ -202,7 +222,8 @@ class AbstractClient(object):
         return candidates[0]
 
     def get_services(self, service_type=None, service_types=None):
-        '''Get services advertised by TAXII server.
+        '''
+        Get services advertised by TAXII server.
 
         This method will try to do automatic discovery by calling
         :py:meth:`discover_services`.
@@ -248,7 +269,8 @@ class AbstractClient(object):
             return services
 
     def discover_services(self, uri=None, cache=True):
-        '''Discover services advertised by TAXII server.
+        '''
+        Discover services advertised by TAXII server.
 
         This method will send discovery request to a service, defined
         by ``uri`` or constructor's connection parameters.
