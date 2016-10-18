@@ -6,8 +6,8 @@ Changelog
 * Cabby will always return content block body as bytes.
 * JWT token caching added.
 * Added support for local TLS CA files.
-* `--port` option in CLI commands gets a higher priority than port extracted from provided `--path`.
-* Docker file moved to `alpine` as a base, shaving off 520MB from the total size of the container.
+* ``--port`` option in CLI commands gets a higher priority than port extracted from provided ``--path``.
+* Docker file moved to ``alpine`` as a base, shaving off 520MB from the total size of the container.
 
 0.1.12 (2016-06-13)
 -------------------
