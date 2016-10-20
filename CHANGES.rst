@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.1.14 (2016-10-19)
+-------------------
+* Issue when Cabby was assuming port 80 for HTTPS URLs is fixed
+
 0.1.13 (2016-10-18)
 -------------------
 * Cabby will always return content block body as bytes.
