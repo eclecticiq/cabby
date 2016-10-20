@@ -83,7 +83,7 @@ class AbstractClient(object):
         self.ca_cert = ca_cert
         self.cert_file = cert_file
         self.key_file = key_file
-        self.key_password = self.key_password
+        self.key_password = key_password
 
         self.username = username
         self.password = password
