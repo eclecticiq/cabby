@@ -38,7 +38,7 @@ A simple Python library for interacting with TAXII servers.
 Docker
 --------
 
-From version 0.1.13 (current latests), the docker image is based on 'Alpine' linux. This means the size of the Image was reduced from 311MB to 74MB
+From version 0.1.13, the docker image is based on 'Alpine' linux. This means the size of the Image was reduced from 311MB to 74MB
 
 To run cabby using docker, execute the following:
 
