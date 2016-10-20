@@ -1,9 +1,13 @@
 Changelog
 =========
 
+0.1.15 (2016-10-19)
+-------------------
+* Issue with unrecognized TLS key password is fixed.
+
 0.1.14 (2016-10-19)
 -------------------
-* Issue when Cabby was assuming port 80 for HTTPS URLs is fixed
+* Issue when Cabby was assuming port 80 for HTTPS URLs is fixed.
 
 0.1.13 (2016-10-18)
 -------------------
