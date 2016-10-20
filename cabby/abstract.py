@@ -28,7 +28,7 @@ class AbstractClient(object):
                  use_https=False, headers=None):
 
         self.host = host
-        self.port = port or (443 if use_https else 80)
+        self.port = port
         self.use_https = use_https
 
         self.discovery_path = discovery_path
