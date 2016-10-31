@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.1.16 (2016-10-31)
+-------------------
+* Support for gzipped responses added.
+
 0.1.15 (2016-10-19)
 -------------------
 * Issue with unrecognized TLS key password is fixed.

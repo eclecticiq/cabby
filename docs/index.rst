@@ -2,7 +2,7 @@
 Cabby
 =====
 
-Latest stable release is v0.1.15. (:doc:`Changelog <changes>`)
+Latest stable release is v0.1.16. (:doc:`Changelog <changes>`)
 
 ..
     Release v\ |release|. (:doc:`Changelog <changes>`)
