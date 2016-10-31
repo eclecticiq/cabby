@@ -4,6 +4,7 @@ import ssl
 import sys
 
 import furl
+import gzip
 import requests
 from lxml import etree
 from six.moves import urllib
@@ -66,8 +67,8 @@ def send_taxii_request(session, url, request, taxii_binding=None,
 
         stream, headers = response.raw, response.headers
 
-    log.info("Response received for {} from {}"
-             .format(request.message_type, url))
+    if 'gzip' in headers.get('content-encoding', ''):
+        stream = gzip.GzipFile(fileobj=stream)
 
     gen = _parse_response(stream, headers, version=request.version)
     obj = next(gen)
