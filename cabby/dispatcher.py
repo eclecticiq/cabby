@@ -3,6 +3,8 @@ import logging
 import ssl
 import sys
 
+from six import StringIO
+
 import furl
 import gzip
 import requests
@@ -68,6 +70,13 @@ def send_taxii_request(session, url, request, taxii_binding=None,
         stream, headers = response.raw, response.headers
 
     if 'gzip' in headers.get('content-encoding', ''):
+
+        if sys.version_info < (3, 2):
+            # It is impossible to seek on a HTTP response inside gzipped stream
+            # in gzip lib for python < v3.2, so we are forced to read all
+            # stream content into memory
+            stream = StringIO(stream.read())
+
         stream = gzip.GzipFile(fileobj=stream)
 
     gen = _parse_response(stream, headers, version=request.version)
