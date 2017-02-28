@@ -1,7 +1,8 @@
 from collections import namedtuple
-import logging
+import os
 import ssl
 import sys
+import logging
 
 from six import StringIO
 
@@ -167,7 +168,35 @@ def _parse_response(stream, headers, version):
         body = stream.read()
         yield tm10.get_message_from_json(body)
 
-    gen = etree.iterparse(stream, events=('start', 'end'))
+    support_huge_trees = not os.environ.get('CABBY_NO_HUGE_TREES')
+    gen = etree.iterparse(
+        stream,
+        events=('start', 'end'),
+        # inject default attributes from DTD or XMLSchema
+        attribute_defaults=False,
+        # validate against a DTD referenced by the document
+        dtd_validation=False,
+        # use DTD for parsing
+        load_dtd=False,
+        # prevent network access for related files (default: True)
+        no_network=True,
+        # try hard to parse through broken XML
+        recover=False,
+        # discard blank text nodes that appear ignorable
+        remove_blank_text=False,
+        # discard comments
+        remove_comments=False,
+        # discard processing instructions
+        remove_pis=False,
+        # replace CDATA sections by normal text content (default: True)
+        strip_cdata=True,
+        # save memory for short text content (default: True)
+        compact=True,
+        # replace entities by their text value (default: True)
+        resolve_entities=False,
+        # enable/disable security restrictions and support very deep
+        # trees and very long text content
+        huge_tree=support_huge_trees)
 
     action, root = next(gen)
     namespace = etree.QName(root).namespace

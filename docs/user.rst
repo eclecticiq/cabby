@@ -2,10 +2,12 @@
 User guide
 ==========
 
-This user guide gives an overview of Cabby. It covers using Cabby as a:
+This user guide gives an overview of Cabby. It covers:
 
-* Python library
-* command line tool
+* using Cabby as a library
+* using Cabby as a command line tool
+* configuration via environment variables
+* Docker quickstart guide
 
 Note: this document assumes basic familiarity with TAXII specifications. Visit the `TAXII
 homepage`_ for more information about its features.
@@ -66,7 +68,8 @@ To force client to use `TAXII 1.0 <taxii.mitre.org/specifications/version1.0/TAX
 
 
 Authentication methods
-======================
+----------------------
+
 It is possible to set authentication parameters for TAXII requests::
 
   from cabby import create_client
@@ -172,6 +175,13 @@ Copy content blocks from one server to another::
                --binding urn:stix.mitre.org:xml:1.1.1
 
 Use ``--help`` to get more usage details.
+
+
+Configuration via environment variables
+=======================================
+
+* ``CABBY_NO_HUGE_TREES``: by default Cabby enables support for huge trees in `lxml lib <http://lxml.de>`_ (see `lxml manual <http://lxml.de/parsing.html>`_). This disables security restrictions and enables support for very deep trees and very long text content. To disable this, set ``CABBY_NO_HUGE_TREES`` environment variable.
+
 
 Docker Quickstart
 =================
