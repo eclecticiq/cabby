@@ -1,14 +1,12 @@
+import six
+from six.moves import map
 
-from libtaxii import constants as const
-
+from . import constants as const
 from .entities import (
     ContentBinding, Collection, PushMethod,
     Subscription, ServiceInstance,
     InboxDetailedService, DetailedServiceInstance, ContentBlock,
-    InboxService, SubscriptionParameters, SubscriptionResponse
-)
-import six
-from six.moves import map
+    InboxService, SubscriptionParameters, SubscriptionResponse)
 
 
 def to_collection_entities(collections, version):
@@ -132,9 +130,15 @@ def to_detailed_service_instance_entity(service):
     return instance
 
 
+def convert_to_bytes(content):
+    if isinstance(content, six.text_type):
+        return content.encode('utf-8')
+    return content
+
+
 def to_content_block_entity(block):
     b = ContentBlock(
-        content=block.content,
+        content=convert_to_bytes(block.content),
         content_binding=to_content_binding_entity(block.content_binding),
         timestamp=block.timestamp_label,
     )

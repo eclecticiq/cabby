@@ -1,6 +1,10 @@
 import httpretty
 import pytest
 import json
+import gzip
+import sys
+
+from six import StringIO
 
 from libtaxii import messages_11 as tm11
 from libtaxii import messages_10 as tm10
@@ -30,11 +34,15 @@ def make_client(version, **kwargs):
     return client
 
 
-def register_uri(uri, body, version, **kwargs):
+def register_uri(uri, body, version, headers=None, **kwargs):
     content_type = VID_TAXII_XML_11 if version == 11 else VID_TAXII_XML_10
+    headers = headers or {}
+    headers.update({
+        'X-TAXII-Content-Type': content_type
+    })
     httpretty.register_uri(
         httpretty.POST, uri, body=body, content_type='application/xml',
-        adding_headers={'X-TAXII-Content-Type': content_type}, **kwargs)
+        adding_headers=headers, **kwargs)
 
 
 def get_sent_message(version):
@@ -176,6 +184,40 @@ def test_jwt_auth_response(version):
         jwt_auth_url=jwt_url
     )
     services = client.discover_services(uri=discovery_uri)
+    assert len(services) == 4
+
+    httpretty.disable()
+    httpretty.reset()
+
+
+def compress(text):
+    if sys.version_info < (3, 2):
+        out = StringIO()
+        with gzip.GzipFile(fileobj=out, mode="w") as f:
+            f.write(text)
+        return out.getvalue()
+    else:
+        return gzip.compress(text.encode('utf-8'))
+
+
+@pytest.mark.parametrize("version", [11, 10])
+def test_gzip_response(version):
+
+    httpretty.reset()
+    httpretty.enable()
+
+    uri = get_fix(version).DISCOVERY_URI_HTTP
+    response = get_fix(version).DISCOVERY_RESPONSE
+
+    body = compress(response)
+
+    register_uri(uri, body, version, headers={
+        'Content-Encoding': 'application/gzip'
+    })
+
+    client = make_client(version)
+
+    services = client.discover_services(uri=uri)
     assert len(services) == 4
 
     httpretty.disable()

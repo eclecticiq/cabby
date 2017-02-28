@@ -3,17 +3,22 @@ import pytest
 import httpretty
 
 from libtaxii import messages_11 as tm11
-from libtaxii.constants import (
-    VID_TAXII_XML_11,
-    SVC_INBOX, SVC_DISCOVERY,
-    RT_COUNT_ONLY
-)
 
 from cabby import create_client
 from cabby import exceptions as exc
 from cabby import entities
+from cabby.constants import (
+    XML_11_BINDING, SVC_INBOX, SVC_DISCOVERY, RT_COUNT_ONLY
+)
 
-from fixtures11 import *  # noqa: all test fixtures
+from fixtures11 import (
+    HOST, CONTENT_BINDING, POLL_RESPONSE, POLL_RESPONSE_WITH_MORE_1,
+    POLL_RESPONSE_WITH_MORE_2, INBOX_RESPONSE, SUBSCRIPTION_ID,
+    COLLECTION_MANAGEMENT_RESPONSE,
+    POLL_PATH, COLLECTION_MANAGEMENT_PATH, DISCOVERY_RESPONSE,
+    SUBSCRIPTION_RESPONSE, DISCOVERY_PATH, CONTENT_BLOCKS,
+    CONTENT, COLLECTION_MANAGEMENT_URI, DISCOVERY_URI_HTTP,
+    DISCOVERY_URI_HTTPS, INBOX_URI, POLL_URI, POLL_COLLECTION)
 
 
 # Utils
@@ -30,9 +35,7 @@ def register_uri(uri, body, **kwargs):
         uri,
         body=body,
         content_type='application/xml',
-        adding_headers={
-            'X-TAXII-Content-Type': VID_TAXII_XML_11
-        },
+        adding_headers={'X-TAXII-Content-Type': XML_11_BINDING},
         **kwargs)
 
 
@@ -224,7 +227,7 @@ def test_poll_with_fullfilment():
     gen = client.poll(POLL_COLLECTION, uri=POLL_PATH)
     block_1 = next(gen)
 
-    assert block_1.content == CONTENT_BLOCKS[0]
+    assert block_1.content.decode('utf-8') == CONTENT_BLOCKS[0]
 
     message = get_sent_message()
     assert type(message) == tm11.PollRequest
@@ -233,7 +236,7 @@ def test_poll_with_fullfilment():
     register_uri(POLL_URI, POLL_RESPONSE_WITH_MORE_2)
     block_2 = next(gen)
 
-    assert block_2.content == CONTENT_BLOCKS[1]
+    assert block_2.content.decode('utf-8') == CONTENT_BLOCKS[1]
 
     message = get_sent_message()
     assert type(message) == tm11.PollFulfillmentRequest
@@ -252,7 +255,7 @@ def test_poll_with_content_bindings():
                       content_bindings=[CONTENT_BINDING])
 
     block_1 = next(gen)
-    assert block_1.content == CONTENT_BLOCKS[0]
+    assert block_1.content.decode('utf-8') == CONTENT_BLOCKS[0]
 
     message = get_sent_message()
     assert type(message) == tm11.PollRequest
@@ -269,7 +272,7 @@ def test_poll_with_content_bindings():
                       content_bindings=[binding])
 
     block_1 = next(gen)
-    assert block_1.content == CONTENT_BLOCKS[0]
+    assert block_1.content.decode('utf-8') == CONTENT_BLOCKS[0]
 
     message = get_sent_message()
     assert type(message) == tm11.PollRequest

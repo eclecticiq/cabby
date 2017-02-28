@@ -2,10 +2,6 @@
 Cabby API documentation
 =======================
 
-Submodules
-==========
-
-
 Module contents
 ===============
 

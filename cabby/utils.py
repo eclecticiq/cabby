@@ -37,3 +37,8 @@ def pack_content_bindings(content_bindings, version):
         bindings.append(pack_content_binding(b, version))
 
     return bindings
+
+
+def if_key_encrypted(key_file):
+    with open(key_file, 'r') as f:
+        return 'Proc-Type: 4,ENCRYPTED' in f.read()

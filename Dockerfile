@@ -8,17 +8,36 @@ VOLUME [ "/input" ]
 # Create the working dir and set the working directory
 WORKDIR /
 
-# Requirements
-COPY ./requirements.txt requirements.txt
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt \
-    && rm -f requirements.txt
+# Setup Python
+RUN apk add --no-cache -U \
+      ca-certificates \
+      build-base \
+      libxml2 \
+      libxml2-dev \
+      libxslt \
+      libxslt-dev \
+      make \
+      python-dev \
+      py-pip \
+      python \
+    && pip install --upgrade pip setuptools  
 
-# Install Cabby
-RUN mkdir /cabby
+
+# Setup Requirements
 COPY ./ /cabby
-RUN cd /cabby \
-    && python setup.py install \
+RUN pip install -r /cabby/requirements.txt \
+  && cd /cabby \
+  && python setup.py install 
+  
+# Cleanup
+RUN apk del build-base \
+      libxml2-dev \
+      libxslt-dev \
+      python-dev \
+      build-base \
+    && rm -rf /var/cache/apk/*  \
+    && rm -r /root/.cache \
+    && rm -f requirements.txt \
     && rm -rf /cabby
 
 RUN {   echo '#!/bin/sh';\

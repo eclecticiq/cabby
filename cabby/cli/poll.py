@@ -148,7 +148,6 @@ def _runner(client, path, args):
                     value = block.raw.to_text()
             else:
                 value = block.content
-
             print(value.decode('utf-8'))
 
         if args.limit and counter >= args.limit:

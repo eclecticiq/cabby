@@ -2,9 +2,9 @@ import argparse
 import logging
 import dateutil
 import pytz
-from cabby import create_client
 
-from libtaxii.constants import (
+from cabby import create_client
+from cabby.constants import (
     CB_STIX_XML_111, CB_CAP_11, CB_SMIME,
     CB_STIX_XML_10, CB_STIX_XML_101, CB_STIX_XML_11, CB_XENC_122002)
 
