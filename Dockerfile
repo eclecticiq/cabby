@@ -1,5 +1,5 @@
 # Set the base image to Python
-FROM python:3.4.5
+FROM alpine:3.4
 MAINTAINER EclecticIQ <cabby@eclecticiq.com>
 
 # Volume for possible input
