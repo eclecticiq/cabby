@@ -176,11 +176,12 @@ Copy content blocks from one server to another::
 
 Use ``--help`` to get more usage details.
 
+.. _configuration_via_env_vars:
 
 Configuration via environment variables
 =======================================
 
-* ``CABBY_NO_HUGE_TREES``: by default Cabby enables support for huge trees in `lxml lib <http://lxml.de>`_ (see `lxml manual <http://lxml.de/parsing.html>`_). This disables security restrictions and enables support for very deep trees and very long text content. To disable this, set ``CABBY_NO_HUGE_TREES`` environment variable.
+* ``CABBY_NO_HUGE_TREES``: by default Cabby enables support for huge trees in `lxml lib <http://lxml.de>`_ (see `lxml manual <http://lxml.de/parsing.html>`_). This disables security restrictions and enables support for very deep trees and very long text content. To disable this, set ``CABBY_NO_HUGE_TREES`` environment variable to any value.
 
 
 Docker Quickstart

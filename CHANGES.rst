@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.1.17 (2017-04-03)
+-------------------
+* Support for XML "huge trees" added. It can be disabled with environment variable. See :ref:`configuration_via_env_vars`.
+
 0.1.16 (2016-10-31)
 -------------------
 * Support for gzipped responses added.
