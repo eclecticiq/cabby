@@ -8,7 +8,7 @@ def _runner(client, path, args):
 
     for s in services:
         if args.as_xml:
-            print(s.raw.to_xml(pretty_print=True))
+            print(s.raw.to_xml(pretty_print=True).decode('utf-8'))
         else:
             print(s.raw.to_text())
 
