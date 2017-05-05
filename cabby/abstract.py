@@ -47,6 +47,7 @@ class AbstractClient(object):
 
         self.jwt_token = None
         self.headers = headers or {}
+        self.timeout = None
 
         self.log = logging.getLogger(
             "{}.{}".format(self.__module__, self.__class__.__name__))
@@ -161,6 +162,7 @@ class AbstractClient(object):
         services by ``service_type``.
         '''
 
+        timeout = self.timeout
         if not uri and not service_type:
             raise NoURIProvidedError('URI or service_type needed')
         elif not uri:
@@ -193,13 +195,15 @@ class AbstractClient(object):
                     'key_file': self.key_file,
                     'key_password': self.key_password,
                     'ca_cert': self.ca_cert
-                })
+                },
+                timeout=timeout)
         else:
             message = dispatcher.send_taxii_request(
                 session,
                 self._prepare_url(uri),
                 request,
-                taxii_binding=self.taxii_binding)
+                taxii_binding=self.taxii_binding,
+                timeout=timeout)
 
         return message
 

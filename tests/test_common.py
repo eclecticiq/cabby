@@ -3,6 +3,7 @@ import pytest
 import json
 import gzip
 import sys
+import requests
 
 from six import StringIO
 
@@ -222,3 +223,17 @@ def test_gzip_response(version):
 
     httpretty.disable()
     httpretty.reset()
+
+
+@pytest.mark.parametrize("version", [11, 10])
+def test_timeout(version):
+
+    client = make_client(version)
+    client.timeout = 1
+    #
+    # Connect to an existing host but to a port that is blocked by the firewall
+    # If no timeout is set, this would take forever to return
+    #
+    with pytest.raises(requests.exceptions.Timeout):
+        client.discover_services(uri='http://httpbin.org:81/')
+
