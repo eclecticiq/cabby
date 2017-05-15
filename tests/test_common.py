@@ -4,6 +4,7 @@ import json
 import gzip
 import sys
 import requests
+from time import sleep
 
 from six import StringIO
 
@@ -56,7 +57,6 @@ def get_sent_message(version):
 
 @pytest.mark.parametrize("version", [11, 10])
 def test_set_headers(version):
-
     httpretty.reset()
     httpretty.enable()
 
@@ -87,7 +87,6 @@ def test_set_headers(version):
 
 @pytest.mark.parametrize("version", [11, 10])
 def test_invalid_response(version):
-
     httpretty.reset()
     httpretty.enable()
 
@@ -113,7 +112,6 @@ def test_invalid_response(version):
 
 @pytest.mark.parametrize("version", [11, 10])
 def test_invalid_response_status(version):
-
     httpretty.reset()
     httpretty.enable()
 
@@ -133,7 +131,6 @@ def test_invalid_response_status(version):
 
 @pytest.mark.parametrize("version", [11, 10])
 def test_jwt_auth_response(version):
-
     httpretty.reset()
     httpretty.enable()
 
@@ -203,7 +200,6 @@ def compress(text):
 
 @pytest.mark.parametrize("version", [11, 10])
 def test_gzip_response(version):
-
     httpretty.reset()
     httpretty.enable()
 
@@ -227,13 +223,33 @@ def test_gzip_response(version):
 
 @pytest.mark.parametrize("version", [11, 10])
 def test_timeout(version):
+    httpretty.reset()
+    httpretty.enable()
+
+    timeout_in_sec = 1
 
     client = make_client(version)
-    client.timeout = 1
     #
-    # Connect to an existing host but to a port that is blocked by the firewall
-    # If no timeout is set, this would take forever to return
+    # configure to raise the error before the timeout
     #
-    with pytest.raises(requests.exceptions.Timeout):
-        client.discover_services(uri='http://httpbin.org:81/')
+    client.timeout = timeout_in_sec / 2.0
 
+    def timeout_request_callback(request, uri, headers):
+        sleep(timeout_in_sec)
+
+        return 200, headers, {'result': 'success'}
+
+    uri = get_fix(version).DISCOVERY_URI_HTTP
+
+    httpretty.register_uri(
+        httpretty.POST,
+        uri,
+        body=timeout_request_callback,
+        content_type='application/json'
+    )
+
+    with pytest.raises(requests.exceptions.Timeout):
+        client.discover_services(uri=uri)
+
+    httpretty.disable()
+    httpretty.reset()

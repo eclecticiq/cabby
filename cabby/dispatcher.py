@@ -64,7 +64,8 @@ def send_taxii_request(session, url, request, taxii_binding=None,
 
         stream, headers = response, response.headers
     else:
-        response = session.post(url, data=request_body, stream=True, timeout=timeout)
+        response = session.post(url, data=request_body, stream=True,
+                                timeout=timeout)
         if not response.ok:
             raise_http_error(response.status_code, response.raw)
 

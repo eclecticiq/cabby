@@ -25,7 +25,7 @@ class AbstractClient(object):
     taxii_version = None
 
     def __init__(self, host=None, discovery_path=None, port=None,
-                 use_https=False, headers=None):
+                 use_https=False, headers=None, timeout=None):
 
         self.host = host
         self.port = port
@@ -47,7 +47,7 @@ class AbstractClient(object):
 
         self.jwt_token = None
         self.headers = headers or {}
-        self.timeout = None
+        self.timeout = timeout
 
         self.log = logging.getLogger(
             "{}.{}".format(self.__module__, self.__class__.__name__))
@@ -162,7 +162,6 @@ class AbstractClient(object):
         services by ``service_type``.
         '''
 
-        timeout = self.timeout
         if not uri and not service_type:
             raise NoURIProvidedError('URI or service_type needed')
         elif not uri:
@@ -196,14 +195,14 @@ class AbstractClient(object):
                     'key_password': self.key_password,
                     'ca_cert': self.ca_cert
                 },
-                timeout=timeout)
+                timeout=self.timeout)
         else:
             message = dispatcher.send_taxii_request(
                 session,
                 self._prepare_url(uri),
                 request,
                 taxii_binding=self.taxii_binding,
-                timeout=timeout)
+                timeout=self.timeout)
 
         return message
 
