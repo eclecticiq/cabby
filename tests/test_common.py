@@ -236,8 +236,7 @@ def test_timeout(version):
 
     def timeout_request_callback(request, uri, headers):
         sleep(timeout_in_sec)
-
-        return 200, headers, {'result': 'success'}
+        return (200, headers, "All good!")
 
     uri = get_fix(version).DISCOVERY_URI_HTTP
 
