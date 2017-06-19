@@ -50,6 +50,11 @@ def get_basic_arg_parser():
               ' You can also pass the path to a CA file for private certs.'
               ' Defaults to "yes".'))
 
+    parser.add_argument(
+        "--timeout", dest="timeout",
+        type=int,
+        help="HTTP request timeout in seconds")
+
     parser.add_argument("--cert", dest="cert", help="certificate file")
     parser.add_argument("--key", dest="key", help="private key file")
     parser.add_argument(
@@ -156,6 +161,8 @@ def run_client(parser, run_func):
         jwt_auth_url=args.jwt_auth_url,
         verify_ssl=verify_ssl
     )
+
+    client.timeout = args.timeout
 
     if args.proxy_url:
         client.set_proxies({args.proxy_type: args.proxy_url})
