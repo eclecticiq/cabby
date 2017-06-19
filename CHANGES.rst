@@ -4,6 +4,7 @@ Changelog
 0.1.18 (2017-06-19)
 -------------------
 * Dependencies upgraded (`changes <https://github.com/EclecticIQ/cabby/commit/be491ccf457b8b989982a8d49634e905d04bf31b>`_).
+* `timeout` property that sets HTTP timeout added to the client class and CLI tools (thanks `@joarleymoraes https://github.com/joarleymoraes`).
 
 0.1.17 (2017-04-03)
 -------------------
