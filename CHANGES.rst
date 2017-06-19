@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.1.18 (2017-06-19)
+-------------------
+* Dependencies upgraded (`changes <https://github.com/EclecticIQ/cabby/commit/be491ccf457b8b989982a8d49634e905d04bf31b>`_).
+
 0.1.17 (2017-04-03)
 -------------------
 * Support for XML "huge trees" added. It can be disabled with environment variable. See :ref:`configuration_via_env_vars`.
