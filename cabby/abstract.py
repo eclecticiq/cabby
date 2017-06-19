@@ -25,7 +25,7 @@ class AbstractClient(object):
     taxii_version = None
 
     def __init__(self, host=None, discovery_path=None, port=None,
-                 use_https=False, headers=None):
+                 use_https=False, headers=None, timeout=None):
 
         self.host = host
         self.port = port
@@ -47,6 +47,7 @@ class AbstractClient(object):
 
         self.jwt_token = None
         self.headers = headers or {}
+        self.timeout = timeout
 
         self.log = logging.getLogger(
             "{}.{}".format(self.__module__, self.__class__.__name__))
@@ -193,13 +194,15 @@ class AbstractClient(object):
                     'key_file': self.key_file,
                     'key_password': self.key_password,
                     'ca_cert': self.ca_cert
-                })
+                },
+                timeout=self.timeout)
         else:
             message = dispatcher.send_taxii_request(
                 session,
                 self._prepare_url(uri),
                 request,
-                taxii_binding=self.taxii_binding)
+                taxii_binding=self.taxii_binding,
+                timeout=self.timeout)
 
         return message
 

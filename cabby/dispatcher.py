@@ -34,7 +34,7 @@ def raise_http_error(status_code, response_stream=None):
 
 
 def send_taxii_request(session, url, request, taxii_binding=None,
-                       tls_details=None):
+                       tls_details=None, timeout=None):
     '''
     Send XML message to a TAXII service and parse a response.
     '''
@@ -55,7 +55,7 @@ def send_taxii_request(session, url, request, taxii_binding=None,
         # https://github.com/kennethreitz/requests/issues/2519 is fixed
         try:
             response = get_response_using_key_pass(
-                url, request_body, session, **tls_details)
+                url, request_body, session, timeout=timeout, **tls_details)
         except urllib.error.HTTPError as e:
             log.error(
                 "Error while connecting to {}".format(url),
@@ -64,7 +64,8 @@ def send_taxii_request(session, url, request, taxii_binding=None,
 
         stream, headers = response, response.headers
     else:
-        response = session.post(url, data=request_body, stream=True)
+        response = session.post(url, data=request_body, stream=True,
+                                timeout=timeout)
         if not response.ok:
             raise_http_error(response.status_code, response.raw)
 
@@ -369,7 +370,7 @@ def obtain_jwt_token(session, jwt_url, username, password):
 
 
 def get_response_using_key_pass(url, data, session, cert_file, key_file,
-                                key_password, ca_cert=None):
+                                key_password, ca_cert=None, timeout=None):
 
     if sys.version_info < (2, 7, 9):
         raise ValueError(
@@ -405,4 +406,7 @@ def get_response_using_key_pass(url, data, session, cert_file, key_file,
 
     request = urllib.request.Request(url, data, headers)
 
-    return opener.open(request)
+    if timeout:
+        return opener.open(request, timeout=timeout)
+    else:
+        return opener.open(request)
