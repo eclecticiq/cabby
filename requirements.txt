@@ -1,6 +1,6 @@
 six
-libtaxii>=1.1.109
+libtaxii>=1.1.111
 colorlog
-pytz>=2014.10
+pytz>=2017.2
 furl>=0.4.7
 requests>=2.7.0
