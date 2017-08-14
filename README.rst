@@ -8,7 +8,7 @@ Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com>
 :Information: https://www.eclecticiq.com
 :Download: https://pypi.python.org/pypi/cabby/
 
-|travis badge| |landscape.io badge| |coveralls.io badge| |version badge| |py.version badge| |downloads badge| |license badge| |docs badge|
+|travis badge| |landscape.io badge| |coveralls.io badge| |docs badge| |requirements badge|
 
 .. |travis badge| image:: https://travis-ci.org/EclecticIQ/cabby.svg?branch=master
    :target: https://travis-ci.org/EclecticIQ/cabby
@@ -19,19 +19,13 @@ Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com>
 .. |coveralls.io badge| image:: https://coveralls.io/repos/EclecticIQ/cabby/badge.svg
    :target: https://coveralls.io/r/EclecticIQ/cabby
    :alt: Coverage Status
-.. |version badge| image:: https://pypip.in/version/cabby/badge.svg?style=flat
-   :target: https://pypi.python.org/pypi/cabby/ 
-.. |py.version badge| image:: https://pypip.in/py_versions/cabby/badge.svg?style=flat
-   :target: https://pypi.python.org/pypi/cabby/ 
-.. |downloads badge| image:: https://pypip.in/download/cabby/badge.svg?style=flat
-   :target: https://pypi.python.org/pypi/cabby/
-.. |license badge| image:: https://pypip.in/license/cabby/badge.svg?style=flat
-   :target: https://pypi.python.org/pypi/cabby/
 .. |docs badge| image:: https://readthedocs.org/projects/cabby/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
     :target: https://readthedocs.org/projects/cabby/
-
+.. |requirements badge| image:: https://requires.io/github/EclecticIQ/cabby/requirements.svg?branch=master
+     :target: https://requires.io/github/EclecticIQ/cabby/requirements/?branch=master
+     :alt: Requirements Status
 A simple Python library for interacting with TAXII servers.
 
 
