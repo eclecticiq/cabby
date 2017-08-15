@@ -8,7 +8,7 @@ Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com>
 :Information: https://www.eclecticiq.com
 :Download: https://pypi.python.org/pypi/cabby/
 
-|travis badge| |landscape.io badge| |coveralls.io badge| |docs badge| 
+|travis badge| |landscape.io badge| |coveralls.io badge| |docs badge| |requirements badge|
 
 .. |travis badge| image:: https://travis-ci.org/EclecticIQ/cabby.svg?branch=master
    :target: https://travis-ci.org/EclecticIQ/cabby
@@ -23,6 +23,9 @@ Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com>
     :alt: Documentation Status
     :scale: 100%
     :target: https://readthedocs.org/projects/cabby/
+.. |requirements badge| image:: https://requires.io/github/EclecticIQ/cabby/requirements.svg?branch=master
+     :target: https://requires.io/github/EclecticIQ/cabby/requirements/?branch=master
+     :alt: Requirements Status
 
 A simple Python library for interacting with TAXII servers.
 
