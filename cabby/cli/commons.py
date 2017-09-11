@@ -55,7 +55,8 @@ def get_basic_arg_parser():
         type=int,
         help="HTTP request timeout in seconds")
 
-    parser.add_argument("--ca-cert", dest="ca_cert", help="CA certificate file")
+    parser.add_argument(
+        "--ca-cert", dest="ca_cert", help="CA certificate file")
     parser.add_argument("--cert", dest="cert", help="certificate file")
     parser.add_argument("--key", dest="key", help="private key file")
     parser.add_argument(
