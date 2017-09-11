@@ -1,6 +1,6 @@
 # flake8: noqa
 
-HOST = 'example.com'
+HOST = 'example.locahost'
 
 DISCOVERY_PATH = '/some/discovery/path'
 DISCOVERY_URI_HTTP = "http://%s%s" % (HOST, DISCOVERY_PATH)
