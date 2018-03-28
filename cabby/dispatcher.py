@@ -1,4 +1,5 @@
 from collections import namedtuple
+import json
 import os
 import ssl
 import sys
@@ -33,8 +34,8 @@ def raise_http_error(status_code, response_stream=None):
     raise HTTPError(status_code)
 
 
-def send_taxii_request(session, url, request, taxii_binding=None,
-                       tls_details=None, timeout=None):
+def send_taxii_request(
+        session, url, request, taxii_binding=None, timeout=None):
     '''
     Send XML message to a TAXII service and parse a response.
     '''
@@ -50,12 +51,28 @@ def send_taxii_request(session, url, request, taxii_binding=None,
         url_scheme=furl.furl(url).scheme,
         message_binding=taxii_binding)
 
-    if tls_details and tls_details.get('key_password'):
+    stream, headers = request_stream(session, url, request_body, timeout)
+
+    gen = _parse_response(stream, headers, version=request.version)
+    obj = next(gen)
+
+    if obj == const.STREAM_MARKER:
+        return gen
+    elif hasattr(obj, 'status_type'):
+        if obj.status_type != 'SUCCESS':
+            raise UnsuccessfulStatusError(obj)
+        else:
+            return None
+    return obj
+
+
+def request_stream(session, url, request_body, timeout, headers=None):
+    if session._cabby_key_password:
         # Workaround until
         # https://github.com/kennethreitz/requests/issues/2519 is fixed
         try:
-            response = get_response_using_key_pass(
-                url, request_body, session, timeout=timeout, **tls_details)
+            response = request_with_key_password(
+                session, url, request_body, timeout, headers)
         except urllib.error.HTTPError as e:
             log.error(
                 "Error while connecting to {}".format(url),
@@ -64,8 +81,12 @@ def send_taxii_request(session, url, request, taxii_binding=None,
 
         stream, headers = response, response.headers
     else:
-        response = session.post(url, data=request_body, stream=True,
-                                timeout=timeout)
+        response = session.post(
+            url,
+            data=request_body,
+            stream=True,
+            timeout=timeout,
+            headers=headers)
         if not response.ok:
             raise_http_error(response.status_code, response.raw)
 
@@ -81,17 +102,7 @@ def send_taxii_request(session, url, request, taxii_binding=None,
 
         stream = gzip.GzipFile(fileobj=stream)
 
-    gen = _parse_response(stream, headers, version=request.version)
-    obj = next(gen)
-
-    if obj == const.STREAM_MARKER:
-        return gen
-    elif hasattr(obj, 'status_type'):
-        if obj.status_type != 'SUCCESS':
-            raise UnsuccessfulStatusError(obj)
-        else:
-            return None
-    return obj
+    return stream, headers
 
 
 def _cleanup_batch(curr_elem, batch):
@@ -292,28 +303,32 @@ class JWTAuth(AuthBase):
         return r
 
 
-def get_generic_session(proxies=None, headers=None,
-                        username=None, password=None,
-                        cert_file=None, key_file=None,
-                        verify_ssl=True):
+def get_generic_session(
+        proxies=None,
+        headers=None,
+        username=None,
+        password=None,
+        cert_file=None,
+        key_file=None,
+        key_password=None,
+        ca_cert=None,
+        verify_ssl=True):
 
     session = requests.Session()
-    session.verify = verify_ssl
-
+    if ca_cert:
+        session.verify = ca_cert
+    else:
+        session.verify = verify_ssl
     if proxies:
         session.proxies = proxies
-
     if headers:
         session.headers.update(headers)
-
+    session.headers['User-Agent'] = 'Cabby {}'.format(cabby_version)
     if username and password:
         session.auth = HTTPBasicAuth(username, password)
-
-    session.headers['User-Agent'] = 'Cabby {}'.format(cabby_version)
-
     if cert_file and key_file:
         session.cert = (cert_file, key_file)
-
+    session._cabby_key_password = key_password
     return session
 
 
@@ -351,27 +366,26 @@ def get_taxii_session(session, url_scheme='https', content_type=None,
     return session
 
 
-def obtain_jwt_token(session, jwt_url, username, password):
+def obtain_jwt_token(session, jwt_url, username, password, timeout=None):
     log.info("Obtaining JWT token from {}".format(jwt_url))
 
-    response = session.post(jwt_url, json={
-        'username': username,
-        'password': password
-    })
+    request_data = json.dumps({'username': username, 'password': password})
+    request_body = request_data.encode('utf-8')
+    headers = {'Content-Type': 'application/json'}
 
-    if not response.ok:
-        raise_http_error(response.status_code, response.raw)
+    stream, headers = request_stream(
+        session, jwt_url, request_body, timeout, headers)
+    response_body = stream.read().decode('utf-8')
+    response_data = json.loads(response_body)
 
-    body = response.json()
-    if 'token' not in body:
-        log.debug("Incorrect JWT response:\n{}".format(body))
+    if 'token' not in response_data:
+        log.debug("Incorrect JWT response:\n{}".format(response_body))
         raise ValueError("No token found in JWT auth response")
-    return body['token']
+    return response_data['token']
 
 
-def get_response_using_key_pass(url, data, session, cert_file, key_file,
-                                key_password, ca_cert=None, timeout=None):
-
+def request_with_key_password(
+        session, url, request_body, timeout=None, headers=None):
     if sys.version_info < (2, 7, 9):
         raise ValueError(
             'Key password specification is not supported in Python < v2.7.9')
@@ -379,32 +393,39 @@ def get_response_using_key_pass(url, data, session, cert_file, key_file,
     if session.auth:
         # Using Requests Session's auth handlers to fill in proper headers
         DummyRequest = namedtuple('DummyRequest', ['headers'])
-        headers = session.auth(DummyRequest(headers=session.headers)).headers
+        request_headers = session.auth(
+            DummyRequest(headers=session.headers)).headers
     else:
-        headers = session.headers
+        request_headers = session.headers
+    if headers:
+        request_headers.update(headers)
 
+    # Take the TLS details from the session object and use them with urllib.
+    # See also 'get_generic_session' which sets many of these attributes.
+
+    # session 'verify' attribute can be a bool or a path to a CA bundle:
+    if not isinstance(session.verify, bool):
+        ca_cert = session.verify
     context = ssl.create_default_context(
         ssl.Purpose.CLIENT_AUTH, cafile=ca_cert)
 
+    cert_file, key_file = session.cert
+    key_password = session._cabby_key_password
     context.load_cert_chain(cert_file, key_file, password=key_password)
 
-    if not session.verify and not ca_cert:
-        context.verify_mode = ssl.CERT_NONE
-    elif session.verify:
+    if session.verify:
         context.verify_mode = ssl.CERT_REQUIRED
-
         if not ca_cert:
             context.set_default_verify_paths()
+    else:
+        context.verify_mode = ssl.CERT_NONE
 
     handlers = [urllib.request.HTTPSHandler(context=context)]
-
     if session.proxies:
-        handlers.append(
-            urllib.request.ProxyHandler(session.proxies))
+        handlers.append(urllib.request.ProxyHandler(session.proxies))
 
     opener = urllib.request.build_opener(*handlers)
-
-    request = urllib.request.Request(url, data, headers)
+    request = urllib.request.Request(url, request_body, request_headers)
 
     if timeout:
         return opener.open(request, timeout=timeout)
