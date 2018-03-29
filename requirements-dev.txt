@@ -2,7 +2,6 @@
 httpretty
 pytest
 pytest-cov
-setuptools-git
 zest.releaser
 flake8
 werkzeug
