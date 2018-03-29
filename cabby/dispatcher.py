@@ -404,6 +404,7 @@ def request_with_key_password(
     # See also 'get_generic_session' which sets many of these attributes.
 
     # session 'verify' attribute can be a bool or a path to a CA bundle:
+    ca_cert = None
     if not isinstance(session.verify, bool):
         ca_cert = session.verify
     context = ssl.create_default_context(
