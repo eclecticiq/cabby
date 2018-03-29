@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.1.20 (2018-03-29)
+-------------------
+
+* Only include relevant files in release packages.
+
 0.1.19 (2018-03-29)
 -------------------
 
