@@ -42,6 +42,5 @@ To run cabby using docker, execute the following:
 Feedback
 --------
 
-You are encouraged to provide feedback by commenting on open issues or sending us 
+You are encouraged to provide feedback by commenting on open issues or sending us
 email at cabby@eclecticiq.com
-
