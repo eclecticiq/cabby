@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.1.19 (2018-03-29)
+-------------------
+
+* Enable client key passphrase for JWT token authentication request
+  (`pr#50 <https://github.com/EclecticIQ/cabby/pull/50>`_)
+
 0.1.18 (2017-06-19)
 -------------------
 * Dependencies upgraded (`changes <https://github.com/EclecticIQ/cabby/commit/be491ccf457b8b989982a8d49634e905d04bf31b>`_).
