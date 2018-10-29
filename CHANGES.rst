@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.1.21 (2018-10-30)
+-------------------
+
+* Allow HTTPS authentication with certificates for taxii-proxy
+
 0.1.20 (2018-03-29)
 -------------------
 
