@@ -8,7 +8,7 @@ Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com>
 :Information: https://www.eclecticiq.com
 :Download: https://pypi.python.org/pypi/cabby/
 
-|travis badge| |landscape.io badge| |coveralls.io badge| |docs badge| |requirements badge|
+|travis badge| |coveralls.io badge| |docs badge| |requirements badge|
 
 .. |travis badge| image:: https://travis-ci.org/eclecticiq/cabby.svg?branch=master
    :target: https://travis-ci.org/eclecticiq/cabby
