@@ -17,12 +17,12 @@ Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com>
    :target: https://coveralls.io/r/eclecticiq/cabby
    :alt: Coverage Status
 .. |docs badge| image:: https://readthedocs.org/projects/cabby/badge/?version=latest
-    :alt: Documentation Status
-    :scale: 100%
-    :target: https://readthedocs.org/projects/cabby/
+   :alt: Documentation Status
+   :scale: 100%
+   :target: https://readthedocs.org/projects/cabby/
 .. |requirements badge| image:: https://requires.io/github/eclecticiq/cabby/requirements.svg?branch=master
-     :target: https://requires.io/github/eclecticiq/cabby/requirements/?branch=master
-     :alt: Requirements Status
+   :target: https://requires.io/github/eclecticiq/cabby/requirements/?branch=master
+   :alt: Requirements Status
 
 A simple Python library for interacting with TAXII servers.
 

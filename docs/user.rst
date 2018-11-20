@@ -191,7 +191,7 @@ To ease the threshold for trying out Cabby, it is possible to use the image prov
 
 .. code-block:: shell
 
-    $ docker run --rm cabby bash
+  $ docker run --rm cabby bash
 
 This will show you some helpful information on what commands are available, and then give you an interactive shell to play around in.
 
