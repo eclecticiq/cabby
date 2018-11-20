@@ -37,7 +37,7 @@ From version 0.1.13, the docker image is based on 'Alpine' linux. This means the
 
 To run cabby using docker, execute the following:
 
-  docker run --rm=true eclecticiq/cabby:latest taxii-discovery --path https://test.taxiistand.com/read-only/services/discovery
+  docker run --rm eclecticiq/cabby taxii-discovery --path https://test.taxiistand.com/read-only/services/discovery
 
 Feedback
 --------
