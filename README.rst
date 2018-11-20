@@ -13,9 +13,6 @@ Python TAXII client implementation from `EclecticIQ <https://www.eclecticiq.com>
 .. |travis badge| image:: https://travis-ci.org/eclecticiq/cabby.svg?branch=master
    :target: https://travis-ci.org/eclecticiq/cabby
    :alt: Build Status
-.. |landscape.io badge| image:: https://landscape.io/github/eclecticiq/cabby/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/eclecticiq/cabby/master
-   :alt: Code Health
 .. |coveralls.io badge| image:: https://coveralls.io/repos/eclecticiq/cabby/badge.svg
    :target: https://coveralls.io/r/eclecticiq/cabby
    :alt: Coverage Status
