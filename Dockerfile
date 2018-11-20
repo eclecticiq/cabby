@@ -9,6 +9,5 @@ RUN pip install -r /cabby/requirements-dev.txt
 COPY . /cabby
 RUN pip install -e /cabby
 
-COPY ./docker-help.sh /
-RUN sh -c "cat /docker-help.sh >> /root/.bashrc"
-CMD ["/docker-help.sh"]
+RUN sh -c "cat /cabby/docker-help.sh >> /root/.bashrc"
+CMD ["/cabby/docker-help.sh"]

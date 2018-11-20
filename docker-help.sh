@@ -1,7 +1,7 @@
 #!/bin/sh
 
 _cmd=""
-if [ $0 = '/docker-help.sh' ]; then
+if [ $0 = '/cabby/docker-help.sh' ]; then
 	_cmd="docker run -it eclecticiq/cabby "
 fi
 
