@@ -191,34 +191,9 @@ To ease the threshold for trying out Cabby, it is possible to use the image prov
 
 .. code-block:: shell
 
-    $ docker run cabby
+  $ docker run --rm cabby bash
 
-Running this will execute the help script, giving you all the possible options:
-
-.. code-block:: text
-
-    Commands to be run:
-
-        taxii-discovery
-        taxii-poll
-        taxii-collections
-        taxii-push
-        taxii-subscription
-        taxii-proxy
-
-    e.g. 
-    
-        $ docker run -ti cabby taxii-discovery \
-              --host test.taxiistand.com \
-              --use-https true \
-              --path /read-write/services/discovery
-
-    More information available at: http://cabby.readthedocs.org
-
-    Or you can choose to drop back into a shell by providing `bash` as the command:
-
-        $ docker run -ti cabby bash
-
+This will show you some helpful information on what commands are available, and then give you an interactive shell to play around in.
 
 .. rubric:: Next steps
 
