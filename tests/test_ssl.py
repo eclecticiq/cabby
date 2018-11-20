@@ -82,14 +82,14 @@ def test_set_auth_ssl(httpsserver):
     missing_key_password = dict(auth_params, key_password=None)
     client.set_auth(**missing_key_password)
     error_msg = "Key file is encrypted but key password was not provided"
-    with pytest.raises(ValueError, matches=error_msg):
+    with pytest.raises(ValueError, match=error_msg):
         client.discover_services()
 
     # Test that server certificate authentication can fail:
     invalid_server_ca_cert = dict(auth_params, ca_cert=None)
     client.set_auth(**invalid_server_ca_cert)
     error_msg = "certificate verify failed"
-    with pytest.raises(urllib.error.URLError, matches=error_msg):
+    with pytest.raises(urllib.error.URLError, match=error_msg):
         client.discover_services()
 
     # Test that verify_ssl=False ignores the invalid certificate:
