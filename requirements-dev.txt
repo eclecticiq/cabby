@@ -2,6 +2,7 @@
 httpretty
 pytest
 pytest-cov
+pytest-pythonpath
 zest.releaser
 flake8
 werkzeug
