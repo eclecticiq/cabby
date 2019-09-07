@@ -1,5 +1,6 @@
 
 import logging
+import mimetypes
 
 from cabby.entities import ContentBinding
 from cabby.constants import CB_STIX_XML_111
@@ -38,7 +39,18 @@ def extend_arguments(parser):
 
 def _runner(client, path, args):
 
-    with open(args.content_file, 'r') as f:
+    content_file_path = args.content_file
+    content_file_type = mimetypes.guess_type(content_file_path)
+
+    readability = None
+
+    if content_file_type[0][:4] == "text" or \
+        (content_file_type[0] == None and content_file_type[1] == None):
+        readability = 'r'
+    else:
+        readability = 'rb'
+
+    with open(content_file_path, readability) as f:
         content = f.read()
 
     if args.binding and args.subtypes:
