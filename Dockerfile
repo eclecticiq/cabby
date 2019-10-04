@@ -3,7 +3,7 @@ LABEL maintainer="EclecticIQ <cabby@eclecticiq.com>"
 RUN python3 -m venv --system-site-packages /venv
 ENV PATH=/venv/bin:$PATH
 
-COPY ./requirements.txt ./requirements-dev.txt /cabby
+COPY ./requirements.txt ./requirements-dev.txt /cabby/
 RUN pip install -r /cabby/requirements-dev.txt
 COPY . /cabby
 RUN pip install -e /cabby
