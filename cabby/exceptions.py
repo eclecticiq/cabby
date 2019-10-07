@@ -18,12 +18,11 @@ class InvalidResponseError(ClientException):
 class UnsuccessfulStatusError(ClientException):
 
     def __init__(self, taxii_status, *args, **kwargs):
-        super(UnsuccessfulStatusError, self).__init__(
-            _status_to_message(taxii_status), *args, **kwargs)
+        msg = "Server Error: {}".format(_status_to_message(self.raw))
+        super(UnsuccessfulStatusError, self).__init__(msg, *args, **kwargs)
 
         self.status = taxii_status.status_type
         self.text = taxii_status.to_text()
-
         self.raw = taxii_status
 
 
