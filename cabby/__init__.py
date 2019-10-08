@@ -1,12 +1,16 @@
 '''
     Cabby, python library for interacting with TAXII servers.
 '''
-from urllib.parse import urlparse
-
 from ._version import __version__  # noqa: used in setup.py
 
 from .client10 import Client10
 from .client11 import Client11
+
+
+try:
+    from urllib.parse import urlparse
+except ImportError:     # Python 2.7
+    from urlparse import urlparse
 
 
 def create_client(host=None, port=None, discovery_path=None, use_https=False,
