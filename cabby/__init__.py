@@ -14,7 +14,7 @@ except ImportError:     # Python 2.7
 
 
 def create_client(host=None, port=None, discovery_path=None, use_https=False,
-                  url=None, version="1.1", headers=None):
+                  discovery_url=None, version="1.1", headers=None):
     '''Create a client instance (TAXII version specific).
 
     ``host``, ``port``, ``use_https``, ``discovery_path`` values
@@ -25,7 +25,8 @@ def create_client(host=None, port=None, discovery_path=None, use_https=False,
     :param int port: TAXII server port
     :param str discovery_path: Discovery Service relative path
     :param bool use_https: if HTTPS should be used
-    :param string url: URL to infer host, port, discovery_path, and use_https
+    :param string discovery_url: URL to infer host, port, discovery_path,
+                                 and use_https.
     :param string version: TAXII version (1.1 or 1.0)
     :param dict headers: additional headers to pass with TAXII messages
 
@@ -33,8 +34,8 @@ def create_client(host=None, port=None, discovery_path=None, use_https=False,
     :rtype: :py:class:`cabby.client11.Client11` or
             :py:class:`cabby.client10.Client10`
     '''
-    if url:
-        parsed = urlparse(url)
+    if discovery_url:
+        parsed = urlparse(discovery_url)
         if not host and parsed.hostname:
             host = parsed.hostname
         if not port and parsed.port:
