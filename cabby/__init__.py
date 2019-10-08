@@ -21,6 +21,7 @@ def create_client(host=None, port=None, discovery_path=None, use_https=False,
     :param int port: TAXII server port
     :param str discovery_path: Discovery Service relative path
     :param bool use_https: if HTTPS should be used
+    :param string url: URL to infer host, port, discovery_path, and use_https
     :param string version: TAXII version (1.1 or 1.0)
     :param dict headers: additional headers to pass with TAXII messages
 
