@@ -1,6 +1,7 @@
 '''
     Cabby, python library for interacting with TAXII servers.
 '''
+from urllib.parse import urlparse
 
 from ._version import __version__  # noqa: used in setup.py
 
@@ -9,7 +10,7 @@ from .client11 import Client11
 
 
 def create_client(host=None, port=None, discovery_path=None, use_https=False,
-                  version="1.1", headers=None):
+                  url=None, version="1.1", headers=None):
     '''Create a client instance (TAXII version specific).
 
     ``host``, ``port``, ``use_https``, ``discovery_path`` values
@@ -27,6 +28,16 @@ def create_client(host=None, port=None, discovery_path=None, use_https=False,
     :rtype: :py:class:`cabby.client11.Client11` or
             :py:class:`cabby.client10.Client10`
     '''
+    if url:
+        parsed = urlparse(url)
+        if not host and parsed.hostname:
+            host = parsed.hostname
+        if not port and parsed.port:
+            port = parsed.port
+        if not discovery_path and parsed.path:
+            discovery_path = parsed.path
+        if parsed.scheme:
+            use_https = parsed.scheme == 'https'
 
     params = dict(
         host=host,
