@@ -376,6 +376,8 @@ def obtain_jwt_token(session, jwt_url, username, password, timeout=None):
     stream, headers = request_stream(
         session, jwt_url, request_body, timeout, headers)
     response_body = stream.read().decode('utf-8')
+    if not response_body:
+        raise ValueError("empty response")
     response_data = json.loads(response_body)
 
     if 'token' not in response_data:
