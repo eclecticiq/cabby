@@ -139,7 +139,10 @@ def test_jwt_auth_response(version):
     password = 'dummy-password'
 
     def jwt_request_callback(request):
-        body = json.loads(request.body)
+        body = request.body
+        if isinstance(body, bytes):
+            body = body.decode()
+        body = json.loads(body)
 
         assert body['username'] == username
         assert body['password'] == password
