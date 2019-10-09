@@ -152,7 +152,9 @@ class AbstractClient(object):
             password=self.password if not self.jwt_url else None,
             cert_file=self.cert_file,
             key_file=self.key_file,
-            verify_ssl=(self.ca_cert or self.verify_ssl))
+            key_password=self.key_password,
+            ca_cert=self.ca_cert,
+            verify_ssl=self.verify_ssl)
 
     def _execute_request(self, request, uri=None, service_type=None):
         '''
@@ -161,7 +163,6 @@ class AbstractClient(object):
         A service is defined by ``uri`` parameter or is chosen from pre-cached
         services by ``service_type``.
         '''
-
         if not uri and not service_type:
             raise NoURIProvidedError('URI or service_type needed')
         elif not uri:
@@ -181,28 +182,12 @@ class AbstractClient(object):
                 self.refresh_jwt_token(session=session)
             session = dispatcher.set_jwt_token(session, self.jwt_token)
 
-        if self.key_password:
-            # If key_password is provided
-            message = dispatcher.send_taxii_request(
-                session,
-                self._prepare_url(uri),
-                request,
-                taxii_binding=self.taxii_binding,
-                # Details in case key_password is provided
-                tls_details={
-                    'cert_file': self.cert_file,
-                    'key_file': self.key_file,
-                    'key_password': self.key_password,
-                    'ca_cert': self.ca_cert
-                },
-                timeout=self.timeout)
-        else:
-            message = dispatcher.send_taxii_request(
-                session,
-                self._prepare_url(uri),
-                request,
-                taxii_binding=self.taxii_binding,
-                timeout=self.timeout)
+        message = dispatcher.send_taxii_request(
+            session,
+            self._prepare_url(uri),
+            request,
+            taxii_binding=self.taxii_binding,
+            timeout=self.timeout)
 
         return message
 
