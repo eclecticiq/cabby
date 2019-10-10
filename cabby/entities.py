@@ -28,6 +28,10 @@ class ContentBlockCount(Entity):
         self.count = count
         self.is_partial = is_partial
 
+    def __repr__(self):
+        t = '{cls}(count={count}, is_partial={is_partial})'
+        return t.format(cls=type(self).__name__, **vars(self))
+
 
 class Collection(Entity):
     '''Collection entity.
@@ -78,6 +82,10 @@ class Collection(Entity):
         self.receiving_inboxes = receiving_inboxes or []
         self.volume = volume
 
+    def __repr__(self):
+        t = '{cls}(name={name}, type={type}, available={available})'
+        return t.format(cls=type(self).__name__, **vars(self))
+
 
 class ContentBinding(Entity):
     '''Content Binding entity.
@@ -85,12 +93,16 @@ class ContentBinding(Entity):
     Represents TAXII Content Binding.
 
     :param str id: Content Binding ID
-    :param str subtypes: Content Subtypes IDs
+    :param list subtypes: Content Subtypes IDs
     '''
 
     def __init__(self, id, subtypes=None):
         self.id = id
         self.subtypes = subtypes or []
+
+    def __repr__(self):
+        t = '{cls}(id={id}, subtypes={subtypes})'
+        return t.format(cls=type(self).__name__, **vars(self))
 
 
 class ServiceInstance(Entity):
@@ -106,6 +118,10 @@ class ServiceInstance(Entity):
         self.protocol = protocol
         self.address = address
         self.message_bindings = message_bindings
+
+    def __repr__(self):
+        t = '{cls}(protocol={protocol}, address={address})'
+        return t.format(cls=type(self).__name__, **vars(self))
 
 
 class InboxService(ServiceInstance):
@@ -141,6 +157,10 @@ class PushMethod(Entity):
         self.protocol = protocol
         self.message_bindings = message_bindings
 
+    def __repr__(self):
+        t = '{cls}(protocol={protocol})'
+        return t.format(cls=type(self).__name__, **vars(self))
+
 
 class SubscriptionParameters(Entity):
     '''Subscription Parameters Entity.
@@ -161,6 +181,10 @@ class SubscriptionParameters(Entity):
             log.error("Unknown response type: %s", response_type)
         self.response_type = response_type
         self.content_bindings = content_bindings or []
+
+    def __repr__(self):
+        t = '{cls}(response_type={response_type})'
+        return t.format(cls=type(self).__name__, **vars(self))
 
 
 class DetailedServiceInstance(Entity):
@@ -200,6 +224,10 @@ class DetailedServiceInstance(Entity):
         self.available = available
         self.message = message
 
+    def __repr__(self):
+        t = '{cls}(type={type}, address={address})'
+        return t.format(cls=type(self).__name__, **vars(self))
+
 
 class InboxDetailedService(DetailedServiceInstance):
     '''Detailed description of TAXII Inbox Service.
@@ -237,6 +265,10 @@ class ContentBlock(Entity):
         self.binding = content_binding
         self.timestamp = timestamp
 
+    def __repr__(self):
+        t = '{cls}(timestamp={timestamp})'
+        return t.format(cls=type(self).__name__, **vars(self))
+
 
 class SubscriptionResponse(Entity):
     '''Subscription Response entity.
@@ -250,6 +282,10 @@ class SubscriptionResponse(Entity):
         self.collection_name = collection_name
         self.message = message
         self.subscriptions = subscriptions or []
+
+    def __repr__(self):
+        t = '{cls}(collection_name={collection_name})'
+        return t.format(cls=type(self).__name__, **vars(self))
 
 
 class Subscription(Entity):
@@ -281,3 +317,7 @@ class Subscription(Entity):
         self.delivery_parameters = delivery_parameters
         self.subscription_parameters = subscription_parameters
         self.poll_instances = poll_instances
+
+    def __repr__(self):
+        t = '{cls}(subscription_id={id}, status={status})'
+        return t.format(cls=type(self).__name__, **vars(self))

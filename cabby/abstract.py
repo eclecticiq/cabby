@@ -301,3 +301,12 @@ class AbstractClient(object):
             self.services = services
 
         return services
+
+    def __repr__(self):
+        t = '{name}(host={host}, port={port}, discovery_path={discovery_path})'
+        return t.format(
+            name=type(self).__name__,
+            host=self.host,
+            port=self.port,
+            discovery_path=self.discovery_path,
+        )
