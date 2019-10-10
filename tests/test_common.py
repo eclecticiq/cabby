@@ -1,4 +1,4 @@
-import httpretty
+import responses
 import pytest
 import json
 import gzip
@@ -36,19 +36,29 @@ def make_client(version, **kwargs):
     return client
 
 
-def register_uri(uri, body, version, headers=None, **kwargs):
+def register_uri(uri, body, version, headers=None, mock=None, **kwargs):
     content_type = VID_TAXII_XML_11 if version == 11 else VID_TAXII_XML_10
     headers = headers or {}
     headers.update({
         'X-TAXII-Content-Type': content_type
     })
-    httpretty.register_uri(
-        httpretty.POST, uri, body=body, content_type='application/xml',
-        adding_headers=headers, **kwargs)
+    if not mock:
+        mock = responses
+    mock.add(
+        method=responses.POST,
+        url=uri,
+        body=body,
+        content_type='application/xml',
+        stream=True,
+        adding_headers=headers,
+        **kwargs)
 
 
-def get_sent_message(version):
-    body = httpretty.last_request().body
+def get_sent_message(version, mock=None):
+    if not mock:
+        mock = responses
+    body = mock.calls[-1].request.body
+    print(repr(body))
     return (tm11 if version == 11 else tm10).get_message_from_xml(body)
 
 
@@ -56,10 +66,8 @@ def get_sent_message(version):
 
 
 @pytest.mark.parametrize("version", [11, 10])
+@responses.activate
 def test_set_headers(version):
-    httpretty.reset()
-    httpretty.enable()
-
     uri = get_fix(version).DISCOVERY_URI_HTTP
     response = get_fix(version).DISCOVERY_RESPONSE
 
@@ -74,22 +82,18 @@ def test_set_headers(version):
     assert len(services) == 4
 
     message = get_sent_message(version)
-    assert type(message) == (tm11 if version == 11 else tm10).DiscoveryRequest
+    expected_type = (tm11 if version == 11 else tm10).DiscoveryRequest
+    assert type(message) == expected_type
 
-    last_request = httpretty.last_request()
+    last_request = responses.calls[-1].request
 
     assert CUSTOM_HEADER_NAME in last_request.headers
     assert last_request.headers[CUSTOM_HEADER_NAME] == CUSTOM_HEADER_VALUE
 
-    httpretty.disable()
-    httpretty.reset()
-
 
 @pytest.mark.parametrize("version", [11, 10])
+@responses.activate
 def test_invalid_response(version):
-    httpretty.reset()
-    httpretty.enable()
-
     uri = get_fix(version).DISCOVERY_URI_HTTP
 
     # FIXME: httpretty returns body as byte string (utf-8 encoded)
@@ -98,42 +102,35 @@ def test_invalid_response(version):
     # https://github.com/EclecticIQ/libtaxii/blob/master/libtaxii/__init__.py#L126
     return
 
-    httpretty.register_uri(
-        httpretty.POST, uri, body='INVALID-BODY', content_type='text/html')
+    responses.add(
+        method=responses.POST,
+        url=uri,
+        body='INVALID-BODY',
+        content_type='text/html',
+    )
 
     client = make_client(version)
 
     with pytest.raises(exc.InvalidResponseError):
         client.discover_services(uri=uri)
 
-    httpretty.disable()
-    httpretty.reset()
-
 
 @pytest.mark.parametrize("version", [11, 10])
+@responses.activate
 def test_invalid_response_status(version):
-    httpretty.reset()
-    httpretty.enable()
-
     uri = get_fix(version).DISCOVERY_URI_HTTP
 
-    httpretty.register_uri(
-        httpretty.POST, uri, status_code=404)
+    responses.add(method=responses.POST, url=uri, status=404)
 
     client = make_client(version)
 
-    with pytest.raises(exc.InvalidResponseError):
+    with pytest.raises(exc.HTTPError):
         client.discover_services(uri=uri)
-
-    httpretty.disable()
-    httpretty.reset()
 
 
 @pytest.mark.parametrize("version", [11, 10])
+@responses.activate
 def test_jwt_auth_response(version):
-    httpretty.reset()
-    httpretty.enable()
-
     jwt_path = '/management/auth/'
     jwt_url = 'http://{}{}'.format(get_fix(version).HOST, jwt_path)
 
@@ -141,20 +138,26 @@ def test_jwt_auth_response(version):
     username = 'dummy-username'
     password = 'dummy-password'
 
-    def jwt_request_callback(request, uri, headers):
-        body = json.loads(request.body.decode('utf-8'))
+    def jwt_request_callback(request):
+        body = request.body
+        if isinstance(body, bytes):
+            body = body.decode()
+        body = json.loads(body)
 
         assert body['username'] == username
         assert body['password'] == password
 
-        return 200, headers, json.dumps({'token': token})
+        content = json.dumps({'token': token}).encode()
+        return (200, {}, content)
 
-    httpretty.register_uri(
-        httpretty.POST,
-        jwt_url,
-        body=jwt_request_callback,
-        content_type='application/json'
-    )
+    # https://github.com/getsentry/responses/pull/268
+    responses.mock._matches.append(responses.CallbackResponse(
+        method=responses.POST,
+        url=jwt_url,
+        callback=jwt_request_callback,
+        content_type='application/json',
+        stream=True,
+    ))
     discovery_uri = get_fix(version).DISCOVERY_URI_HTTP
 
     register_uri(
@@ -184,9 +187,6 @@ def test_jwt_auth_response(version):
     services = client.discover_services(uri=discovery_uri)
     assert len(services) == 4
 
-    httpretty.disable()
-    httpretty.reset()
-
 
 def compress(text):
     if sys.version_info < (3, 2):
@@ -199,10 +199,8 @@ def compress(text):
 
 
 @pytest.mark.parametrize("version", [11, 10])
+@responses.activate
 def test_gzip_response(version):
-    httpretty.reset()
-    httpretty.enable()
-
     uri = get_fix(version).DISCOVERY_URI_HTTP
     response = get_fix(version).DISCOVERY_RESPONSE
 
@@ -217,38 +215,35 @@ def test_gzip_response(version):
     services = client.discover_services(uri=uri)
     assert len(services) == 4
 
-    httpretty.disable()
-    httpretty.reset()
-
 
 @pytest.mark.parametrize("version", [11, 10])
+@responses.activate
 def test_timeout(version):
-    httpretty.reset()
-    httpretty.enable()
+    # this can't be tested with responses,
+    # because it substitutes requests session
+    # and doesn't worry about timeouts
+    pytest.skip("cannot be tested yet")
 
     timeout_in_sec = 1
-
     client = make_client(version)
-    #
     # configure to raise the error before the timeout
-    #
     client.timeout = timeout_in_sec / 2.0
 
-    def timeout_request_callback(request, uri, headers):
+    def timeout_request_callback(request):
         sleep(timeout_in_sec)
-        return (200, headers, "All good!")
+        return (200, {'X-TAXII-Content-Type': content_type}, "All good!")
 
     uri = get_fix(version).DISCOVERY_URI_HTTP
 
-    httpretty.register_uri(
-        httpretty.POST,
+    # https://github.com/getsentry/responses/pull/268
+    content_type = VID_TAXII_XML_11 if version == 11 else VID_TAXII_XML_10
+    responses.mock._matches.append(responses.CallbackResponse(
+        responses.POST,
         uri,
-        body=timeout_request_callback,
-        content_type='application/json'
-    )
+        callback=timeout_request_callback,
+        content_type='application/json',
+        stream=True,
+    ))
 
     with pytest.raises(requests.exceptions.Timeout):
         client.discover_services(uri=uri)
-
-    httpretty.disable()
-    httpretty.reset()

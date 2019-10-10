@@ -1,6 +1,6 @@
 
 import pytest
-import httpretty
+import responses
 
 from libtaxii import messages_11 as tm11
 
@@ -30,17 +30,19 @@ def create_client_11(**kwargs):
 
 
 def register_uri(uri, body, **kwargs):
-    httpretty.register_uri(
-        httpretty.POST,
-        uri,
+    responses.add(
+        method=responses.POST,
+        url=uri,
         body=body,
         content_type='application/xml',
+        stream=True,
         adding_headers={'X-TAXII-Content-Type': XML_11_BINDING},
         **kwargs)
 
 
 def get_sent_message():
-    body = httpretty.last_request().body
+    body = responses.calls[-1].request.body
+    print(repr(body))
     return tm11.get_message_from_xml(body)
 
 
@@ -61,10 +63,10 @@ def test_no_discovery_path_when_pushing():
         client.push(CONTENT, CONTENT_BINDING)
 
 
-@httpretty.activate
+@responses.activate
 def test_incorrect_path():
 
-    httpretty.register_uri(httpretty.POST, DISCOVERY_URI_HTTP, status=404)
+    responses.add(responses.POST, DISCOVERY_URI_HTTP, status=404)
 
     client = create_client_11(discovery_path=DISCOVERY_PATH)
 
@@ -72,7 +74,7 @@ def test_incorrect_path():
         client.discover_services()
 
 
-@httpretty.activate
+@responses.activate
 def test_discovery():
 
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
@@ -94,7 +96,7 @@ def test_discovery():
     assert type(message) == tm11.DiscoveryRequest
 
 
-@httpretty.activate
+@responses.activate
 def test_discovery_https():
 
     register_uri(DISCOVERY_URI_HTTPS, DISCOVERY_RESPONSE)
@@ -109,7 +111,7 @@ def test_discovery_https():
     assert type(message) == tm11.DiscoveryRequest
 
 
-@httpretty.activate
+@responses.activate
 def test_collections():
 
     register_uri(COLLECTION_MANAGEMENT_URI, COLLECTION_MANAGEMENT_RESPONSE)
@@ -125,7 +127,7 @@ def test_collections():
     assert type(message) == tm11.CollectionInformationRequest
 
 
-@httpretty.activate
+@responses.activate
 def test_collections_with_automatic_discovery():
 
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
@@ -141,7 +143,7 @@ def test_collections_with_automatic_discovery():
     assert type(message) == tm11.CollectionInformationRequest
 
 
-@httpretty.activate
+@responses.activate
 def test_poll():
 
     register_uri(POLL_URI, POLL_RESPONSE)
@@ -156,7 +158,7 @@ def test_poll():
     assert message.collection_name == POLL_COLLECTION
 
 
-@httpretty.activate
+@responses.activate
 def test_poll_count_only():
 
     register_uri(POLL_URI, POLL_RESPONSE)
@@ -173,7 +175,7 @@ def test_poll_count_only():
     assert message.poll_parameters.response_type == RT_COUNT_ONLY
 
 
-@httpretty.activate
+@responses.activate
 def test_poll_with_subscription():
 
     register_uri(POLL_URI, POLL_RESPONSE)
@@ -191,7 +193,7 @@ def test_poll_with_subscription():
     assert message.subscription_id == SUBSCRIPTION_ID
 
 
-@httpretty.activate
+@responses.activate
 def test_poll_with_delivery():
 
     register_uri(DISCOVERY_URI_HTTP, DISCOVERY_RESPONSE)
@@ -217,7 +219,7 @@ def test_poll_with_delivery():
     assert message.poll_parameters.allow_asynch is True
 
 
-@httpretty.activate
+@responses.activate
 def test_poll_with_fullfilment():
 
     register_uri(POLL_URI, POLL_RESPONSE_WITH_MORE_1)
@@ -233,6 +235,7 @@ def test_poll_with_fullfilment():
     assert type(message) == tm11.PollRequest
     assert message.collection_name == POLL_COLLECTION
 
+    responses.remove(responses.POST, POLL_URI)
     register_uri(POLL_URI, POLL_RESPONSE_WITH_MORE_2)
     block_2 = next(gen)
 
@@ -244,7 +247,7 @@ def test_poll_with_fullfilment():
     assert message.result_part_number == 2
 
 
-@httpretty.activate
+@responses.activate
 def test_poll_with_content_bindings():
 
     register_uri(POLL_URI, POLL_RESPONSE_WITH_MORE_1)
@@ -283,7 +286,7 @@ def test_poll_with_content_bindings():
     assert poll_params.content_bindings[0].subtype_ids == binding.subtypes
 
 
-@httpretty.activate
+@responses.activate
 def test_subscribe():
 
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
@@ -300,7 +303,7 @@ def test_subscribe():
     assert message.action == tm11.ACT_SUBSCRIBE
 
 
-@httpretty.activate
+@responses.activate
 def test_subscribe_with_push():
 
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
@@ -325,7 +328,7 @@ def test_subscribe_with_push():
     assert message.action == tm11.ACT_SUBSCRIBE
 
 
-@httpretty.activate
+@responses.activate
 def test_subscribtion_status():
 
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
@@ -344,7 +347,7 @@ def test_subscribtion_status():
     assert message.action == tm11.ACT_STATUS
 
 
-@httpretty.activate
+@responses.activate
 def test_unsubscribe():
 
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
@@ -367,7 +370,7 @@ def test_unsubscribe():
     assert message.action == tm11.ACT_UNSUBSCRIBE
 
 
-@httpretty.activate
+@responses.activate
 def test_pause_subscription():
 
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
@@ -386,7 +389,7 @@ def test_pause_subscription():
     assert message.action == tm11.ACT_PAUSE
 
 
-@httpretty.activate
+@responses.activate
 def test_resume_subscription():
 
     register_uri(COLLECTION_MANAGEMENT_URI, SUBSCRIPTION_RESPONSE)
@@ -405,7 +408,7 @@ def test_resume_subscription():
     assert message.action == tm11.ACT_RESUME
 
 
-@httpretty.activate
+@responses.activate
 def test_push():
 
     register_uri(INBOX_URI, INBOX_RESPONSE)
@@ -423,7 +426,7 @@ def test_push():
     assert binding == CONTENT_BINDING
 
 
-@httpretty.activate
+@responses.activate
 def test_push_with_destination():
 
     register_uri(INBOX_URI, INBOX_RESPONSE)
