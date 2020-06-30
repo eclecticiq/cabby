@@ -1,6 +1,6 @@
 -r requirements.txt
 responses
-pytest
+pytest>=4.6
 pytest-cov
 pytest-pythonpath
 zest.releaser
