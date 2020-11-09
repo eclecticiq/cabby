@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.1.21 (2020-11-09)
+-------------------
+
+* Refresh JWT and retry request once on UNAUTHORIZED status message
+* Add discovery_url argument to create_client function
+
 0.1.20 (2018-03-29)
 -------------------
 
