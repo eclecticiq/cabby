@@ -1,6 +1,6 @@
 # flake8: noqa
 
-HOST = 'example.locahost'
+HOST = 'example.localhost'
 
 DISCOVERY_PATH = '/some/discovery/path'
 DISCOVERY_URI_HTTP = "http://%s%s" % (HOST, DISCOVERY_PATH)
@@ -115,3 +115,14 @@ SUBSCRIPTION_RESPONSE = '''
 INBOX_RESPONSE = '''
 <taxii:Status_Message xmlns:taxii="http://taxii.mitre.org/messages/taxii_xml_binding-1" xmlns:taxii_11="http://taxii.mitre.org/messages/taxii_xml_binding-1.1" xmlns:tdq="http://taxii.mitre.org/query/taxii_default_query-1" message_id="48205" in_response_to="13777" status_type="SUCCESS"/>
 '''
+
+STATUS_MESSAGE_UNAUTHORIZED = """\
+<?xml version="1.0"?>
+<taxii:Status_Message
+    xmlns:taxii="http://taxii.mitre.org/messages/taxii_xml_binding-1"
+    xmlns:taxii_11="http://taxii.mitre.org/messages/taxii_xml_binding-1.1"
+    xmlns:tdq="http://taxii.mitre.org/query/taxii_default_query-1"
+    message_id="123123"
+    in_response_to="0"
+    status_type="UNAUTHORIZED"/>
+"""

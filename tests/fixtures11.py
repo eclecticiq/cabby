@@ -139,3 +139,14 @@ SUBSCRIPTION_RESPONSE = '''
 INBOX_RESPONSE = '''
 <taxii_11:Status_Message xmlns:taxii="http://taxii.mitre.org/messages/taxii_xml_binding-1" xmlns:taxii_11="http://taxii.mitre.org/messages/taxii_xml_binding-1.1" xmlns:tdq="http://taxii.mitre.org/query/taxii_default_query-1" message_id="83710" in_response_to="57915" status_type="SUCCESS"/>
 '''
+
+STATUS_MESSAGE_UNAUTHORIZED = """\
+<?xml version="1.0"?>
+<taxii_11:Status_Message
+    xmlns:taxii="http://taxii.mitre.org/messages/taxii_xml_binding-1"
+    xmlns:taxii_11="http://taxii.mitre.org/messages/taxii_xml_binding-1.1"
+    xmlns:tdq="http://taxii.mitre.org/query/taxii_default_query-1"
+    message_id="1209263632454336330"
+    in_response_to="0"
+    status_type="UNAUTHORIZED"/>
+"""

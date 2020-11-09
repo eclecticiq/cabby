@@ -22,6 +22,8 @@ import fixtures10
 
 CUSTOM_HEADER_NAME = 'X-custom-header'
 CUSTOM_HEADER_VALUE = 'header value with space!'
+JWT_PATH = '/management/auth/'
+JWT_URL = "http://example.localhost" + JWT_PATH
 
 
 def get_fix(version):
@@ -36,23 +38,24 @@ def make_client(version, **kwargs):
     return client
 
 
-def register_uri(uri, body, version, headers=None, mock=None, **kwargs):
-    content_type = VID_TAXII_XML_11 if version == 11 else VID_TAXII_XML_10
-    headers = headers or {}
-    headers.update({
-        'X-TAXII-Content-Type': content_type
-    })
-    if not mock:
-        mock = responses
-    mock.add(
+def register_uri(uri, body, version, headers=None):
+    if headers is None:
+        headers = {}
+    headers.update(make_taxii_headers(version))
+    responses.add(
         method=responses.POST,
         url=uri,
         body=body,
-        content_type='application/xml',
+        content_type="application/xml",
         stream=True,
         adding_headers=headers,
-        **kwargs)
+    )
 
+
+def make_taxii_headers(version):
+    return {
+        "X-TAXII-Content-Type": VID_TAXII_XML_11 if version == 11 else VID_TAXII_XML_10
+    }
 
 def get_sent_message(version, mock=None):
     if not mock:
@@ -131,10 +134,6 @@ def test_invalid_response_status(version):
 @pytest.mark.parametrize("version", [11, 10])
 @responses.activate
 def test_jwt_auth_response(version):
-    jwt_path = '/management/auth/'
-    jwt_url = 'http://{}{}'.format(get_fix(version).HOST, jwt_path)
-
-    token = 'dummy'
     username = 'dummy-username'
     password = 'dummy-password'
 
@@ -147,17 +146,18 @@ def test_jwt_auth_response(version):
         assert body['username'] == username
         assert body['password'] == password
 
-        content = json.dumps({'token': token}).encode()
+        content = json.dumps({"token": "dummy"}).encode()
         return (200, {}, content)
 
     # https://github.com/getsentry/responses/pull/268
     responses.mock._matches.append(responses.CallbackResponse(
         method=responses.POST,
-        url=jwt_url,
+        url=JWT_URL,
         callback=jwt_request_callback,
         content_type='application/json',
         stream=True,
     ))
+
     discovery_uri = get_fix(version).DISCOVERY_URI_HTTP
 
     register_uri(
@@ -172,7 +172,7 @@ def test_jwt_auth_response(version):
     client.set_auth(
         username=username,
         password=password,
-        jwt_auth_url=jwt_path
+        jwt_auth_url=JWT_PATH
     )
     services = client.discover_services(uri=discovery_uri)
     assert len(services) == 4
@@ -182,7 +182,7 @@ def test_jwt_auth_response(version):
     client.set_auth(
         username=username,
         password=password,
-        jwt_auth_url=jwt_url
+        jwt_auth_url=JWT_URL
     )
     services = client.discover_services(uri=discovery_uri)
     assert len(services) == 4
@@ -247,3 +247,61 @@ def test_timeout(version):
 
     with pytest.raises(requests.exceptions.Timeout):
         client.discover_services(uri=uri)
+
+
+@pytest.mark.parametrize("version", [11, 10])
+@responses.activate
+def test_retry_once_on_unauthorized(version):
+    # Test if the client refreshes the JWT if it receives an UNAUTHORIZED
+    # status message.
+    # Flow is as follows when client.poll() is called:
+    #   1. Authenticate and get first_token
+    #   2. Do poll request with first_token: Get UNAUTHORIZED response.
+    #   3. Authenticate again and get second_token
+    #   4. Do poll request with second_token: Get POLL_RESPONSE.
+
+    # Set up two responses with tokens for auth request
+    first_token = "first"
+    second_token = "second"
+    for token in (first_token, second_token):
+        responses.add(
+            method=responses.POST,
+            url=JWT_URL,
+            json={"token": token},
+            content_type="application/json",
+            stream=True,
+        )
+
+    client = make_client(version)
+    client.set_auth(username="username", password="pass", jwt_auth_url=JWT_PATH)
+
+    # Set up two responses for poll request: First is UNAUTHORIZED, the second is
+    # a normal POLL_RESPONSE if the token was refreshed.
+    attempt = 0
+    def poll_callback(request):
+        nonlocal attempt
+        attempt += 1
+        _, _, token = request.headers["Authorization"].partition("Bearer ")
+        if attempt == 1:
+            assert token == first_token
+            return (
+                200,
+                make_taxii_headers(version),
+                get_fix(version).STATUS_MESSAGE_UNAUTHORIZED,
+            )
+        else:
+            assert attempt == 2
+            assert token == second_token
+            return (200, make_taxii_headers(version), get_fix(version).POLL_RESPONSE)
+
+    responses.mock._matches.append(
+        responses.CallbackResponse(
+            responses.POST,
+            url="http://example.localhost/poll",
+            callback=poll_callback,
+            stream=True,
+        )
+    )
+
+    results = list(client.poll(collection_name="X", uri="/poll"))
+    assert client.jwt_token == second_token

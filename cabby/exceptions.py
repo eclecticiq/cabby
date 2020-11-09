@@ -1,5 +1,3 @@
-
-
 class ClientException(Exception):
     pass
 
@@ -18,7 +16,7 @@ class InvalidResponseError(ClientException):
 class UnsuccessfulStatusError(ClientException):
 
     def __init__(self, taxii_status, *args, **kwargs):
-        msg = "Server Error: {}".format(_status_to_message(self.raw))
+        msg = "Server Error: {}".format(_status_to_message(taxii_status))
         super(UnsuccessfulStatusError, self).__init__(msg, *args, **kwargs)
 
         self.status = taxii_status.status_type
