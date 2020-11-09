@@ -1,13 +1,16 @@
 from furl import furl
 import logging
 
-from libtaxii.common import generate_message_id
+import libtaxii
 
 from . import dispatcher, utils
 from .converters import to_detailed_service_instance_entity
 from .exceptions import (
-    NoURIProvidedError, ServiceNotFoundError,
-    AmbiguousServicesError, ClientException
+    AmbiguousServicesError,
+    ClientException,
+    NoURIProvidedError,
+    ServiceNotFoundError,
+    UnsuccessfulStatusError,
 )
 from six.moves import map
 
@@ -137,6 +140,7 @@ class AbstractClient(object):
             self._prepare_url(self.jwt_url),
             self.username,
             self.password)
+        session.auth = dispatcher.JWTAuth(self.jwt_token)
         return self.jwt_token
 
     def prepare_generic_session(self):
@@ -180,19 +184,24 @@ class AbstractClient(object):
         if self.jwt_url and self.username and self.password:
             if not self.jwt_token:
                 self.refresh_jwt_token(session=session)
-            session = dispatcher.set_jwt_token(session, self.jwt_token)
 
-        message = dispatcher.send_taxii_request(
-            session,
-            self._prepare_url(uri),
-            request,
-            taxii_binding=self.taxii_binding,
-            timeout=self.timeout)
-
-        return message
+        for attempt in (1, 2):
+            try:
+                return dispatcher.send_taxii_request(
+                    session,
+                    self._prepare_url(uri),
+                    request,
+                    taxii_binding=self.taxii_binding,
+                    timeout=self.timeout)
+            except UnsuccessfulStatusError as exc:
+                # Refresh the token once if authorization failed and retry
+                if attempt == 1 and exc.status == libtaxii.ST_UNAUTHORIZED:
+                    self.refresh_jwt_token(session=session)
+                    continue
+                raise
 
     def _generate_id(self):
-        return generate_message_id(version=self.services_version)
+        return libtaxii.common.generate_message_id(version=self.services_version)
 
     def _get_service(self, service_type):
         candidates = self.get_services(service_type=service_type)
