@@ -57,6 +57,7 @@ def make_taxii_headers(version):
         "X-TAXII-Content-Type": VID_TAXII_XML_11 if version == 11 else VID_TAXII_XML_10
     }
 
+
 def get_sent_message(version, mock=None):
     if not mock:
         mock = responses
@@ -277,12 +278,12 @@ def test_retry_once_on_unauthorized(version):
 
     # Set up two responses for poll request: First is UNAUTHORIZED, the second is
     # a normal POLL_RESPONSE if the token was refreshed.
-    attempt = 0
+    attempts = []
+
     def poll_callback(request):
-        nonlocal attempt
-        attempt += 1
+        attempts.append(request)
         _, _, token = request.headers["Authorization"].partition("Bearer ")
-        if attempt == 1:
+        if len(attempts) == 1:
             assert token == first_token
             return (
                 200,
@@ -290,7 +291,7 @@ def test_retry_once_on_unauthorized(version):
                 get_fix(version).STATUS_MESSAGE_UNAUTHORIZED,
             )
         else:
-            assert attempt == 2
+            assert len(attempts) == 2
             assert token == second_token
             return (200, make_taxii_headers(version), get_fix(version).POLL_RESPONSE)
 
@@ -303,5 +304,5 @@ def test_retry_once_on_unauthorized(version):
         )
     )
 
-    results = list(client.poll(collection_name="X", uri="/poll"))
+    list(client.poll(collection_name="X", uri="/poll"))
     assert client.jwt_token == second_token
