@@ -158,7 +158,9 @@ class AbstractClient(object):
             key_file=self.key_file,
             key_password=self.key_password,
             ca_cert=self.ca_cert,
-            verify_ssl=self.verify_ssl)
+            verify_ssl=self.verify_ssl,
+            jwt_token=self.jwt_token,
+        )
 
     def _execute_request(self, request, uri=None, service_type=None):
         '''
