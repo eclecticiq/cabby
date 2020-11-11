@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.1.22 (2020-11-09)
+-------------------
+
+* Fix bug where JWT would not be used if client.jwt_token is set directly
+
 0.1.21 (2020-11-09)
 -------------------
 
