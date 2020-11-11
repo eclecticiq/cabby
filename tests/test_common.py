@@ -306,3 +306,28 @@ def test_retry_once_on_unauthorized(version):
 
     list(client.poll(collection_name="X", uri="/poll"))
     assert client.jwt_token == second_token
+
+
+@pytest.mark.parametrize("version", [11, 10])
+@responses.activate
+def test_jwt_token_when_set_directly(version):
+    given_token = "abcd"
+    client = make_client(version)
+
+    # The purpose of this test is to check that this assignment has effect:
+    client.jwt_token = given_token
+
+    def poll_callback(request):
+        _, _, token = request.headers["Authorization"].partition("Bearer ")
+        assert token == given_token
+        return (200, make_taxii_headers(version), get_fix(version).POLL_RESPONSE)
+
+    responses.mock._matches.append(
+        responses.CallbackResponse(
+            responses.POST,
+            url="http://example.localhost/poll",
+            callback=poll_callback,
+            stream=True,
+        )
+    )
+    list(client.poll(collection_name="X", uri="/poll"))

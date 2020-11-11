@@ -304,16 +304,17 @@ class JWTAuth(AuthBase):
 
 
 def get_generic_session(
-        proxies=None,
-        headers=None,
-        username=None,
-        password=None,
-        cert_file=None,
-        key_file=None,
-        key_password=None,
-        ca_cert=None,
-        verify_ssl=True):
-
+    proxies=None,
+    headers=None,
+    username=None,
+    password=None,
+    cert_file=None,
+    key_file=None,
+    key_password=None,
+    ca_cert=None,
+    verify_ssl=True,
+    jwt_token=None,
+):
     session = requests.Session()
     if ca_cert:
         session.verify = ca_cert
@@ -328,6 +329,8 @@ def get_generic_session(
         session.auth = HTTPBasicAuth(username, password)
     if cert_file and key_file:
         session.cert = (cert_file, key_file)
+    if jwt_token:
+        session.auth = JWTAuth(jwt_token)
     session._cabby_key_password = key_password
     return session
 
