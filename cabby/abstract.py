@@ -183,23 +183,28 @@ class AbstractClient(object):
 
         session = self.prepare_generic_session()
 
-        if self.jwt_url and self.username and self.password:
-            if not self.jwt_token:
-                self.refresh_jwt_token(session=session)
+        uses_jwt = self.jwt_url and self.username and self.password
+        if uses_jwt and not self.jwt_token:
+            self.refresh_jwt_token(session=session)
 
-        for attempt in (1, 2):
-            try:
-                return dispatcher.send_taxii_request(
-                    session,
-                    self._prepare_url(uri),
-                    request,
-                    taxii_binding=self.taxii_binding,
-                    timeout=self.timeout)
-            except UnsuccessfulStatusError as exc:
-                # Refresh the token once if authorization failed and retry
-                if attempt == 1 and exc.status == libtaxii.ST_UNAUTHORIZED:
-                    self.refresh_jwt_token(session=session)
-                    continue
+        def do_request():
+            return dispatcher.send_taxii_request(
+                session,
+                self._prepare_url(uri),
+                request,
+                taxii_binding=self.taxii_binding,
+                timeout=self.timeout,
+            )
+
+        try:
+            return do_request()
+        except UnsuccessfulStatusError as exc:
+            if uses_jwt and exc.status == libtaxii.ST_UNAUTHORIZED:
+                # An authorization error may indicate JWT token expiry:
+                # transparently try to refresh it, then retry the request.
+                self.refresh_jwt_token(session=session)
+                return do_request()
+            else:
                 raise
 
     def _generate_id(self):
