@@ -1,10 +1,18 @@
 Changelog
 =========
 
+0.1.23 (2020-11-18)
+-------------------
+
+* Only transparently refresh JWT token when using JWT auth
+  (`pr#78 <https://github.com/eclecticiq/cabby/pull/78>`_)
+
 0.1.22 (2020-11-09)
 -------------------
 
 * Fix bug where JWT would not be used if client.jwt_token is set directly
+  (`pr#76 <https://github.com/eclecticiq/cabby/pull/76>`_,
+  `pr#77 <https://github.com/eclecticiq/cabby/pull/77>`_)
 
 0.1.21 (2020-11-09)
 -------------------
