@@ -246,6 +246,9 @@ def test_poll_with_fullfilment():
     assert message.collection_name == POLL_COLLECTION
     assert message.result_part_number == 2
 
+    with pytest.raises(StopIteration):
+        next(gen)
+
 
 @responses.activate
 def test_poll_with_content_bindings():

@@ -504,7 +504,7 @@ class Client11(AbstractClient):
 
                 for block in fulfilment_stream:
                     if block is None:
-                        # Break fulilment loop when PollResponse.more is false
+                        # Break fulfilment loop when PollResponse.more is false
                         has_data = False
                         break
                     has_data = True
