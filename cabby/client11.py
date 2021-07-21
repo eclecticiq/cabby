@@ -503,6 +503,10 @@ class Client11(AbstractClient):
                     part_number=part, uri=uri)
 
                 for block in fulfilment_stream:
+                    if block is None:
+                        # Break fulfilment loop when PollResponse.more is false
+                        has_data = False
+                        break
                     has_data = True
                     yield block
 
@@ -545,5 +549,9 @@ class Client11(AbstractClient):
                                        service_type=const.SVC_POLL)
 
         for obj in stream:
-            if isinstance(obj, tm11.ContentBlock):
+            if isinstance(obj, tm11.PollResponse):
+                # Verify if more ContentBlocks are available
+                if not obj.more:
+                    yield
+            elif isinstance(obj, tm11.ContentBlock):
                 yield to_content_block_entity(obj)
