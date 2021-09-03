@@ -1,14 +1,14 @@
 
 import logging
 
+from cabby.constants import CB_STIX_XML_12
 from cabby.entities import ContentBinding
-from cabby.constants import CB_STIX_XML_111
 
 from .commons import run_client, get_basic_arg_parser
 
 log = logging.getLogger(__name__)
 
-DEFAULT_BINDING = CB_STIX_XML_111
+DEFAULT_BINDING = CB_STIX_XML_12
 
 
 def extend_arguments(parser):
