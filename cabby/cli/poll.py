@@ -12,6 +12,11 @@ log = logging.getLogger(__name__)
 
 
 def extend_arguments(parser):
+    parser.description += (
+        "\n\nTo get output ready for ingestion with taxii-push, "
+        "use --dest-dir and use the individual output files in taxii-push."
+    )
+
     parser.add_argument(
         "-c", "--collection", dest="collection",
         help="collection to poll", required=True)

@@ -17,10 +17,12 @@ VERSION_CHOICES = [TAXII_10, TAXII_11]
 
 
 def get_basic_arg_parser():
+    class Formatter(argparse.RawDescriptionHelpFormatter, argparse.ArgumentDefaultsHelpFormatter):
+        pass
 
     parser = argparse.ArgumentParser(
         description="TAXII client",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=Formatter
     )
     parser.add_argument(
         "--host", dest="host",

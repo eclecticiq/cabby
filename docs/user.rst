@@ -122,7 +122,9 @@ Fetch the collections list from Collection Management Service::
   (venv) $ taxii-collections \
                --path https://test.taxiistand.com/read-only/services/collection-management
 
-Poll content from a collection (Polling Service will be autodiscovered in advertised services)::
+Poll content from a collection (Polling Service will be autodiscovered in advertised services).
+    To get output ready to use in taxii-push, use ``--dest-dir`` argument and loop over the output files to push them one-by-one.
+::
 
   (venv) $ $ taxii-poll \
                  --host test.taxiistand.com \
