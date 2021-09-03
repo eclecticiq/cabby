@@ -4,9 +4,9 @@ import dateutil
 import pytz
 
 from cabby import create_client
-from cabby.constants import (
-    CB_STIX_XML_111, CB_CAP_11, CB_SMIME,
-    CB_STIX_XML_10, CB_STIX_XML_101, CB_STIX_XML_11, CB_XENC_122002)
+from cabby.constants import (CB_CAP_11, CB_SMIME, CB_STIX_XML_10,
+                             CB_STIX_XML_11, CB_STIX_XML_12, CB_STIX_XML_101,
+                             CB_STIX_XML_111, CB_XENC_122002)
 
 from .commons import (
     DEFAULT_VERSION, VERSION_CHOICES,
@@ -16,8 +16,7 @@ from .commons import (
 log = logging.getLogger(__name__)
 
 # Extra Binding
-CB_STIX_XML_12 = 'urn:stix.mitre.org:xml:1.2'
-DEFAULT_BINDING = CB_STIX_XML_111
+DEFAULT_BINDING = CB_STIX_XML_12
 BINDING_CHOICES = [CB_STIX_XML_111, CB_CAP_11, CB_SMIME, CB_STIX_XML_12,
                    CB_STIX_XML_10, CB_STIX_XML_101, CB_STIX_XML_11,
                    CB_XENC_122002]
