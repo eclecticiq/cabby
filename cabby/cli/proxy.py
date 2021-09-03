@@ -55,6 +55,25 @@ def service_arguments(parser, ident, descriptor):
         help="password for {} authentication".format(descriptor))
 
     parser.add_argument(
+        "--{}-verify".format(ident), dest="{}_verify".format(ident),
+        help=('Set to "no" to skip checking the host\'s SSL certificate for {}.'
+              ' You can also pass the path to a CA file for private certs.'
+              ' Defaults to "yes".'.format(descriptor)))
+
+    parser.add_argument(
+        "--{}-cert".format(ident),
+        dest="{}_cert".format(ident),
+        help="certificate file for {}".format(descriptor))
+    parser.add_argument(
+        "--{}-key".format(ident),
+        dest="{}_key".format(ident),
+        help="private key file for {}".format(descriptor))
+    parser.add_argument(
+        "--{}-key-password".format(ident),
+        dest="{}_key_password".format(ident),
+        help="private key password for {}".format(descriptor))
+
+    parser.add_argument(
         "--{}-jwt-auth".format(ident), dest="{}_jwt_auth_url".format(ident),
         help="JWT authentication URL for {}".format(descriptor))
 
@@ -179,16 +198,42 @@ def run_client(parser, run_func):
     inbox_client = create_client(version=args.inbox_taxii_version,
                                  headers=inbox_headers)
 
+    if args.poll_verify == "yes":
+        poll_verify_ssl = True
+    elif args.poll_verify == "no":
+        poll_verify_ssl = False
+    elif args.poll_verify:
+        poll_verify_ssl = args.poll_verify
+    else:
+        poll_verify_ssl = True
+
     poll_client.set_auth(
+        cert_file=args.poll_cert,
+        key_file=args.poll_key,
         username=args.poll_username,
         password=args.poll_password,
-        jwt_auth_url=args.poll_jwt_auth_url
+        key_password=args.poll_key_password,
+        jwt_auth_url=args.poll_jwt_auth_url,
+        verify_ssl=poll_verify_ssl
     )
 
+    if args.inbox_verify == "yes":
+        inbox_verify_ssl = True
+    elif args.inbox_verify == "no":
+        inbox_verify_ssl = False
+    elif args.inbox_verify:
+        inbox_verify_ssl = args.inbox_verify
+    else:
+        inbox_verify_ssl = True
+
     inbox_client.set_auth(
+        cert_file=args.inbox_cert,
+        key_file=args.inbox_key,
         username=args.inbox_username,
         password=args.inbox_password,
-        jwt_auth_url=args.inbox_jwt_auth_url
+        key_password=args.inbox_key_password,
+        jwt_auth_url=args.inbox_jwt_auth_url,
+        verify_ssl=inbox_verify_ssl
     )
 
     try:

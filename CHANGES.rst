@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.1.24 (unreleased)
+-------------------
+
+* Allow HTTPS authentication with certificates for taxii-proxy
+
 0.1.23 (2020-11-18)
 -------------------
 
